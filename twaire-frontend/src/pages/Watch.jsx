@@ -16,32 +16,37 @@ function Watch() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/videos/${id}/view`, {
+        const videoDataRequest = await fetch(`http://localhost:5000/api/videos/${id}/view`, {
           method: "POST",
           credentials: "include",
         });
-        if (!res.ok) throw new Error("Failed to fetch video");
-        const data = await res.json();
+
+        if (!videoDataRequest.ok) {
+          const errorData = await videoDataRequest.json().catch(() => ({}));
+          throw new Error(errorData.error || "Failed to fetch video");
+        }
+
+        const data = await videoDataRequest.json();
         setVideo(data);
         document.title = `${data.title} - Twaire`;
 
         if (data.uploaderId) {
-          // check subscription status
-          const subRes = await fetch(
+          const subDataRequest = await fetch(
             `http://localhost:5000/api/users/${data.uploaderId}/isSubscribed`,
             { credentials: "include" }
           );
-          if (subRes.ok) {
-            const subData = await subRes.json();
+
+          if (subDataRequest.ok) {
+            const subData = await subDataRequest.json();
             setSubscribed(subData.subscribed);
           }
 
-          // fetch uploader subscribers count
-          const uploaderRes = await fetch(
+          const uploaderDataRequest = await fetch(
             `http://localhost:5000/api/users/${data.channel}`
           );
-          if (uploaderRes.ok) {
-            const uploaderData = await uploaderRes.json();
+
+          if (uploaderDataRequest.ok) {
+            const uploaderData = await uploaderDataRequest.json();
             setUploaderSubs(uploaderData.subscribers);
           }
         }

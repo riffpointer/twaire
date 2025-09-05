@@ -96,7 +96,7 @@ function Upload() {
         message: `Video uploaded successfully! Redirecting in`,
         videoId: data._id,
       });
-      setRedirectCountdown(5);
+      setRedirectCountdown(3);
       setDisabled(true);
 
       setTitle("");

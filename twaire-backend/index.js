@@ -349,7 +349,7 @@ app.post("/api/videos/:id/comments", async (req, res) => {
     res.json(comment);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error while trying to retrieve comments" });
   }
 });
 
@@ -371,7 +371,7 @@ app.post("/api/comments/:id/replies", async (req, res) => {
     res.json(comment);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error while trying to retrieve replies" });
   }
 });
 
@@ -402,7 +402,7 @@ app.post("/api/comments/:id/like", async (req, res) => {
     res.json({ likes: comment.likes.length, dislikes: comment.dislikes.length });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error while trying to process reactions (like)" });
   }
 });
 
@@ -432,7 +432,7 @@ app.post("/api/comments/:id/dislike", async (req, res) => {
     res.json({ likes: comment.likes.length, dislikes: comment.dislikes.length });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error while trying to process reactions (dislike)" });
   }
 });
 
@@ -451,6 +451,9 @@ app.post(
       const { title, description, tags } = req.body;
       if (!req.files || !req.files.video)
         return res.status(400).json({ error: "No video file provided" });
+      
+      if (!title || title.trim().length === 0)
+        return res.status(400).json({ error: "Title is required" });
 
       const videoFile = req.files.video[0];
       const thumbnailFile = req.files.thumbnail?.[0] || null;
@@ -475,7 +478,7 @@ app.post(
         thumbnail: thumbnailFile?.filename || "",
         channel: user.publicName?.trim() || user.username,
         views: 0,
-        tags: sanitizedTags,
+        tags: JSON.parse(sanitizedTags),
         uploader: userId,
       });
 
@@ -509,7 +512,6 @@ app.get("/api/users/:id/isSubscribed", isAuthenticated, async (req, res) => {
     res.status(500).json({ error: "Server error while retrieving subscription status" });
   }
 });
-
 
 // POST /api/users/:id/subscribe
 app.post("/api/users/:id/subscribe", isAuthenticated, async (req, res) => {
