@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
+import { MenuItem, TextField } from '@mui/material';
 
 
 function Home() {
@@ -45,14 +46,17 @@ function Home() {
           <h3 className="mb-0">
             {sort === "latest" ? "Latest uploads" : "Trending now"}
           </h3>
-          <select
-            className="form-select w-auto"
+          <TextField
+            select
+            size="small"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
+            variant="outlined"
+            sx={{ width: 'auto', minWidth: 120 }}
           >
-            <option value="latest">Latest</option>
-            <option value="trending">Trending</option>
-          </select>
+            <MenuItem value="latest">Latest</MenuItem>
+            <MenuItem value="trending">Trending</MenuItem>
+          </TextField>
         </div>
 
         <div className="mb-3">

@@ -1,6 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import ApiConfig from '../utils/ApiConfig.jsx';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 function VideoActionBar({ videoId }) {
   const [likes, setLikes] = useState(0);
@@ -8,10 +15,11 @@ function VideoActionBar({ videoId }) {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [openShare, setOpenShare] = useState(false);
+  const [copyButtonText, setCopyButtonText] = useState('Copy');
 
   useEffect(() => {
     if (!videoId) return;
-    // Fetch like/dislike counts and user reaction
     const fetchReactions = async () => {
       try {
         const res = await fetch(`${ApiConfig.serverUrl}/api/videos/${videoId}/reactions`, { credentials: 'include' });
@@ -19,7 +27,6 @@ function VideoActionBar({ videoId }) {
           const data = await res.json();
           setLikes(data.likes);
           setDislikes(data.dislikes);
-
           setLiked(data.liked);
           setDisliked(data.disliked);
         } else {
@@ -47,8 +54,8 @@ function VideoActionBar({ videoId }) {
         const data = await res.json();
         setLikes(data.likes);
         setDislikes(data.dislikes);
-        setLiked(true);
-        setDisliked(false);
+        setDisliked(data.disliked);
+        setLiked(data.liked);
       }
     } finally {
       setLoading(false);
@@ -68,12 +75,31 @@ function VideoActionBar({ videoId }) {
         const data = await res.json();
         setLikes(data.likes);
         setDislikes(data.dislikes);
-        setDisliked(true);
-        setLiked(false);
+        setDisliked(data.disliked);
+        setLiked(data.liked);
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleShareClick = () => {
+    setOpenShare(true);
+  };
+
+  const handleCloseShare = () => {
+    setOpenShare(false);
+    setTimeout(() => {
+        setCopyButtonText('Copy');
+    }, 500);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`http://localhost:5173/watch/${videoId}`);
+    setCopyButtonText('Copied!');
+    setTimeout(() => {
+        setCopyButtonText('Copy');
+    }, 2000);
   };
 
   const btnStyle = {
@@ -116,6 +142,7 @@ function VideoActionBar({ videoId }) {
           className="btn btn-light d-flex align-items-center border border-1"
           style={btnStyle}
           title="Share the video"
+          onClick={handleShareClick}
         >
           <i className="bi bi-share me-2" />
           <span>Share</span>
@@ -131,6 +158,40 @@ function VideoActionBar({ videoId }) {
           <span>Save</span>
         </button>
       </div>
+
+      <Dialog open={openShare} onClose={handleCloseShare} fullWidth maxWidth="sm">
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Share Video</Typography>
+            <IconButton onClick={handleCloseShare}>
+              <i className="bi bi-x-lg" />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              value={`http://localhost:5173/watch/${videoId}`}
+              InputProps={{
+                readOnly: true,
+              }}
+              variant="outlined"
+            />
+            <Button 
+                onClick={handleCopy} 
+                color={copyButtonText === 'Copy' ? 'primary' : 'success'}
+                variant="contained" 
+                disableElevation
+                sx={{minWidth: '110px'}}
+            >
+              <i className={`bi ${copyButtonText === 'Copy' ? 'bi-clipboard' : 'bi-check-lg'} me-2`} />
+              {copyButtonText}
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

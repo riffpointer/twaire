@@ -10,6 +10,10 @@ import Button from '@mui/material/Button';
 import { CircularProgress } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
 import VideoActionBar from "../components/VideoActionBar.jsx";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
 function Watch() {
   const { id } = useParams();
@@ -18,6 +22,40 @@ function Watch() {
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
   const [uploaderSubs, setUploaderSubs] = useState(0);
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    setContextMenu(
+      contextMenu === null
+        ? {
+          mouseX: event.clientX + 2,
+          mouseY: event.clientY - 6,
+        }
+        : null,
+    );
+  };
+
+  const handleClose = () => {
+    setContextMenu(null);
+  };
+
+  const handlePlayPause = () => {
+    const videoElement = document.getElementById("main-video-player");
+    if (videoElement.paused) {
+      videoElement.play();
+    } else {
+      videoElement.pause();
+    }
+    handleClose();
+  };
+
+  const handleRestart = () => {
+    const videoElement = document.getElementById("main-video-player");
+    videoElement.currentTime = 0;
+    videoElement.play();
+    handleClose();
+  };
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -118,6 +156,7 @@ function Watch() {
 
   const uploadedAgo = getRelativeTime(video.uploadedAt);
   const formattedUploadDate = video.uploadedAt ? new Date(video.uploadedAt).toLocaleDateString() : "";
+  const isPaused = document.getElementById("main-video-player")?.paused;
 
   return (
     <>
@@ -130,10 +169,48 @@ function Watch() {
               {/* Video player */}
               <div className="ratio ratio-16x9 mb-3">
                 <video
+                  id="main-video-player"
                   controls
                   src={`${ApiConfig.serverUrl}/uploads/${video.filename}`}
                   className="w-100"
+                  onContextMenu={handleContextMenu}
                 />
+                <Menu
+                  open={contextMenu !== null}
+                  onClose={handleClose}
+                  anchorReference="anchorPosition"
+                  anchorPosition={
+                    contextMenu !== null
+                      ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                      : undefined
+                  }
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        backgroundColor: '#2c2c2c',
+                        color: 'white',
+                        '& .MuiMenuItem-root': {
+                          '&:hover': {
+                            backgroundColor: '#444444',
+                          },
+                        },
+                      },
+                    }
+                  }}
+                >
+                  <MenuItem onClick={handlePlayPause}>
+                    <ListItemIcon>
+                      <i className={`bi ${isPaused ? 'bi-play-fill' : 'bi-pause-fill'}`} style={{ color: 'white' }}></i>
+                    </ListItemIcon>
+                    <ListItemText>{isPaused ? 'Play' : 'Pause'}</ListItemText>
+                  </MenuItem>
+                  <MenuItem onClick={handleRestart}>
+                    <ListItemIcon>
+                      <i className="bi bi-arrow-repeat" style={{ color: 'white' }}></i>
+                    </ListItemIcon>
+                    <ListItemText>Restart</ListItemText>
+                  </MenuItem>
+                </Menu>
               </div>
 
               {/* Tags */}
