@@ -8,6 +8,8 @@ import bcrypt from "bcrypt";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const app = express();
 const PORT = 5000;
 
@@ -67,17 +69,16 @@ const commentSchema = new mongoose.Schema(
 
 // schema for videos
 const videoSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  filename: String,
-  thumbnail: { type: String, default: "" },
-  channel: { type: String, default: "Deleted User" },
+  title: { type: String, required: true },
+  description: { type: String },
+  uploader: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  thumbnail: { type: String },
+  tags: [String],
   views: { type: Number, default: 0 },
-  likes: { type: Number, default: 0 },
-  dislikes: { type: Number, default: 0 },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   uploadedAt: { type: Date, default: Date.now },
-  tags: { type: [String], default: [] },
-  uploader: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  verified: { type: Boolean, default: false }
 });
 
 const Video = mongoose.model("Video", videoSchema);
@@ -272,6 +273,100 @@ const storage = multer.diskStorage({
   },
 });
 
+app.post('/api/videos/:id/like', async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+    // Ensure arrays are always present
+    video.likes = Array.isArray(video.likes) ? video.likes : [];
+    video.dislikes = Array.isArray(video.dislikes) ? video.dislikes : [];
+    const hasLiked = video.likes.map(id => id.toString()).includes(userId);
+    if (hasLiked) {
+      // Remove like if already liked
+      video.likes = video.likes.filter(id => id.toString() !== userId);
+    } else {
+      // Add like and remove dislike if present
+      video.likes.push(userId);
+      video.dislikes = video.dislikes.filter(id => id.toString() !== userId);
+    }
+    await video.save();
+
+    let liked = false;
+    let disliked = false;
+
+    if (userId) {
+      liked = video.likes.map(id => id.toString()).includes(userId);
+      disliked = video.dislikes.map(id => id.toString()).includes(userId);
+    }
+
+    res.json({ likes: video.likes.length, dislikes: video.dislikes.length, liked, disliked });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Dislike a video
+app.post('/api/videos/:id/dislike', async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+    video.likes = Array.isArray(video.likes) ? video.likes : [];
+    video.dislikes = Array.isArray(video.dislikes) ? video.dislikes : [];
+    const hasDisliked = video.dislikes.map(id => id.toString()).includes(userId);
+    if (hasDisliked) {
+      // Remove dislike if already disliked
+      video.dislikes = video.dislikes.filter(id => id.toString() !== userId);
+    } else {
+      // Add dislike and remove like if present
+      video.dislikes.push(userId);
+      video.likes = video.likes.filter(id => id.toString() !== userId);
+    }
+    await video.save();
+
+    let liked = false;
+    let disliked = false;
+
+    if (userId) {
+      liked = video.likes.map(id => id.toString()).includes(userId);
+      disliked = video.dislikes.map(id => id.toString()).includes(userId);
+    }
+
+    res.json({ likes: video.likes.length, dislikes: video.dislikes.length, liked, disliked });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get like/dislike counts
+app.get('/api/videos/:id/reactions', async (req, res) => {
+  try {
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    let liked = false;
+    let disliked = false;
+    const userId = req.session?.userId?.toString();
+
+    if (userId) {
+      liked = video.likes.map(id => id.toString()).includes(userId);
+      disliked = video.dislikes.map(id => id.toString()).includes(userId);
+    }
+
+    res.json({
+      likes: video.likes.length,
+      dislikes: video.dislikes.length,
+      liked,
+      disliked
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const upload = multer({ storage });
 
 // API: get all videos with sorting
@@ -340,7 +435,7 @@ app.post("/api/videos/:id/comments", async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
 
     const user = await User.findById(req.session.userId).select("username publicName profilePicture verified");
-    if (!user) 
+    if (!user)
       return res.status(404).json({ error: "Comment author does not exist" });
 
     const comment = new Comment({
@@ -455,7 +550,7 @@ app.post(
       const { title, description, tags } = req.body;
       if (!req.files || !req.files.video)
         return res.status(400).json({ error: "No video file provided" });
-      
+
       if (!title || title.trim().length === 0)
         return res.status(400).json({ error: "Title is required" });
 
@@ -482,7 +577,7 @@ app.post(
         thumbnail: thumbnailFile?.filename || "",
         channel: user.publicName?.trim() || user.username,
         views: 0,
-        tags: JSON.parse(sanitizedTags),
+        tags: JSON.parse(sanitizedTags.toString().trim() || "[]"),
         uploader: userId,
       });
 
@@ -552,6 +647,8 @@ app.post("/api/users/:id/subscribe", isAuthenticated, async (req, res) => {
 
     await currentUser.save();
     await targetUser.save();
+
+    await delay(500);
 
     res.json({ subscribed: !isSubscribed });
   } catch (err) {

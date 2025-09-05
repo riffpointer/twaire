@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import VideoCard from "./VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "./Loading.jsx";
+import { TextField, MenuItem } from "@mui/material";
 
 function PublicVideosList({ defaultSort = "trending", limit }) {
   const [videos, setVideos] = useState([]);
@@ -33,14 +34,18 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
     <div className="public-videos-list">
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="mb-0">{sort === "latest" ? "Latest uploads" : "Trending now"}</h5>
-        <select
-          className="form-select form-select-sm w-auto"
+        <TextField
+          select
+          size="small"
           value={sort}
           onChange={(e) => setSort(e.target.value)}
+          variant="outlined"
+          sx={{ width: 'auto', minWidth: 120 }}
         >
-          <option value="latest">Latest</option>
-          <option value="trending">Trending</option>
-        </select>
+          <MenuItem value="latest">Latest</MenuItem>
+          <MenuItem value="trending">Trending</MenuItem>
+        </TextField>
+
       </div>
 
       {loading ? (

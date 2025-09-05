@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
+import { Alert, Button } from "@mui/material";
 
 
 function Upload() {
@@ -124,13 +125,20 @@ function Upload() {
         <form onSubmit={handleSubmit} className="card shadow-sm">
           <div className="card-body">
             {alert && (
-              <div className={`alert alert-${alert.type} alert-dismissible fade show`} role="alert">
-                {redirectCountdown === null ? alert.message : <i>{alert.message}</i>}
+              <Alert
+                severity={alert.type === 'danger' ? 'error' : alert.type}
+                className="mb-3"
+                onClose={() => setAlert(null)}
+                variant="filled"
+              >
+                {redirectCountdown === null
+                  ? alert.message
+                  : <em>{alert.message}</em>
+                }
                 {alert.type === "success" && redirectCountdown !== null && (
-                  <i><b> ({redirectCountdown})...</b></i>
+                  <em> <strong>({redirectCountdown})...</strong></em>
                 )}
-                <button type="button" className="btn-close" onClick={() => setAlert(null)}></button>
-              </div>
+              </Alert>
             )}
 
             <div className="mb-3">
@@ -192,9 +200,9 @@ function Upload() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={disabled} title="Click to upload!">
+            <Button variant="contained" disableElevation color="primary" type="submit" disabled={disabled} title="Click to upload!">
               Upload
-            </button>
+            </Button>
           </div>
         </form>
       </div>

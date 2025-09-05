@@ -4,6 +4,8 @@ import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
+import { Button, CircularProgress } from "@mui/material";
+import SubscribeButton from "../components/SubscribeButton.jsx";
 
 function User() {
   const { username } = useParams(); // URL: /user/:username
@@ -57,7 +59,7 @@ function User() {
     };
 
     fetchUserAndVideos();
-  }, [username]);
+  }, [username, subscribed]);
 
   const handleSubscribe = async () => {
     if (!user?._id) return;
@@ -131,13 +133,11 @@ function User() {
               {user.verified && <span className="badge bg-success me-1">Verified</span>}
               {user.official && <span className="badge bg-primary">Official</span>}
               <div className="mt-2">
-                <button
-                  className={`btn ${subscribed ? "btn-secondary" : "btn-danger"} btn-sm`}
-                  onClick={handleSubscribe}
-                  disabled={subLoading}
-                >
-                  {subscribed ? "Subscribed" : "Subscribe"}
-                </button>
+                <SubscribeButton
+                  subscribed={subscribed}
+                  subLoading={subLoading}
+                  handleSubscribe={handleSubscribe}
+                />
               </div>
             </div>
           </div>
@@ -149,7 +149,7 @@ function User() {
             </div>
           )}
 
-          <div className="mb-3">
+          <div>
             <strong>Subscribers:</strong> {user.subscribers} <br />
             <strong>Profile views:</strong> {user.views || 0}
           </div>

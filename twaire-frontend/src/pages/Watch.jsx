@@ -7,6 +7,9 @@ import CommentSection from "../components/CommentSection.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
 import Button from '@mui/material/Button';
+import { CircularProgress } from "@mui/material";
+import SubscribeButton from "../components/SubscribeButton.jsx";
+import VideoActionBar from "../components/VideoActionBar.jsx";
 
 function Watch() {
   const { id } = useParams();
@@ -186,18 +189,15 @@ function Watch() {
                 </div>
 
                 <div>
-                  <Button
-                    disableElevation
-                    variant={subscribed ? "outlined" : "contained"}
-                    color={subscribed ? "secondary" : "error"}
-                    size="small"
-                    onClick={handleSubscribe}
-                    disabled={subLoading}
-                  >
-                    {subscribed ? "Subscribed" : "Subscribe"}
-                  </Button>
+                  <SubscribeButton
+                    subscribed={subscribed}
+                    subLoading={subLoading}
+                    handleSubscribe={handleSubscribe}
+                  />
                 </div>
               </div>
+
+              <VideoActionBar videoId={video._id} />
 
               {/* Description */}
               <div className="card p-3 mb-3">

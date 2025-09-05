@@ -59,104 +59,117 @@ function Navbar() {
     }
   };
 
-  return (
-    <nav className="navbar navbar-expand-lg sticky-top px-3">
-      <NavLink className="navbar-brand" to="/">
-        <b className="vend-sans">Twaire</b>
-      </NavLink>
+return (
+  <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top px-3">
+    <NavLink className="navbar-brand" to="/">
+      <b className="vend-sans">Twaire</b>
+    </NavLink>
 
-      <button
-        className="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
+    <button
+      className="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span className="navbar-toggler-icon"></span>
+    </button>
+
+    <div className="collapse navbar-collapse" id="navbarNav">
+      {/* Left side navigation */}
+      <ul className="navbar-nav me-auto">
+        <li className="nav-item">
+          <NavLink className="nav-link" to="/">Home</NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink className="nav-link" to="/trending">Trending</NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink className="nav-link" to="/about">About</NavLink>
+        </li>
+      </ul>
+
+      {/* Centered Search bar */}
+      <form 
+        className="d-flex position-absolute start-50 translate-middle-x" 
+        style={{ width: '40%' }}
+        onSubmit={handleSearch}
       >
-        <span className="navbar-toggler-icon"></span>
-      </button>
-
-      <div className="collapse navbar-collapse" id="navbarNav">
-        <ul className="navbar-nav me-auto">
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/">Home</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/trending">Trending</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/about">About</NavLink>
-          </li>
-        </ul>
-
-        {/* Search bar */}
-        <form className="d-flex" onSubmit={handleSearch}>
-          <TextField
-            variant="outlined"
-            size="small"
-            className="me-1"
+        <div className="input-group">
+          <input
+            type="text"
+            className="form-control"
             placeholder="Search videos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Search videos"
           />
-          <button className="btn btn-light" type="submit" title="Search">
+          <button
+            className="btn btn-light"
+            type="button"
+            title="Search"
+          >
             <i className="bi bi-search"></i>
           </button>
-        </form>
+        </div>
+      </form>
 
-        <ul className="navbar-nav ms-2">
-          {!user && !loading && (
-            <li className="nav-item" id="navbar-login-default">
-              <NavLink className="nav-link" to="/login">
-                <i className="bi bi-box-arrow-in-right"></i> Login
-              </NavLink>
-            </li>
-          )}
+      {/* Right side navigation */}
+      <ul className="navbar-nav ms-auto">
+        {!user && !loading && (
+          <li className="nav-item" id="navbar-login-default">
+            <NavLink className="nav-link" to="/login">
+              <i className="bi bi-box-arrow-in-right"></i> Login
+            </NavLink>
+          </li>
+        )}
 
-          {user && (
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#!"
-                id="userDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i className="bi bi-person-fill me-2"></i>
-                {user.publicName || user.username}
-              </a>
-              <ul
-                className="dropdown-menu dropdown-menu-end"
-                aria-labelledby="userDropdown"
-              >
-                <li>
-                  <NavLink className="dropdown-item" to="/myaccount">
-                    <i className="bi bi-person-fill me-2"></i>
-                    My Profile
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink className="dropdown-item" to="/upload">
-                    <i className="bi bi-arrow-bar-up me-2"></i>
-                    Upload a video
-                  </NavLink>
-                </li>
-                <li><hr className="dropdown-divider" /></li>
-                <li>
-                  <button
-                    className="dropdown-item text-danger"
-                    onClick={handleLogout}
-                  >
-                    <i className="bi bi-box-arrow-right me-2"></i>
-                    Logout
-                  </button>
-                </li>
-              </ul>
-            </li>
-          )}
-        </ul>
-      </div>
-    </nav>
-  );
+        {user && (
+          <li className="nav-item dropdown">
+            <a
+              className="nav-link dropdown-toggle"
+              href="#!"
+              id="userDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i className="bi bi-person-fill me-2"></i>
+              {user.publicName || user.username}
+            </a>
+            <ul
+              className="dropdown-menu dropdown-menu-end"
+              aria-labelledby="userDropdown"
+            >
+              <li>
+                <NavLink className="dropdown-item" to="/myaccount">
+                  <i className="bi bi-person-fill me-2"></i>
+                  My Profile
+                </NavLink>
+              </li>
+              <li>
+                <NavLink className="dropdown-item" to="/upload">
+                  <i className="bi bi-arrow-bar-up me-2"></i>
+                  Upload a video
+                </NavLink>
+              </li>
+              <li><hr className="dropdown-divider" /></li>
+              <li>
+                <button
+                  className="dropdown-item text-danger"
+                  onClick={handleLogout}
+                >
+                  <i className="bi bi-box-arrow-right me-2"></i>
+                  Logout
+                </button>
+              </li>
+            </ul>
+          </li>
+        )}
+      </ul>
+    </div>
+  </nav>
+);
+
 }
 
 export default Navbar;
