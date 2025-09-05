@@ -1,3 +1,3 @@
-/backend/twaire-backend/node_modules
-/backend/twaire-backend/thumbnails
-/backend/twaire-backend/uploads
+node_modules
+/twaire-backend/thumbnails
+/twaire-backend/uploads
