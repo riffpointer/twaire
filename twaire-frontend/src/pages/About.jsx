@@ -48,6 +48,15 @@ function About() {
         <p>
           Twaire is primarily developed and maintained by <a href="https://github.com/theonlyasdk" target="_blank" rel="noopener noreferrer">theonlyasdk</a>.
         </p>
+
+        {/* Add license info and link to https://github.com/theonlyasdk/twaire */}
+        <h3 className="mt-4">License</h3>
+        <p>
+          Twaire is open source software licensed under the{" "}
+          <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT License</a>.
+          You can find the source code on{" "}
+          <a href="https://github.com/theonlyasdk/twaire" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        </p>
       </div>
       <Footer />
     </>
