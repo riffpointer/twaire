@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+
 
 function Upload() {
   const [title, setTitle] = useState("");
@@ -21,7 +23,7 @@ function Upload() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/me", {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Not authenticated");
@@ -77,7 +79,7 @@ function Upload() {
     if (sanitizedTags.length > 0) formData.append("tags", JSON.stringify(sanitizedTags));
 
     try {
-      const res = await fetch("http://localhost:5000/api/videos", {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/videos`, {
         method: "POST",
         credentials: "include",
         body: formData,

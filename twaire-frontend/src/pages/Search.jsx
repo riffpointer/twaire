@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "../components/Loading.jsx";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -23,7 +25,7 @@ function Search() {
         setError(null);
 
         const res = await fetch(
-          `http://localhost:5000/api/videos/search?q=${encodeURIComponent(searchTerm)}&sort=${sort}`
+          `${ApiConfig.serverUrl}/api/videos/search?q=${encodeURIComponent(searchTerm)}&sort=${sort}`
         );
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -47,7 +49,7 @@ function Search() {
       <Navbar />
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2>Search Results for: <b>{searchTerm}</b></h2>
+          <h2 className="mb-0">Search Results for: <b>{searchTerm}</b></h2>
           <select
             className="form-select w-auto"
             value={sort}
@@ -59,7 +61,7 @@ function Search() {
           </select>
         </div>
 
-        {loading && <p>Loading...</p>}
+        {loading && <Loading label="Loading search results..." />}
         {error && <p className="text-danger">Unable to fetch search results: {error}</p>}
 
         {!loading && !error && videos.length === 0 && (

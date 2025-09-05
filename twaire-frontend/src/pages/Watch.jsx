@@ -4,6 +4,9 @@ import Navbar from "../components/Navbar.jsx";
 import PublicVideosList from "../components/PublicVideosList.jsx";
 import { getRelativeTime } from "../utils/DateUtils.jsx";
 import CommentSection from "../components/CommentSection.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "../components/Loading.jsx";
+import Button from '@mui/material/Button';
 
 function Watch() {
   const { id } = useParams();
@@ -16,7 +19,7 @@ function Watch() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const videoDataRequest = await fetch(`http://localhost:5000/api/videos/${id}/view`, {
+        const videoDataRequest = await fetch(`${ApiConfig.serverUrl}/api/videos/${id}/view`, {
           method: "POST",
           credentials: "include",
         });
@@ -32,7 +35,7 @@ function Watch() {
 
         if (data.uploaderId) {
           const subDataRequest = await fetch(
-            `http://localhost:5000/api/users/${data.uploaderId}/isSubscribed`,
+            `${ApiConfig.serverUrl}/api/users/${data.uploaderId}/isSubscribed`,
             { credentials: "include" }
           );
 
@@ -42,7 +45,7 @@ function Watch() {
           }
 
           const uploaderDataRequest = await fetch(
-            `http://localhost:5000/api/users/${data.channel}`
+            `${ApiConfig.serverUrl}/api/users/${data.channel}`
           );
 
           if (uploaderDataRequest.ok) {
@@ -66,7 +69,7 @@ function Watch() {
     try {
       setSubLoading(true);
       const res = await fetch(
-        `http://localhost:5000/api/users/${video.uploaderId}/subscribe`,
+        `${ApiConfig.serverUrl}/api/users/${video.uploaderId}/subscribe`,
         {
           method: "POST",
           credentials: "include",
@@ -95,7 +98,7 @@ function Watch() {
       <>
         <Navbar />
         <div className="container mt-4">
-          <h1>Loading video...</h1>
+          <Loading label="Loading video..." />
         </div>
       </>
     );
@@ -111,6 +114,7 @@ function Watch() {
     );
 
   const uploadedAgo = getRelativeTime(video.uploadedAt);
+  const formattedUploadDate = video.uploadedAt ? new Date(video.uploadedAt).toLocaleDateString() : "";
 
   return (
     <>
@@ -124,7 +128,7 @@ function Watch() {
               <div className="ratio ratio-16x9 mb-3">
                 <video
                   controls
-                  src={`http://localhost:5000/uploads/${video.filename}`}
+                  src={`${ApiConfig.serverUrl}/uploads/${video.filename}`}
                   className="w-100"
                 />
               </div>
@@ -145,7 +149,7 @@ function Watch() {
                 <strong>{video.title}</strong>
               </h2>
               <div className="text-muted small mb-3">
-                {video.views} views • Uploaded {uploadedAgo}
+                {video.views} views • Uploaded {uploadedAgo} ({formattedUploadDate})
               </div>
 
               {/* Uploader + subscribe */}
@@ -154,7 +158,7 @@ function Watch() {
                   <img
                     src={
                       video.uploaderProfilePicture
-                        ? `http://localhost:5000/${video.uploaderProfilePicture}`
+                        ? `${ApiConfig.serverUrl}/${video.uploaderProfilePicture}`
                         : "https://placehold.co/48x48?text=User"
                     }
                     alt="Uploader profile"
@@ -182,14 +186,16 @@ function Watch() {
                 </div>
 
                 <div>
-                  <button
-                    className={`btn ${subscribed ? "btn-secondary" : "btn-danger"
-                      } btn-sm`}
+                  <Button
+                    disableElevation
+                    variant={subscribed ? "outlined" : "contained"}
+                    color={subscribed ? "secondary" : "error"}
+                    size="small"
                     onClick={handleSubscribe}
                     disabled={subLoading}
                   >
                     {subscribed ? "Subscribed" : "Subscribe"}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -202,7 +208,7 @@ function Watch() {
                   <i>No description provided.</i>
                 )}
               </div>
-              <hr/>
+              <hr />
               <CommentSection videoId={video._id} />
             </div>
           </div>

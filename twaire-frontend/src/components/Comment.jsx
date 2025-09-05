@@ -1,29 +1,37 @@
 import { Link } from "react-router-dom";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import { Button, TextField } from "@mui/material";
 
 function Comment({ comment, likedComments, dislikedComments, onToggle, replyingTo, replyText, onReplyTextChange, onReplySubmit, onReplyCancel, setReplyingTo }) {
+  const commentAuthorUsername = comment.user?.username || "Deleted User";
+  const commentAuthorPublicName = comment.user?.publicName || commentAuthorUsername;
+  const commentAuthorShortName = commentAuthorPublicName
+    .split(" ")
+    .map((name) => name.charAt(0).toUpperCase())
+    .join("") || commentAuthorUsername.charAt(0).toUpperCase();
+  const commentAuthorProfilePicture = comment.user?.profilePicture
+    ? `${ApiConfig.serverUrl}/profile_pictures/${comment.user.profilePicture}`
+    : "https://placehold.co/40?text=" + encodeURIComponent(commentAuthorShortName);
+
   return (
     <div key={comment._id} className="mb-3">
-      <div className="d-flex">
+      <div className="d-flex w-100">
         <img
-          src={
-            comment.user?.profilePicture
-              ? `http://localhost:5000/${comment.user.profilePicture}`
-              : "https://placehold.co/40"
-          }
+          src={commentAuthorProfilePicture}
           alt="User"
           className="rounded-circle me-2"
           width={40}
           height={40}
         />
-        <div>
+        <div className="w-100">
           <div className="d-flex align-items-center">
             <Link to={`/user/${comment.user?.username}`} className="me-1 text-decoration-none">
-              <b>{comment.user?.publicName || comment.user?.username || "User"}</b>
+              <b>{commentAuthorPublicName}</b>
             </Link>
             <small className="text-muted"> commented</small>
             {comment.user?.verified && <i className="bi bi-patch-check-fill text-primary"></i>}
           </div>
-          <p className="mb-1">{comment.text}</p>
+          <p className="mb-1 text-wrap text-break">{comment.text}</p>
           <div className="d-flex align-items-center small text-muted gap-1">
             <button
               type="button"
@@ -53,24 +61,28 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
           </div>
 
           {replyingTo === comment._id && (
-            <form onSubmit={(e) => onReplySubmit(e, comment._id)} className="mt-2 ms-4">
-              <textarea
-                className="form-control mb-2 w-100"
-                rows="1"
-                placeholder="Write a reply..."
+            <form onSubmit={(e) => onReplySubmit(e, comment._id)} className="p-2 mt-2 ms-4">
+              <TextField
+                size="small"
+                className="mb-2 w-100"
+                label="Write a reply..."
                 value={replyText}
                 onChange={onReplyTextChange}
               />
-              <button className="btn btn-primary btn-sm me-2" type="submit">
+              <Button
+                disableElevation
+                variant="contained"
+                className="me-2"
+                type="submit">
                 Post Reply
-              </button>
-              <button
-                className="btn btn-secondary btn-sm"
+              </Button>
+              <Button
+                variant="text"
                 type="button"
                 onClick={onReplyCancel}
               >
                 Cancel
-              </button>
+              </Button>
             </form>
           )}
 
@@ -81,7 +93,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                   <img
                     src={
                       reply.user?.profilePicture
-                        ? `http://localhost:5000/${reply.user.profilePicture}`
+                        ? `${ApiConfig.serverUrl}/api/profile_pictures/${reply.user.profilePicture}`
                         : "https://placehold.co/32"
                     }
                     alt="User"
@@ -102,7 +114,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                         onClick={() => onToggle(reply._id, "like")}
                         title="I like this reply!"
                       >
-                        <i className={`bi bi-hand-thumbs-up-${likedComments.has(reply._id) ? 'fill' : ''} me-1`}></i>
+                        <i className={`bi bi-hand-thumbs-up${likedComments.has(reply._id) ? '-fill' : ''} me-1`}></i>
                         {Array.isArray(reply.likes) ? reply.likes.length : 0}
                       </button>
                       <button
@@ -111,7 +123,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                         onClick={() => onToggle(reply._id, "dislike")}
                         title="I dislike this reply!"
                       >
-                        <i className={`bi bi-hand-thumbs-down-${dislikedComments.has(reply._id) ? 'fill' : ''} me-1`}></i>
+                        <i className={`bi bi-hand-thumbs-down${dislikedComments.has(reply._id) ? '-fill' : ''} me-1`}></i>
                         {Array.isArray(reply.dislikes) ? reply.dislikes.length : 0}
                       </button>
                     </div>

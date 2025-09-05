@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "../components/Loading.jsx";
 
 function User() {
   const { username } = useParams(); // URL: /user/:username
@@ -18,7 +20,7 @@ function User() {
         setError(null);
 
         // Fetch user data
-        const resUser = await fetch(`http://localhost:5000/api/users/${username}`);
+        const resUser = await fetch(`${ApiConfig.serverUrl}/api/users/${username}`);
         if (!resUser.ok) {
           const errData = await resUser.json().catch(() => ({}));
           throw new Error(errData.error || "User not found");
@@ -27,7 +29,7 @@ function User() {
         setUser(userData);
 
         // Fetch user's videos
-        const resVideos = await fetch(`http://localhost:5000/api/videos?uploader=${userData._id}`);
+        const resVideos = await fetch(`${ApiConfig.serverUrl}/api/videos?uploader=${userData._id}`);
         if (!resVideos.ok) {
           const errData = await resVideos.json().catch(() => ({}));
           throw new Error(errData.error || "Failed to fetch videos");
@@ -37,7 +39,7 @@ function User() {
 
         // Check subscription status
         const subRes = await fetch(
-          `http://localhost:5000/api/users/${userData._id}/isSubscribed`,
+          `${ApiConfig.serverUrl}/api/users/${userData._id}/isSubscribed`,
           { credentials: "include" }
         );
         if (subRes.ok) {
@@ -61,7 +63,7 @@ function User() {
     if (!user?._id) return;
     try {
       setSubLoading(true);
-      const res = await fetch(`http://localhost:5000/api/users/${user._id}/subscribe`, {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/users/${user._id}/subscribe`, {
         method: "POST",
         credentials: "include",
       });
@@ -81,7 +83,7 @@ function User() {
       <>
         <Navbar />
         <div className="container mt-4">
-          <h1>Loading user...</h1>
+          <Loading label="Loading user..." />
         </div>
       </>
     );
@@ -91,7 +93,7 @@ function User() {
       <>
         <Navbar />
         <div className="container mt-4">
-          <h1 className="text-danger">Error: {error}</h1>
+          <h1 className="text-danger">Ooops! Unable to load user! {error}</h1>
         </div>
       </>
     );
@@ -115,7 +117,7 @@ function User() {
             <img
               src={
                 user.profilePicture
-                  ? `http://localhost:5000/${user.profilePicture}`
+                  ? `${ApiConfig.serverUrl}/${user.profilePicture}`
                   : "https://placehold.co/100x100?text=Profile"
               }
               alt="Profile"

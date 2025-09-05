@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Strings from "../utils/Strings";
 import Comment from "./Comment";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "./Loading.jsx";
+import Button from '@mui/material/Button';
+import { TextField } from "@mui/material";
 
 function CommentSection({ videoId }) {
   const [comments, setComments] = useState([]);
@@ -25,7 +29,7 @@ function CommentSection({ videoId }) {
     try {
       setLoading(true);
       setErr(null);
-      const res = await fetch(`http://localhost:5000/api/videos/${videoId}/comments`);
+      const res = await fetch(`${ApiConfig.serverUrl}/api/videos/${videoId}/comments`);
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Failed to load comments, try reloading the page!`);
       setComments(toArray(data));
@@ -51,7 +55,7 @@ function CommentSection({ videoId }) {
     setPostErr(null);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/videos/${videoId}/comments`, {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/videos/${videoId}/comments`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -92,7 +96,7 @@ function CommentSection({ videoId }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/comments/${id}/${kind}`, {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/comments/${id}/${kind}`, {
         method: "POST",
         credentials: "include",
       });
@@ -114,7 +118,7 @@ function CommentSection({ videoId }) {
     if (!replyText.trim()) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/comments/${commentId}/replies`, {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/comments/${commentId}/replies`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -139,19 +143,33 @@ function CommentSection({ videoId }) {
       {reactErr && <div className="alert alert-danger" role="alert">{reactErr}</div>}
 
       <form onSubmit={handlePost} className="mb-3 d-flex gap-3 align-items-center">
-        <textarea
-          className="form-control"
-          rows="1"
+        <TextField
+          fullWidth multiline
+          size="small"
           placeholder="Write a comment..."
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              handlePost(e);
+            }
+          }}
         />
-        <button className="btn btn-primary btn-sm" type="submit" style={{ height: 38 }}>
+        <Button
+          disableElevation
+          variant="contained"
+          color="primary"
+          size="small"
+          type="submit"
+          disabled={!text.trim()}
+          style={{ height: 38, minWidth: 64 }}
+        >
           Post
-        </button>
+        </Button>
       </form>
 
-      {loading && <p>Loading comments…</p>}
+      {loading && <Loading label="Loading comments..." />}
       {err && <p className="text-danger">Unable to load comments: {err}</p>}
       {!loading && !err && comments.length === 0 && <p className="text-muted">No comments yet.</p>}
 

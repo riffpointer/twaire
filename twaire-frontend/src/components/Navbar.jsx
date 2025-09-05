@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import ApiConfig from "../utils/ApiConfig";
+import { Skeleton, TextField } from "@mui/material";
 
 function Navbar() {
   const [user, setUser] = useState(null);
@@ -11,7 +13,7 @@ function Navbar() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/me", {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
           credentials: "include",
         });
         if (!res.ok) {
@@ -39,7 +41,7 @@ function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/api/users/logout", {
+      await fetch(`${ApiConfig.serverUrl}/api/users/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -58,7 +60,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg sticky-top navbar-dark bg-dark px-3">
+    <nav className="navbar navbar-expand-lg sticky-top px-3">
       <NavLink className="navbar-brand" to="/">
         <b className="vend-sans">Twaire</b>
       </NavLink>
@@ -87,9 +89,10 @@ function Navbar() {
 
         {/* Search bar */}
         <form className="d-flex" onSubmit={handleSearch}>
-          <input
-            className="form-control me-1 navbar-search-videos-box"
-            type="search"
+          <TextField
+            variant="outlined"
+            size="small"
+            className="me-1"
             placeholder="Search videos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -99,7 +102,7 @@ function Navbar() {
           </button>
         </form>
 
-        <ul className="navbar-nav ms-3">
+        <ul className="navbar-nav ms-2">
           {!user && !loading && (
             <li className="nav-item" id="navbar-login-default">
               <NavLink className="nav-link" to="/login">

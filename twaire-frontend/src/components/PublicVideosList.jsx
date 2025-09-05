@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import VideoCard from "./VideoCard.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "./Loading.jsx";
 
 function PublicVideosList({ defaultSort = "trending", limit }) {
   const [videos, setVideos] = useState([]);
@@ -9,13 +11,12 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
 
   useEffect(() => {
     fetchVideos(sort);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort]);
 
   const fetchVideos = async (sortOption) => {
     try {
       setLoading(true);
-      let url = `http://localhost:5000/api/videos?sort=${sortOption}`;
+      let url = `${ApiConfig.serverUrl}/api/videos?sort=${sortOption}`;
       if (limit) url += `&limit=${limit}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch videos");
@@ -43,7 +44,7 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
       </div>
 
       {loading ? (
-        <p>Loading videos...</p>
+        <Loading label="Loading videos..." />
       ) : videos.length === 0 ? (
         <p>No videos available.</p>
       ) : (

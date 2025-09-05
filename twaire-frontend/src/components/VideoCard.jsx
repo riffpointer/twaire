@@ -1,8 +1,10 @@
 import { getRelativeTime } from "../utils/DateUtils";
+import ApiConfig from "../utils/ApiConfig.jsx";
+
 
 function VideoCard({ title, channel, views, thumbnail, description, verified, uploadedAt }) {
     const safeThumbnail = thumbnail
-        ? `http://localhost:5000/thumbnails/${thumbnail}`
+        ? `${ApiConfig.serverUrl}/thumbnails/${thumbnail}`
         : `https://placehold.co/320x180?text=${encodeURIComponent(title)}`;
 
     // Format uploaded date

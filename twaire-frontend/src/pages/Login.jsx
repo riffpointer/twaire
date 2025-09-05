@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from '../components/Navbar.jsx';
 import Strings from "../utils/Strings.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import { Container, Typography, TextField, Button, Alert, Box, Stack } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -22,7 +25,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/login", {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // important for session cookies
@@ -51,47 +54,65 @@ function Login() {
   return (
     <>
       <Navbar />
-      <div className="container mt-4">
-        <h1>Login to Twaire</h1>
-        <p>{Strings.branding.description} To share your videos, please login to continue.</p>
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Login to Twaire
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          {Strings.branding.description} To share your videos, please login to continue.
+        </Typography>
 
         {alert && (
-          <div className={`alert alert-${alert.type} alert-dismissible fade show`} role="alert">
+          <Alert
+            severity={alert.type === "danger" ? "error" : alert.type}
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => setAlert(null)}
+              >
+                <i className="bi bi-close"></i>
+              </IconButton>
+            }
+            sx={{ mt: 2 }}
+          >
             {alert.message}
-            <button type="button" className="btn-close" onClick={() => setAlert(null)}></button>
-          </div>
+          </Alert>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Enter email..."
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+        <Box component="form" onSubmit={handleLogin} noValidate>
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            fullWidth
+            margin="normal"
+            required
+          />
 
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Enter password..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <TextField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            fullWidth
+            margin="normal"
+            required
+          />
 
-          <button type="submit" className="btn btn-dark">Login</button>
+          <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+            <Button type="submit" variant="contained" disableElevation>
+              Login
+            </Button>
 
-          <p className="mt-3">
-            Or <Link to="/signup">sign up</Link> instead
-          </p>
-        </form>
-      </div>
+            <Button component={Link} to="/signup" variant="text" disableElevation>
+              Sign up
+            </Button>
+          </Stack>
+        </Box>
+      </Container>
     </>
   );
 }

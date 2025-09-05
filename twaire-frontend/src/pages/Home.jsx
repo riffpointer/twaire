@@ -4,6 +4,9 @@ import Strings from '../utils/Strings.jsx';
 import VideoCard from '../components/VideoCard.jsx';
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from '../components/Loading.jsx';
+
 
 function Home() {
   const [videos, setVideos] = useState([]);
@@ -19,7 +22,7 @@ function Home() {
   const fetchVideos = async (sortOption) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/videos?sort=${sortOption}`);
+      const res = await fetch(`${ApiConfig.serverUrl}/api/videos?sort=${sortOption}`);
       if (!res.ok) throw new Error("Failed to fetch videos");
       const data = await res.json();
       setVideos(data);
@@ -54,7 +57,7 @@ function Home() {
 
         <div className="mb-3">
           {loading ? (
-            <p>Loading videos...</p>
+            <Loading />
           ) : videos.length === 0 ? (
             <p>No videos uploaded yet.</p>
           ) : (
@@ -67,7 +70,7 @@ function Home() {
                   >
                     <VideoCard
                       title={video.title}
-                      channel={video.channel || "Twaire"}
+                      channel={video.channel || "Deleted User"}
                       views={video.views ?? 0}
                       thumbnail={video.thumbnail}
                       description={video.description}

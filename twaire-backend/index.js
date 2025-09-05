@@ -339,9 +339,13 @@ app.post("/api/videos/:id/comments", async (req, res) => {
     if (!req.session.userId)
       return res.status(401).json({ error: "Not logged in" });
 
+    const user = await User.findById(req.session.userId).select("username publicName profilePicture verified");
+    if (!user) 
+      return res.status(404).json({ error: "Comment author does not exist" });
+
     const comment = new Comment({
       video: req.params.id,
-      user: req.session.userId,
+      user: user,
       text: req.body.text,
     });
 

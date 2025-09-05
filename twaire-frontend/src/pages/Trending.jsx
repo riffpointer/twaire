@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "../components/Loading.jsx";
 
 function Trending() {
   const [videos, setVideos] = useState([]);
@@ -15,7 +17,7 @@ function Trending() {
         setError(null);
         setLoading(true);
 
-        const res = await fetch("http://localhost:5000/api/videos/");
+        const res = await fetch(`${ApiConfig.serverUrl}/api/videos/`);
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || "Failed to fetch trending videos");
@@ -40,7 +42,7 @@ function Trending() {
         <h2><i class="bi bi-fire"></i> Trending Videos</h2>
         <p className="mb-1">Have a look at the latest trending videos!</p>
 
-        {loading && <p>Loading...</p>}
+        {loading && <Loading />}
         {error && <p className="text-danger">Error: {error}</p>}
 
         {!loading && !error && videos.length === 0 && (

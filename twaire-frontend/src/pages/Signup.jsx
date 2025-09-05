@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
 
 function Signup() {
   const [username, setUsername] = useState("");
@@ -38,7 +39,7 @@ function Signup() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/signup", {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/users/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,7 +56,7 @@ function Signup() {
       let countdown = 2;
       setAlert({
         type: "success",
-        message: `Signup successful! Redirecting in ${countdown}...`,
+        message: `Signup successful! Redirecting to login page in ${countdown}...`,
       });
 
       const timer = setInterval(() => {
@@ -63,7 +64,7 @@ function Signup() {
         if (countdown > 0) {
           setAlert({
             type: "success",
-            message: `Signup successful! Redirecting in ${countdown}...`,
+            message: `Signup successful! Redirecting to login page in ${countdown}...`,
           });
         } else {
           clearInterval(timer);

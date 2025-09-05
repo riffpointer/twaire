@@ -2,6 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import Loading from "../components/Loading.jsx";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  DialogContentText
+} from "@mui/material";
+
 
 function MyAccount() {
   const [user, setUser] = useState(null);
@@ -15,7 +26,7 @@ function MyAccount() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/me", {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Not authenticated");
@@ -23,7 +34,7 @@ function MyAccount() {
         setUser(data);
 
         // fetch user's uploaded videos
-        const vidRes = await fetch(`http://localhost:5000/api/videos?uploader=${data._id}`);
+        const vidRes = await fetch(`${ApiConfig.serverUrl}/api/videos?uploader=${data._id}`);
         if (vidRes.ok) {
           const vidData = await vidRes.json();
           setVideos(vidData);
@@ -41,7 +52,7 @@ function MyAccount() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/api/users/logout", {
+      await fetch(`${ApiConfig.serverUrl}/api/users/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -55,7 +66,7 @@ function MyAccount() {
     <>
       <Navbar />
       <div className="container mt-4">
-        <h2>Loading account...</h2>
+        <Loading label="Loading your account..." />
       </div>
     </>
   );
@@ -67,7 +78,7 @@ function MyAccount() {
         <div className="card shadow-sm p-3">
           <div className="d-flex align-items-center mb-3">
             <img
-              src={user.profilePicture ? `http://localhost:5000/${user.profilePicture}` : "https://placehold.co/100x100?text=Profile"}
+              src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : "https://placehold.co/100x100?text=Profile"}
               alt="Profile"
               className="rounded-circle me-3"
               width={100}
@@ -104,7 +115,7 @@ function MyAccount() {
                     <Link to={`/watch/${video._id}`} className="text-decoration-none">
                       <VideoCard
                         title={video.title}
-                        channel={video.channel || video.uploaderUsername} // fallback if channel name is blank
+                        channel={video.channel || video.uploaderUsername}
                         views={video.views}
                         thumbnail={video.thumbnail}
                         description={video.description}
@@ -118,31 +129,41 @@ function MyAccount() {
           )}
 
           <hr />
-          <button className="btn btn-danger" onClick={() => setShowLogoutModal(true)}>
+          <Button variant="contained" color="error" disableElevation onClick={() => setShowLogoutModal(true)}>
             Logout
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Bootstrap Logout Modal */}
-      <div className={`modal fade ${showLogoutModal ? "show d-block" : ""}`} tabIndex="-1" role="dialog">
-        <div className="modal-dialog modal-dialog-centered" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Confirm Logout</h5>
-              <button type="button" className="btn-close" onClick={() => setShowLogoutModal(false)}></button>
-            </div>
-            <div className="modal-body">
-              <p>Are you sure you want to log out?</p>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowLogoutModal(false)}>Cancel</button>
-              <button type="button" className="btn btn-danger" onClick={handleLogout}>Logout</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {showLogoutModal && <div className="modal-backdrop fade show"></div>}
+      {/* MUI Dialog for logout confirmation */}
+      <Dialog
+        open={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+      >
+        <DialogTitle id="logout-dialog-title">Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="logout-dialog-description">
+            Are you sure you want to log out? This action will redirect you to the login page.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowLogoutModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setShowLogoutModal(false);
+              handleLogout();
+            }}
+            color="error"
+            variant="text"
+          >
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
