@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Strings from "../utils/Strings";
 
 function CommentSection({ videoId }) {
   const [comments, setComments] = useState([]);
@@ -25,7 +26,7 @@ function CommentSection({ videoId }) {
       setErr(null);
       const res = await fetch(`http://localhost:5000/api/videos/${videoId}/comments`);
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Failed to fetch comments");
+      if (!res.ok) throw new Error(data.error || `Failed to load comments, try reloading the page!`);
       setComments(toArray(data));
     } catch (e) {
       console.error(e);
@@ -56,7 +57,7 @@ function CommentSection({ videoId }) {
         body: JSON.stringify({ text }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Failed to post comment");
+      if (!res.ok) throw new Error(data.error || `Failed to post comment! ${Strings.help.report_active_issue}`);
 
       const newComment = data.comment ?? data;
       setComments((prev) => [newComment, ...prev]);
@@ -95,7 +96,7 @@ function CommentSection({ videoId }) {
         credentials: "include",
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Failed to react");
+      if (!res.ok) throw new Error(data.error || `Failed to add reaction! ${Strings.help.report_active_issue}`);
 
       setComments((prev) =>
         prev.map((c) =>
@@ -119,7 +120,7 @@ function CommentSection({ videoId }) {
         body: JSON.stringify({ text: replyText }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Failed to post reply");
+      if (!res.ok) throw new Error(data.error || `Failed to post reply! ${Strings.help.report_active_issue}`);
 
       setReplyingTo(null);
       setReplyText("");
@@ -154,13 +155,13 @@ function CommentSection({ videoId }) {
       {!loading && !err && comments.length === 0 && <p className="text-muted">No comments yet.</p>}
 
       <div>
-        {comments.map((c) => (
-          <div key={c._id} className="mb-3">
+        {comments.map((comment) => (
+          <div key={comment._id} className="mb-3">
             <div className="d-flex">
               <img
                 src={
-                  c.user?.profilePicture
-                    ? `http://localhost:5000/${c.user.profilePicture}`
+                  comment.user?.profilePicture
+                    ? `http://localhost:5000/${comment.user.profilePicture}`
                     : "https://placehold.co/40"
                 }
                 alt="User"
@@ -170,43 +171,43 @@ function CommentSection({ videoId }) {
               />
               <div>
                 <div className="d-flex align-items-center">
-                  <Link to={`/user/${c.user?.username}`} className="me-1 text-decoration-none">
-                    <b>{c.user?.publicName || c.user?.username || "User"}</b>
+                  <Link to={`/user/${comment.user?.username}`} className="me-1 text-decoration-none">
+                    <b>{comment.user?.publicName || comment.user?.username || "User"}</b>
                   </Link>
                   <small className="text-muted"> commented</small>
-                  {c.user?.verified && <i className="bi bi-patch-check-fill text-primary"></i>}
+                  {comment.user?.verified && <i className="bi bi-patch-check-fill text-primary"></i>}
                 </div>
-                <p className="mb-1">{c.text}</p>
+                <p className="mb-1">{comment.text}</p>
                 <div className="d-flex align-items-center small text-muted gap-1">
                   <button
                     type="button"
-                    className={`btn btn-sm ps-0 pe-0 ${likedComments.has(c._id) ? 'text-primary' : ''} d-flex align-items-center`}
-                    onClick={() => toggle(c._id, "like")}
+                    className={`btn btn-sm ps-0 pe-0 ${likedComments.has(comment._id) ? 'text-primary' : ''} d-flex align-items-center`}
+                    onClick={() => toggle(comment._id, "like")}
                     title="I like this comment!"
                   >
-                    <i className={`bi bi-hand-thumbs-up${likedComments.has(c._id) ? '-fill' : ''} me-1`}></i>
-                    {Array.isArray(c.likes) ? c.likes.length : 0}
+                    <i className={`bi bi-hand-thumbs-up${likedComments.has(comment._id) ? '-fill' : ''} me-1`}></i>
+                    {Array.isArray(comment.likes) ? comment.likes.length : 0}
                   </button>
                   <button
                     type="button"
-                    className={`btn btn-sm ms-1 ps-0 pe-0 ${dislikedComments.has(c._id) ? 'text-danger' : ''} d-flex align-items-center`}
-                    onClick={() => toggle(c._id, "dislike")}
+                    className={`btn btn-sm ms-1 ps-0 pe-0 ${dislikedComments.has(comment._id) ? 'text-danger' : ''} d-flex align-items-center`}
+                    onClick={() => toggle(comment._id, "dislike")}
                     title="I dislike this comment!"
                   >
-                    <i className={`bi bi-hand-thumbs-down${dislikedComments.has(c._id) ? '-fill' : ''} me-1`}></i>
-                    {Array.isArray(c.dislikes) ? c.dislikes.length : 0}
+                    <i className={`bi bi-hand-thumbs-down${dislikedComments.has(comment._id) ? '-fill' : ''} me-1`}></i>
+                    {Array.isArray(comment.dislikes) ? comment.dislikes.length : 0}
                   </button>
                   <button
                     type="button"
                     className="btn btn-sm"
-                    onClick={() => setReplyingTo(replyingTo === c._id ? null : c._id)}
+                    onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
                   >
                     Reply
                   </button>
                 </div>
 
-                {replyingTo === c._id && (
-                  <form onSubmit={(e) => handleReply(e, c._id)} className="mt-2 ms-4">
+                {replyingTo === comment._id && (
+                  <form onSubmit={(e) => handleReply(e, comment._id)} className="mt-2 ms-4">
                     <textarea
                       className="form-control mb-2 w-100"
                       rows="1"
@@ -227,14 +228,14 @@ function CommentSection({ videoId }) {
                   </form>
                 )}
 
-                {Array.isArray(c.replies) && c.replies.length > 0 && (
+                {Array.isArray(comment.replies) && comment.replies.length > 0 && (
                   <div className="ms-0 mt-2" style={{ borderLeft: '2px solid #ccc', paddingLeft: '10px' }}>
-                    {c.replies.map((r) => (
-                      <div key={r._id} className="d-flex mb-2">
+                    {comment.replies.map((reply) => (
+                      <div key={reply._id} className="d-flex mb-2">
                         <img
                           src={
-                            r.user?.profilePicture
-                              ? `http://localhost:5000/${r.user.profilePicture}`
+                            reply.user?.profilePicture
+                              ? `http://localhost:5000/${reply.user.profilePicture}`
                               : "https://placehold.co/32"
                           }
                           alt="User"
@@ -243,29 +244,29 @@ function CommentSection({ videoId }) {
                           height={32}
                         />
                         <div>
-                          <Link to={`/user/${r.user?.username}`} className="me-1 text-decoration-none">
-                            <b>{r.user?.publicName || r.user?.username || "User"}</b>
+                          <Link to={`/user/${reply.user?.username}`} className="me-1 text-decoration-none">
+                            <b>{reply.user?.publicName || reply.user?.username || "User"}</b>
                           </Link>
                           <small className="text-muted"> replied</small>
-                          <p className="mb-1">{r.text}</p>
+                          <p className="mb-1">{reply.text}</p>
                           <div className="d-flex align-items-center small text-muted gap-1">
                             <button
                               type="button"
-                              className={`btn btn-sm ${likedComments.has(r._id) ? 'btn-primary' : ''} d-flex align-items-center`}
-                              onClick={() => toggle(r._id, "like")}
+                              className={`btn btn-sm ${likedComments.has(reply._id) ? 'text-primary' : ''} d-flex align-items-center`}
+                              onClick={() => toggle(reply._id, "like")}
                               title="I like this reply!"
                             >
-                              <i className="bi bi-hand-thumbs-up me-1"></i>
-                              {Array.isArray(r.likes) ? r.likes.length : 0}
+                              <i className={`bi bi-hand-thumbs-up-${likedComments.has(reply._id) ? 'fill' : ''} me-1`}></i>
+                              {Array.isArray(reply.likes) ? reply.likes.length : 0}
                             </button>
                             <button
                               type="button"
-                              className={`btn btn-sm ${dislikedComments.has(r._id) ? 'btn-danger' : ''} d-flex align-items-center`}
-                              onClick={() => toggle(r._id, "dislike")}
+                              className={`btn btn-sm ${dislikedComments.has(reply._id) ? 'text-danger' : ''} d-flex align-items-center`}
+                              onClick={() => toggle(reply._id, "dislike")}
                               title="I dislike this reply!"
                             >
-                              <i className="bi bi-hand-thumbs-down me-1"></i>
-                              {Array.isArray(r.dislikes) ? r.dislikes.length : 0}
+                              <i className={`bi bi-hand-thumbs-down-${dislikedComments.has(reply._id) ? 'fill' : ''} me-1`}></i>
+                              {Array.isArray(reply.dislikes) ? reply.dislikes.length : 0}
                             </button>
                           </div>
                         </div>

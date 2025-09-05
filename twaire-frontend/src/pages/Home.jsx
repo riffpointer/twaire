@@ -80,7 +80,6 @@ function Home() {
           )}
         </div>
       </div>
-      <hr />
       <Footer />
     </>
   );

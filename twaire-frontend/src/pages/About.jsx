@@ -13,7 +13,7 @@ function About() {
       <div className="container mt-4 mb-4">
         <h1 className="display-4">About Twaire</h1>
         <p className="lead">
-          Twaire is a simple open source video sharing platform built with React, Node.js,
+          Twaire is an open source video sharing platform built with React, Node.js,
           Express, and MongoDB. It’s designed as a lightweight YouTube-style
           video platform where users can upload, watch, and explore videos.
         </p>
@@ -44,11 +44,9 @@ function About() {
           <a href="https://mongoosejs.com/" target="_blank" rel="noopener noreferrer">Mongoose</a>)
         </p>
 
-
-        <h3 className="mt-4">Future Plans</h3>
+        <h3 className="mt-4">Author</h3>
         <p>
-          We plan to add features like user authentication, likes/dislikes,
-          comments, and playlists in future updates.
+          Twaire is primarily developed and maintained by <a href="https://github.com/theonlyasdk" target="_blank" rel="noopener noreferrer">theonlyasdk</a>.
         </p>
       </div>
       <Footer />

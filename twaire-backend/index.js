@@ -11,21 +11,23 @@ import MongoStore from "connect-mongo";
 const app = express();
 const PORT = 5000;
 
-// connect to local MongoDB
+// You must have MongoDB installed: https://www.mongodb.com/try/download/community
+// Let us connect to a local MongoDB instance.
 mongoose.connect("mongodb://127.0.0.1:27017/twaire");
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
-db.once("open", () => console.log("Connected to MongoDB"));
+db.once("open", () => console.log("Connected to MongoDB instance successfully"));
 
 app.use(
   session({
-    secret: "session_secret",
+    secret: process.env.SESSION_SECRET || "session_secret",
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: "mongodb://127.0.0.1:27017/twaire" }),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      // Let us store the cookie for a maximum of 1 week
+      maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
     },
   })
@@ -35,10 +37,11 @@ app.use(cors({
   origin: "http://localhost:5173",
   credentials: true,
 }));
+
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 app.use("/thumbnails", express.static("thumbnails"));
-
+app.use("/profile_pictures", express.static("profile_pictures"));
 
 const replySchema = new mongoose.Schema(
   {
@@ -597,5 +600,5 @@ app.get("/api/videos/:id", async (req, res) => {
 });
 
 app.listen(PORT, () =>
-  console.log(`Server running at http://localhost:${PORT}`)
+  console.log(`Twaire backend server is running at http://localhost:${PORT}`)
 );

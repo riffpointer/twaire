@@ -13,6 +13,16 @@ Twaire is built with [Node.js](https://nodejs.org/) and [Express](https://expres
 - More features coming soon...!
 
 ## Installation
+
+### Prerequisites
+
+To run a local instance of Twaire, you must have the following installed on your system:
+
+- [Node.js](https://nodejs.org/) (v16 or higher recommended)
+- [Git](https://git-scm.com/)
+- [MongoDB Server](https://www.mongodb.com/try/download/community) (running locally or accessible remotely)
+
+### Running
 Twaire has two components: 
  - the **backend server** 
  - and a **ReactJS powered frontend**.
