@@ -57,3 +57,22 @@
 .bg-blur {
   backdrop-filter: blur(5px);
 }
+
+.overlay .MuiTouchRipple-child {
+  background: rgb(255, 255, 255) !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  transition: border-color 250ms ease-out !important;
+}
+
+.profile-picture-container .overlay {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.profile-picture-container:hover .overlay {
+  opacity: 1;
+}

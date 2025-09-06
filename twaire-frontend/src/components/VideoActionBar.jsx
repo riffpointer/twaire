@@ -95,7 +95,7 @@ function VideoActionBar({ videoId }) {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`http://localhost:5173/watch/${videoId}`);
+    navigator.clipboard.writeText(`${ApiConfig.serverUrl}/watch/${videoId}`);
     setCopyButtonText('Copied!');
     setTimeout(() => {
         setCopyButtonText('Copy');
@@ -173,7 +173,7 @@ function VideoActionBar({ videoId }) {
             <TextField
               fullWidth
               size="small"
-              value={`http://localhost:5173/watch/${videoId}`}
+              value={`${ApiConfig.serverUrl}/watch/${videoId}`}
               InputProps={{
                 readOnly: true,
               }}

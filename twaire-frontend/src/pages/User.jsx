@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Snackbar } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
 
 function User() {
@@ -12,15 +12,28 @@ function User() {
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("error");
+
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   useEffect(() => {
     const fetchUserAndVideos = async () => {
       try {
-        setError(null);
-
         // Fetch user data
         const resUser = await fetch(`${ApiConfig.serverUrl}/api/users/${username}`);
         if (!resUser.ok) {
@@ -49,10 +62,10 @@ function User() {
           setSubscribed(subData.subscribed);
         }
 
-        document.title = `${userData.publicName || userData.username} - Twaire`;
+        document.title = `${userData.username} - Twaire`;
       } catch (err) {
         console.error(err);
-        setError(err.message);
+        showSnackbar(`Unable to load videos: ${err.message}`, "error");
       } finally {
         setLoading(false);
       }
@@ -74,9 +87,24 @@ function User() {
       setSubscribed(data.subscribed);
     } catch (err) {
       console.error(err);
-      alert("Subscription action failed: " + err.message);
+      showSnackbar("Subscription failed: " + err.message, "error");
     } finally {
       setSubLoading(false);
+    }
+  };
+
+  const getSnackbarIcon = (severity) => {
+    switch (severity) {
+      case "error":
+        return <i className="bi bi-exclamation-circle-fill me-2"></i>;
+      case "success":
+        return <i className="bi bi-check-circle-fill me-2"></i>;
+      case "warning":
+        return <i className="bi bi-exclamation-triangle-fill me-2"></i>;
+      case "info":
+        return <i className="bi bi-info-circle-fill me-2"></i>;
+      default:
+        return null;
     }
   };
 
@@ -90,22 +118,31 @@ function User() {
       </>
     );
 
-  if (error)
-    return (
-      <>
-        <Navbar />
-        <div className="container mt-4">
-          <h1 className="text-danger">Ooops! Unable to load user! {error}</h1>
-        </div>
-      </>
-    );
-
   if (!user)
     return (
       <>
         <Navbar />
         <div className="container mt-4">
           <h1>User not found.</h1>
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={handleCloseSnackbar}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            ContentProps={{
+              sx: {
+                backgroundColor: snackbarSeverity === "error" ? "#d32f2f" : "#2e7d32",
+                display: 'flex',
+                alignItems: 'center'
+              },
+            }}
+            message={
+              <span className="d-flex align-items-center">
+                {getSnackbarIcon(snackbarSeverity)}
+                {snackbarMessage}
+              </span>
+            }
+          />
         </div>
       </>
     );
@@ -120,7 +157,7 @@ function User() {
               src={
                 user.profilePicture
                   ? `${ApiConfig.serverUrl}/${user.profilePicture}`
-                  : "https://placehold.co/100x100?text=Profile"
+                  : `https://placehold.co/100x100?text=${user.publicName?.charAt(0)}`
               }
               alt="Profile"
               className="rounded-circle me-3"
@@ -144,7 +181,7 @@ function User() {
 
           {user.bio && (
             <div className="mb-3">
-              <strong>Bio:</strong>
+              <strong>Bio</strong>
               <p>{user.bio}</p>
             </div>
           )}
@@ -185,6 +222,25 @@ function User() {
           <p className="text-muted">This user has not uploaded any videos yet.</p>
         )}
       </div>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        ContentProps={{
+          sx: {
+            backgroundColor: snackbarSeverity === "error" ? "#d32f2f" : "#2e7d32",
+            display: 'flex',
+            alignItems: 'center'
+          },
+        }}
+        message={
+          <span className="d-flex align-items-center">
+            {getSnackbarIcon(snackbarSeverity)}
+            {snackbarMessage}
+          </span>
+        }
+      />
     </>
   );
 }

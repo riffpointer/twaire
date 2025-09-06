@@ -237,9 +237,9 @@ function Watch() {
                 <div className="d-flex align-items-center">
                   <img
                     src={
-                      video.uploaderProfilePicture
-                        ? `${ApiConfig.serverUrl}/${video.uploaderProfilePicture}`
-                        : "https://placehold.co/48x48?text=User"
+                      video.uploader?.profilePicture
+                        ? `${ApiConfig.serverUrl}/${video.uploader.profilePicture}`
+                        : `https://placehold.co/48x48?text=${video.channel?.charAt(0)}`
                     }
                     alt="Uploader profile"
                     className="rounded-circle me-2"
@@ -248,10 +248,10 @@ function Watch() {
                   />
                   <div>
                     <Link
-                      to={`/user/${video.username || video.channel}`}
+                      to={`/user/${video.username}`}
                       className="fw-bold text-dark text-decoration-none"
                     >
-                      {video.channel || video.username}
+                      {video.channel}
                     </Link>
                     {video.verified && (
                       <i

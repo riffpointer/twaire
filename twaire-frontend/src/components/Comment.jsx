@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
-import { Button, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 
-function Comment({ comment, likedComments, dislikedComments, onToggle, replyingTo, replyText, onReplyTextChange, onReplySubmit, onReplyCancel, setReplyingTo }) {
+function Comment({ comment, likedComments, dislikedComments, onToggle, replyingTo, replyText, onReplyTextChange, onReplySubmit, onReplyCancel, setReplyingTo, currentUser }) {
   const commentAuthorUsername = comment.user?.username || "Deleted User";
   const commentAuthorPublicName = comment.user?.publicName || commentAuthorUsername;
   const commentAuthorShortName = commentAuthorPublicName
@@ -10,7 +10,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
     .map((name) => name.charAt(0).toUpperCase())
     .join("") || commentAuthorUsername.charAt(0).toUpperCase();
   const commentAuthorProfilePicture = comment.user?.profilePicture
-    ? `${ApiConfig.serverUrl}/profile_pictures/${comment.user.profilePicture}`
+    ? `${ApiConfig.serverUrl}/${comment.user.profilePicture}`
     : "https://placehold.co/40?text=" + encodeURIComponent(commentAuthorShortName);
 
   return (
@@ -61,28 +61,39 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
           </div>
 
           {replyingTo === comment._id && (
-            <form onSubmit={(e) => onReplySubmit(e, comment._id)} className="p-2 mt-2 ms-4">
-              <TextField
-                size="small"
-                className="mb-2 w-100"
-                label="Write a reply..."
-                value={replyText}
-                onChange={onReplyTextChange}
+            <form onSubmit={(e) => onReplySubmit(e, comment._id)} className="p-2 mt-2 ms-0 d-flex flex-row w-100">
+              <img
+                src={currentUser?.profilePicture ? `${ApiConfig.serverUrl}/${currentUser.profilePicture}` : `https://placehold.co/32?text=${currentUser?.username?.charAt(0)}`}
+                alt="User"
+                className="rounded-circle me-2 mt-1"
+                width={32}
+                height={32}
               />
-              <Button
-                disableElevation
-                variant="contained"
-                className="me-2"
-                type="submit">
-                Post Reply
-              </Button>
-              <Button
-                variant="text"
-                type="button"
-                onClick={onReplyCancel}
-              >
-                Cancel
-              </Button>
+              <Box className="d-flex align-items-center mb-2 flex-column w-100">
+                <TextField
+                  size="small"
+                  className="w-100 mb-2"
+                  label="Write a reply..."
+                  value={replyText}
+                  onChange={onReplyTextChange}
+                />
+                <Box className="d-flex w-100">
+                  <Button
+                    disableElevation
+                    variant="contained"
+                    className="me-2"
+                    type="submit">
+                    Post Reply
+                  </Button>
+                  <Button
+                    variant="text"
+                    type="button"
+                    onClick={onReplyCancel}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Box>
             </form>
           )}
 
@@ -93,8 +104,8 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                   <img
                     src={
                       reply.user?.profilePicture
-                        ? `${ApiConfig.serverUrl}/api/profile_pictures/${reply.user.profilePicture}`
-                        : "https://placehold.co/32"
+                        ? `${ApiConfig.serverUrl}/${reply.user.profilePicture}`
+                        : `https://placehold.co/32?text=${reply.user?.username?.charAt(0)}`
                     }
                     alt="User"
                     className="rounded-circle me-2"
@@ -103,7 +114,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                   />
                   <div>
                     <Link to={`/user/${reply.user?.username}`} className="me-1 text-decoration-none">
-                      <b>{reply.user?.publicName || reply.user?.username || "User"}</b>
+                      <b>{reply.user?.publicName || reply.user?.username || "Deleted User"}</b>
                     </Link>
                     <small className="text-muted"> replied</small>
                     <p className="mb-1">{reply.text}</p>

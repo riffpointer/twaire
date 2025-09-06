@@ -18,6 +18,7 @@ function CommentSection({ videoId }) {
   const [dislikedComments, setDislikedComments] = useState(new Set());
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
 
   const toArray = (payload) => {
     if (Array.isArray(payload)) return payload;
@@ -48,6 +49,24 @@ function CommentSection({ videoId }) {
 
     if (videoId) fetchComments();
   }, [videoId]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUser(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   const handlePost = async (e) => {
     e.preventDefault();
@@ -187,6 +206,7 @@ function CommentSection({ videoId }) {
             onReplySubmit={handleReply}
             onReplyCancel={() => setReplyingTo(null)}
             setReplyingTo={setReplyingTo}
+            currentUser={currentUser}
           />
         ))}
       </div>

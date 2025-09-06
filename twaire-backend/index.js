@@ -70,14 +70,17 @@ const commentSchema = new mongoose.Schema(
 // schema for videos
 const videoSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: { type: String },
-  uploader: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  thumbnail: { type: String },
-  tags: [String],
+  description: String,
+  filename: { type: String, required: true },
+  thumbnail: { type: String, default: "" },
+  channel: { type: String, default: "Deleted User" },
+  username: { type: String, default: "ghostuser" },
   views: { type: Number, default: 0 },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   uploadedAt: { type: Date, default: Date.now },
+  tags: { type: [String], default: [] },
+  uploader: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   verified: { type: Boolean, default: false }
 });
 
@@ -194,6 +197,7 @@ app.get("/api/users/me", isAuthenticated, async (req, res) => {
   if (!user) return res.status(404).json({ error: "User not found" });
 
   res.json({
+    _id: user._id,
     username: user.username,
     publicName: user.publicName || user.username,
     profilePicture: user.profilePicture,
@@ -201,6 +205,39 @@ app.get("/api/users/me", isAuthenticated, async (req, res) => {
     subscribers: user.subscribers,
     verified: user.verified,
   });
+});
+
+app.put("/api/user/profile", isAuthenticated, userUpload.single("profilePicture"), async (req, res) => {
+  try {
+    const { publicName, bio } = req.body;
+    const user = await User.findById(req.session.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.publicName = publicName || user.publicName;
+    user.bio = bio || user.bio;
+
+    if (req.file) {
+      user.profilePicture = req.file.path;
+    }
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        username: user.username,
+        publicName: user.publicName,
+        profilePicture: user.profilePicture,
+        bio: user.bio,
+      },
+    });
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.status(500).json({ error: "Server error during profile update" });
+  }
 });
 
 app.get("/api/users/:id/videos", async (req, res) => {
@@ -228,6 +265,8 @@ app.get("/api/users/:username", async (req, res) => {
       verified: user.verified,
       subscribers: user.subscribers.length,
       accountViews: user.accountViews,
+      profilePicture: user.profilePicture,
+      bio: user.bio
     });
   } catch (err) {
     console.error(err);
@@ -401,7 +440,7 @@ app.post("/api/videos/:id/view", async (req, res) => {
       req.params.id,
       { $inc: { views: 1 } },
       { new: true }
-    ).populate("uploader", "_id username publicName verified subscribers"); // populate uploader info
+    ).populate("uploader", "_id username publicName verified subscribers profilePicture");
 
     if (!video) return res.status(404).json({ error: "Video not found" });
 
@@ -576,6 +615,7 @@ app.post(
         filename: videoFile.filename,
         thumbnail: thumbnailFile?.filename || "",
         channel: user.publicName?.trim() || user.username,
+        username: user.username,
         views: 0,
         tags: JSON.parse(sanitizedTags.toString().trim() || "[]"),
         uploader: userId,
@@ -615,11 +655,13 @@ app.get("/api/users/:id/isSubscribed", isAuthenticated, async (req, res) => {
 // POST /api/users/:id/subscribe
 app.post("/api/users/:id/subscribe", isAuthenticated, async (req, res) => {
   try {
+    await delay(500);
+
     const targetUserId = req.params.id;
     const currentUserId = req.session.userId;
 
     if (currentUserId === targetUserId)
-      return res.status(400).json({ error: "Cannot subscribe to yourself" });
+      return res.status(400).json({ error: "You may not subscribe to yourself" });
 
     const currentUser = await User.findById(currentUserId);
     const targetUser = await User.findById(targetUserId);
@@ -647,8 +689,6 @@ app.post("/api/users/:id/subscribe", isAuthenticated, async (req, res) => {
 
     await currentUser.save();
     await targetUser.save();
-
-    await delay(500);
 
     res.json({ subscribed: !isSubscribed });
   } catch (err) {

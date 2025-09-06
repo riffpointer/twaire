@@ -11,6 +11,7 @@ import User from './pages/User.jsx';
 import MyAccount from './pages/MyAccount.jsx';
 import Search from './pages/Search.jsx';
 import Trending from './pages/Trending.jsx';
+import ProfileSettings from './pages/ProfileSettings.jsx';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/user/:username" element={<User />} />
+          <Route path="/profile-settings" element={<ProfileSettings />} />
         </Routes>
       </BrowserRouter>
     </>

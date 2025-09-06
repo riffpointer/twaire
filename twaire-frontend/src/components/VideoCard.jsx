@@ -25,12 +25,12 @@ function VideoCard({ title, channel, views, thumbnail, description, verified, up
             <div className="card-body p-2">
                 <h6 className="card-title text-truncate mb-1">{title}</h6>
                 <p className="card-text text-muted mb-0 d-flex align-items-center gap-1" style={{ fontSize: "0.85rem" }}>
-                    <span>{channel}</span>
+                    <span className="text-truncate">{channel}</span>
                     {verified && (
                         <i className="bi bi-patch-check-fill text-primary" title="Verified channel"></i>
                     )}
-                    • <span>{views} views</span>
-                    {uploadedAtFormatted && <>• <span>{uploadedAtFormatted}</span></>}
+                    • <span className="text-nowrap">{views} views</span>
+                    {uploadedAtFormatted && <>• <span className="text-nowrap">{uploadedAtFormatted}</span></>}
                 </p>
             </div>
         </div>

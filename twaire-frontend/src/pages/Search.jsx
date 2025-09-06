@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
+import { TextField, MenuItem } from "@mui/material";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -50,15 +51,18 @@ function Search() {
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="mb-0">Search Results for: <b>{searchTerm}</b></h2>
-          <select
-            className="form-select w-auto"
+          <TextField
+            select
+            label="Sort by"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
+            variant="outlined"
+            sx={{ minWidth: 200 }}
           >
-            <option value="relevance">Relevance</option>
-            <option value="date">Upload date (Newest first)</option>
-            <option value="views">Most viewed</option>
-          </select>
+            <MenuItem value="relevance">Relevance</MenuItem>
+            <MenuItem value="date">Upload date (Newest first)</MenuItem>
+            <MenuItem value="views">Most viewed</MenuItem>
+          </TextField>
         </div>
 
         {loading && <Loading label="Loading search results..." />}

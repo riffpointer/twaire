@@ -54,7 +54,7 @@ function Login() {
   return (
     <>
       <Navbar />
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Container maxWidth="sm" sx={{ mt: 4 }}>
         <Typography variant="h4" gutterBottom>
           Login to Twaire
         </Typography>
@@ -108,7 +108,7 @@ function Login() {
             </Button>
 
             <Button component={Link} to="/signup" variant="text" disableElevation>
-              Sign up
+              Don't have an account? Sign up
             </Button>
           </Stack>
         </Box>

@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import ApiConfig from '../utils/ApiConfig';
 
 // Assume user and handleLogout are passed as props
 const UserDropdown = ({ user, handleLogout }) => {
@@ -62,7 +63,7 @@ const UserDropdown = ({ user, handleLogout }) => {
                 <MenuItem component={NavLink} sx={{ pointerEvents: 'none' }}>
                     <Typography variant="h6" component="span" className="d-flex align-items-center">
                         <img
-                            src={user.profilePicture || `https://placehold.co/48x48?text=${shortName}`}
+                            src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : `https://placehold.co/48x48?text=${shortName}`}
                             alt={user.publicName || user.username}
                             className="rounded-circle me-2"
                             width={48}
@@ -74,6 +75,9 @@ const UserDropdown = ({ user, handleLogout }) => {
                 <Divider />
                 <MenuItem component={NavLink} to="/myaccount" onClick={handleClose}>
                     <i className="bi bi-person-fill me-2"></i> My Profile
+                </MenuItem>
+                <MenuItem component={NavLink} to="/profile-settings" onClick={handleClose}>
+                    <i className="bi bi-gear-fill me-2"></i> Profile Settings
                 </MenuItem>
                 <MenuItem component={NavLink} to="/upload" onClick={handleClose}>
                     <i className="bi bi-arrow-bar-up me-2"></i> Upload a video

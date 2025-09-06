@@ -87,12 +87,15 @@ function MyAccount() {
             <div>
               <h3>{user.publicName || user.username}</h3>
               <p className="text-muted">@{user.username}</p>
+              <Link to="/profile-settings">
+                <Button variant="outlined" size="small">Edit Profile</Button>
+              </Link>
             </div>
           </div>
 
           {user.bio && (
             <div className="mb-3">
-              <strong>Bio:</strong>
+              <strong>Bio</strong>
               <p>{user.bio}</p>
             </div>
           )}
