@@ -101,8 +101,8 @@ const userSchema = new mongoose.Schema({
   subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   accountViews: { type: Number, default: 0 },
-  profilePicture: { type: String, default: "" },
-  bio: { type: String, default: "" },
+  profilePicture: { type: String, default: null },
+  bio: { type: String, default: null },
 });
 
 const User = mongoose.model("User", userSchema);

@@ -77,13 +77,19 @@ function MyAccount() {
       <div className="container mt-4 mb-4">
         <div className="card shadow-sm p-3">
           <div className="d-flex align-items-center mb-3">
-            <img
-              src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : "https://placehold.co/100x100?text=Profile"}
-              alt="Profile"
-              className="rounded-circle me-3"
-              width={100}
-              height={100}
-            />
+            {user.profilePicture ? (
+              <img
+                src={`${ApiConfig.serverUrl}/${user.profilePicture}`}
+                alt="Profile"
+                className="rounded-circle me-3"
+                width={100}
+                height={100}
+              />
+            ) : (
+              <div className="me-3 no-profile-icon">
+                <i className="bi bi-person-fill"></i>
+              </div>
+            )}
             <div>
               <h3>{user.publicName || user.username}</h3>
               <p className="text-muted">@{user.username}</p>

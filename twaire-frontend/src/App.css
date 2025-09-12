@@ -76,3 +76,20 @@
 .profile-picture-container:hover .overlay {
   opacity: 1;
 }
+
+.no-profile-icon {
+  background-color: gray;
+  color: white;
+  width: 6em;
+  height: 6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.no-profile-icon i {
+  font-size: 1.8em;
+  margin: 0;
+  padding: 0;
+}
