@@ -73,7 +73,7 @@ function ProfileSettings() {
     }
 
     try {
-      const res = await fetch(`${ApiConfig.serverUrl}/api/user/profile`, {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/users/profile`, {
         method: "PUT",
         credentials: "include",
         body: formData,
