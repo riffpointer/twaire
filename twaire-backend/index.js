@@ -1,16 +1,12 @@
-import express from "express";
-import cors from "cors";
-import mongoose from "mongoose";
-import session from "express-session";
 import MongoStore from "connect-mongo";
+import cors from "cors";
+import express from "express";
+import session from "express-session";
+import mongoose from "mongoose";
 
-import isAuthenticated from "./middleware/auth.js";
-import { Video, User, Comment } from "./models/models.js";
-
-import { userUpload, videoUpload } from "./providers/storage.js";
+import commentsRouter from "./routes/commentsRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import videoRouter from "./routes/videoRoutes.js";
-import commentsRouter from "./routes/commentsRoutes.js";
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 

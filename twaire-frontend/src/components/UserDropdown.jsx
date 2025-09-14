@@ -11,7 +11,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import ApiConfig from '../utils/ApiConfig';
 
 // Assume user and handleLogout are passed as props
-const UserDropdown = ({ user, handleLogout }) => {
+const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline=false }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -31,17 +31,17 @@ const UserDropdown = ({ user, handleLogout }) => {
     return (
         <Box>
             <Button
-                id="user-menu-button"
                 aria-controls={open ? 'user-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
                 onClick={handleClick}
-                className="text-white"
-                disableElevation
+                className={textWhite ? "text-white" : ""}
+                disableElevation={hasOutline}
                 sx={{ textTransform: 'none' }}
                 title="Account menu"
+                variant={hasOutline ? "contained" : ""}
             >
-                <i className="bi bi-person-fill me-2"></i>
+                <i className="bi bi-person-fill me-2 mb-0" style={{lineHeight: 0}}></i>
                 <Typography variant="body1" component="span">
                     {user.publicName || user.username}
                 </Typography>
@@ -58,8 +58,7 @@ const UserDropdown = ({ user, handleLogout }) => {
                 transformOrigin={{
                     vertical: 'top',
                     horizontal: 'right',
-                }}
-            >
+                }}>
                 <MenuItem component={NavLink} sx={{ pointerEvents: 'none' }}>
                     <Typography variant="h6" component="span" className="d-flex align-items-center">
                         <img

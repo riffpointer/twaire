@@ -5,6 +5,32 @@ import { videoUpload } from "../providers/storage.js";
 import isAuthenticated from "../middleware/auth.js";
 
 const videoRouter = express.Router();
+const sample_autocomplete_info = [
+  "twaire",
+  "twaire official videos",
+  "twaire release videos",
+  "what is twaire?",
+  "twaire social platform",
+  "twaire video ideas",
+  "twaire content sharing",
+  "twaire open platform",
+  "create an account on twaire",
+  "twaire community guidelines",
+  "twaire for creators",
+  "upload videos to twaire",
+  "how to use twaire",
+  "twaire app download",
+  "twaire vs youtube",
+  "twaire monetization",
+  "twaire trending videos",
+  "twaire login",
+  "twaire sign up",
+  "discover creators on twaire",
+  "twaire vlog sharing",
+  "twaire video upload size",
+  "twaire privacy settings",
+  "twaire for social media",
+];
 
 // POST API: Like a video of specified ID
 videoRouter.post('/:id/like', isAuthenticated, async (req, res) => {
@@ -271,6 +297,26 @@ videoRouter.get("/search", async (req, res) => {
   } catch (err) {
     console.error("Search error:", err);
     res.status(500).json({ error: "Server error during search: " + err.message });
+  }
+});
+
+// GET API: Return search autocomplete information
+videoRouter.get("/search/autocomplete", async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (q) {
+      if (q.trim() === "nice try twaire") {
+        res.json(["You got us!"]);
+      }
+
+      const filtered_autocomplete_info = sample_autocomplete_info.filter(elem => elem.charAt(0) == q.charAt(0));
+      res.json(filtered_autocomplete_info);
+    }
+
+    res.json(sample_autocomplete_info);
+  } catch (err) {
+    res.status(500).json({error:"Error while retrieving autocomplete info: " + err})
   }
 });
 

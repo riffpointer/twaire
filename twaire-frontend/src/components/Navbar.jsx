@@ -68,7 +68,7 @@ function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top px-3">
       <NavLink className="navbar-brand" to="/">
-        <b className="vend-sans">Twaire</b>
+        <b className="gabarito">Twaire</b>
       </NavLink>
 
       <button
