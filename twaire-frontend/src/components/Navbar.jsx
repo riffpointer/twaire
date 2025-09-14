@@ -8,6 +8,8 @@ import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import UserDropdown from "./UserDropdown";
+import Loading from "./Loading";
+import { CircularProgress } from "@mui/material";
 
 function Navbar() {
   const [user, setUser] = useState(null);
@@ -129,8 +131,10 @@ function Navbar() {
             </li>
           )}
 
-          {user && (
-            <UserDropdown user={user} handleLogout={handleLogout } />
+          {user ? (
+            <UserDropdown user={user} handleLogout={handleLogout} />
+          ) : (
+            <CircularProgress size="20px" />
           )}
         </ul>
       </div>

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
-import { MenuItem, TextField, Typography } from '@mui/material';
+import { Box, MenuItem, TextField, Typography } from '@mui/material';
 
 
 function Home() {
@@ -35,7 +35,7 @@ function Home() {
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100">
+    <Box className="d-flex flex-column min-vh-100">
       <Navbar />
       <div className="container mt-4">
         <Typography variant="h2">
@@ -83,7 +83,7 @@ function Home() {
         </div>
       </div>
       <Footer />
-    </div>
+    </Box>
   );
 }
 

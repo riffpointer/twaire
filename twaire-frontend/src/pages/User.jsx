@@ -180,9 +180,9 @@ function User() {
           </div>
 
           {user.bio && (
-            <div className="mb-3">
-              <strong>Bio</strong>
-              <p>{user.bio}</p>
+            <div className="card p-3 mb-3">
+              <strong>About this channel</strong>
+              <p className="mb-0">{user.bio}</p>
             </div>
           )}
 

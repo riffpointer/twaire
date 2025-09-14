@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
+import { Alert, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 
 function About() {
   useEffect(() => {
@@ -10,8 +12,12 @@ function About() {
   return (
     <>
       <Navbar />
-      <div className="container mt-4 mb-4">
+      <div className="container mt-4 mb-4 vend-sans">
         <h1 className="display-4">About Twaire</h1>
+        <Alert icon={<i className="bi bi-check"></i>} severity="success" className="mb-2 shadow-sm round-2">
+          <h4 className="vend-sans">Check out the new homepage!</h4>
+          <p className="mb-0">We are rolling out a new homepage! Check it out <Link to="/homeneo">here!</Link></p>
+        </Alert>
         <p className="lead">
           Twaire is an open source video sharing platform built with React, Node.js,
           Express, and MongoDB. It’s designed as a lightweight YouTube-style

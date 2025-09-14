@@ -116,7 +116,7 @@ function HomeNeo() {
   return (
     <>
       <div className="d-flex flex-column min-vh-100">
-        <div className="d-flex text-center w-100 flex-fill align-items-center justify-content-center flex-column">
+        <div className="d-flex text-center flex-fill align-items-center justify-content-center flex-column">
           <div className="p-1">
             <h1 className="mb-2 gabarito text-very-big">
               Twaire
@@ -185,16 +185,16 @@ function HomeNeo() {
                 </Button>
               </Stack>
             </form>
-          </div>
-          <div className="card p-2 shadow-sm mt-2 mb-4 d-flex flex-row align-items-center justify-content-center">
-            {Object.keys(links).map((key, index, arr) => (
-              <div key={key}>
-                <Link to={links[key]} className="text-decoration-none">
-                  <Typography variant="button">{key}</Typography>
-                </Link>
-                {index < arr.length - 1 && <span>&nbsp;&bull;&nbsp;</span>}
-              </div>
-            ))}
+            <div className="card p-2 shadow-sm mt-2 mb-4 d-flex flex-row align-items-center justify-content-center">
+              {Object.keys(links).map((key, index, arr) => (
+                <div key={key}>
+                  <Link to={links[key]} className="text-decoration-none">
+                    <Typography variant="button">{key}</Typography>
+                  </Link>
+                  {index < arr.length - 1 && <span>&nbsp;&bull;&nbsp;</span>}
+                </div>
+              ))}
+            </div>
           </div>
           {user && (
             <div className="me-2 mb-2 shadow-sm bottom-0 end-0 position-absolute d-flex flex-row gap-2 align-items-center justify-content-center">

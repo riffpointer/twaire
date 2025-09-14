@@ -23,7 +23,7 @@
 
 #root {
   margin: 0 auto;
-  font-family: "Roboto", "Inter", "Arial", sans-serif;
+  font-family: "Vend Sans", "Inter", "Arial", sans-serif !important;
 }
 
 .verified-check {

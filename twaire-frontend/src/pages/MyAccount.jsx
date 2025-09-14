@@ -105,14 +105,12 @@ function MyAccount() {
 
           {user.bio && (
             <div className="card p-3 mb-3">
-              <div className="mb-3">
-                <strong>About this channel</strong>
-                <p>{user.bio}</p>
-              </div>
+              <strong>About this channel</strong>
+              <p className="mb-0">{user.bio}</p>
             </div>
           )}
 
-          <h4>Your videos</h4>
+          <h2 className="mb-0 mt-2">Your videos</h2>
           {videos.length === 0 && (
             <i>No videos.</i>
           )}
