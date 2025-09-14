@@ -60,15 +60,7 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
               to={`/watch/${video._id}`}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <VideoCard
-                title={video.title}
-                channel={video.channel || "Deleted User"}
-                views={video.views ?? 0}
-                thumbnail={video.thumbnail}
-                description={video.description}
-                uploadedAt={video.uploadedAt}
-                verified={video.verified}
-              />
+              <VideoCard video={video} />
             </Link>
           ))}
         </div>

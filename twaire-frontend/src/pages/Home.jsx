@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
-import { MenuItem, TextField } from '@mui/material';
+import { MenuItem, TextField, Typography } from '@mui/material';
 
 
 function Home() {
@@ -35,11 +35,13 @@ function Home() {
   };
 
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <Navbar />
       <div className="container mt-4">
-        <h2 className="display-4">Welcome to Twaire!</h2>
-        <p>{Strings.branding.description}</p>
+        <Typography variant="h2">
+          Welcome to Twaire!
+        </Typography>
+        <Typography variant="subtitle1">{Strings.branding.description}</Typography>
         <hr />
 
         <div className="d-flex justify-content-between align-items-center mb-3">
@@ -72,14 +74,7 @@ function Home() {
                     to={`/watch/${video._id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
-                    <VideoCard
-                      title={video.title}
-                      channel={video.channel || "Deleted User"}
-                      views={video.views ?? 0}
-                      thumbnail={video.thumbnail}
-                      description={video.description}
-                      uploadedAt={video.uploadedAt}
-                    />
+                    <VideoCard video={video} />
                   </Link>
                 </div>
               ))}
@@ -88,7 +83,7 @@ function Home() {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }
 

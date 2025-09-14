@@ -12,13 +12,14 @@ import MyAccount from './pages/MyAccount.jsx';
 import Search from './pages/Search.jsx';
 import Trending from './pages/Trending.jsx';
 import ProfileSettings from './pages/ProfileSettings.jsx';
+import HomeNeo from './pages/HomeNeo.jsx';
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<HomeNeo />} />
           <Route path="/watch/:id" element={<Watch />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/login" element={<Login />} />
@@ -28,7 +29,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/user/:username" element={<User />} />
-          <Route path="/profile-settings" element={<ProfileSettings />} />
+          <Route path="/editprofile" element={<ProfileSettings />} />
         </Routes>
       </BrowserRouter>
     </>

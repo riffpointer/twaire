@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
+import Footer from "../components/Footer.jsx";
 
 function Trending() {
   const [videos, setVideos] = useState([]);
@@ -36,7 +37,7 @@ function Trending() {
   }, []);
 
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <Navbar />
       <div className="container mt-4 mb-4">
         <h2><i class="bi bi-fire"></i> Trending Videos</h2>
@@ -56,21 +57,14 @@ function Trending() {
                 to={`/watch/${video._id}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <VideoCard
-                  title={video.title}
-                  channel={video.channel}
-                  views={video.views || 0}
-                  thumbnail={video.thumbnail}
-                  description={video.description}
-                  verified={video.verified}
-                  uploadedAt={video.uploadedAt}
-                />
+                <VideoCard video={video} />
               </Link>
             </div>
           ))}
         </div>
       </div>
-    </>
+      <Footer />
+    </div>
   );
 }
 

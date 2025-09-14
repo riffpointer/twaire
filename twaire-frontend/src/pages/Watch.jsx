@@ -7,7 +7,7 @@ import CommentSection from "../components/CommentSection.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
 import Button from '@mui/material/Button';
-import { CircularProgress } from "@mui/material";
+import { Chip, CircularProgress } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
 import VideoActionBar from "../components/VideoActionBar.jsx";
 import Menu from '@mui/material/Menu';
@@ -215,11 +215,9 @@ function Watch() {
 
               {/* Tags */}
               {video.tags && video.tags.length > 0 && (
-                <div className="mb-1">
+                <div className="mb-2">
                   {video.tags.map((tag, index) => (
-                    <span key={index} className="badge bg-secondary me-1">
-                      #{tag}
-                    </span>
+                    <Chip label={tag} key={index} className="me-1" />
                   ))}
                 </div>
               )}
@@ -232,8 +230,10 @@ function Watch() {
                 {video.views} views • Uploaded {uploadedAgo} ({formattedUploadDate})
               </div>
 
+              <VideoActionBar videoId={video._id} />
+
               {/* Uploader + subscribe */}
-              <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="card p-3 d-flex flex-row justify-content-between align-items-center mb-3">
                 <div className="d-flex align-items-center">
                   <img
                     src={
@@ -273,8 +273,6 @@ function Watch() {
                   />
                 </div>
               </div>
-
-              <VideoActionBar videoId={video._id} />
 
               {/* Description */}
               <div className="card p-3 mb-3">

@@ -79,15 +79,7 @@ function Search() {
                 to={`/watch/${video._id}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <VideoCard
-                  title={video.title}
-                  channel={video.channel}
-                  views={video.views || 0}
-                  thumbnail={video.thumbnail}
-                  description={video.description}
-                  verified={video.verified}
-                  uploadedAt={video.uploadedAt}
-                />
+                <VideoCard video={video} />
               </Link>
             </div>
           ))}

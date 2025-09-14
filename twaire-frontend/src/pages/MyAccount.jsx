@@ -91,25 +91,26 @@ function MyAccount() {
               </div>
             )}
             <div>
-              <h3>{user.publicName || user.username}</h3>
-              <p className="text-muted">@{user.username}</p>
-              <Link to="/profile-settings">
+              <h3 className="mb-0">{user.publicName || user.username}</h3>
+              <p className="text-muted mb-0">@{user.username}</p>
+              <small className="text-muted mb-2 mt-0 d-block">
+                {user.subscribers.length} subscribers &bull;&nbsp;
+                {user.accountViews || 0} views
+              </small>
+              <Link to="/editprofile">
                 <Button variant="outlined" size="small">Edit Profile</Button>
               </Link>
             </div>
           </div>
 
           {user.bio && (
-            <div className="mb-3">
-              <strong>Bio</strong>
-              <p>{user.bio}</p>
+            <div className="card p-3 mb-3">
+              <div className="mb-3">
+                <strong>About this channel</strong>
+                <p>{user.bio}</p>
+              </div>
             </div>
           )}
-
-          <div className="mb-3">
-            <strong>Subscribers:</strong> {user.subscribers.length} <br />
-            <strong>Account views:</strong> {user.accountViews || 0}
-          </div>
 
           <h4>Your videos</h4>
           {videos.length === 0 && (
@@ -122,14 +123,7 @@ function MyAccount() {
                 {videos.map((video) => (
                   <div key={video._id} className="col-md-4">
                     <Link to={`/watch/${video._id}`} className="text-decoration-none">
-                      <VideoCard
-                        title={video.title}
-                        channel={video.channel || video.uploaderUsername}
-                        views={video.views}
-                        thumbnail={video.thumbnail}
-                        description={video.description}
-                        uploadedAt={video.uploadedAt}
-                      />
+                      <VideoCard video={video} />
                     </Link>
                   </div>
                 ))}

@@ -129,6 +129,7 @@ function ProfileSettings() {
                   onChange={handlePublicNameChange}
                   error={!!publicNameError}
                   helperText={publicNameError}
+                  title="This will be displayed on your user profile and on the watch page."
                 />
               </div>
               <div className="mb-3">
@@ -139,6 +140,7 @@ function ProfileSettings() {
                   rows={4}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
+                  title="Write some words about yourself; This will be displayed on your user profile page."
                 />
               </div>
               <Button type="submit" variant="contained" color="primary">

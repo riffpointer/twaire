@@ -76,7 +76,7 @@ const UserDropdown = ({ user, handleLogout }) => {
                 <MenuItem component={NavLink} to="/myaccount" onClick={handleClose}>
                     <i className="bi bi-person-fill me-2"></i> My Profile
                 </MenuItem>
-                <MenuItem component={NavLink} to="/profile-settings" onClick={handleClose}>
+                <MenuItem component={NavLink} to="/editprofile" onClick={handleClose}>
                     <i className="bi bi-gear-fill me-2"></i> Profile Settings
                 </MenuItem>
                 <MenuItem component={NavLink} to="/upload" onClick={handleClose}>

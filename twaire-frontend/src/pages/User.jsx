@@ -202,15 +202,7 @@ function User() {
                     to={`/watch/${video._id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
-                    <VideoCard
-                      title={video.title}
-                      channel={user.publicName || user.username}
-                      views={video.views || 0}
-                      thumbnail={video.thumbnail}
-                      description={video.description}
-                      verified={user.verified}
-                      uploadedAt={video.uploadedAt}
-                    />
+                    <VideoCard video={video} />
                   </Link>
                 </div>
               ))}
