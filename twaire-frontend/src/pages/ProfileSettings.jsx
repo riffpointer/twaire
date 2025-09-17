@@ -3,7 +3,18 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
-import { Button, TextField, Avatar, ButtonBase, Tooltip } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Avatar,
+  Tooltip,
+  Container,
+  Paper,
+  Typography,
+  Box,
+  IconButton,
+} from "@mui/material";
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 function ProfileSettings() {
   const [user, setUser] = useState(null);
@@ -91,9 +102,9 @@ function ProfileSettings() {
     return (
       <>
         <Navbar />
-        <div className="container mt-4">
+        <Container maxWidth="md" sx={{ mt: 4 }}>
           <Loading label="Loading profile settings..." />
-        </div>
+        </Container>
       </>
     );
   }
@@ -101,55 +112,88 @@ function ProfileSettings() {
   return (
     <>
       <Navbar />
-      <div className="container mt-4 mb-4">
-        <div className="card shadow-sm p-3">
-          <h3>Profile Settings</h3>
-          <form className="d-flex flex-row w-100 mt-4" onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <div className="profile-picture-container position-relative d-inline-block">
-                <Avatar src={preview || `https://placehold.co/100x100?text=${publicName.charAt(0)}`} sx={{ width: 100, height: 100 }} />
-                <input type="file" id="profile-picture-upload" hidden onChange={handleFileChange} accept="image/*" />
-                <Tooltip title="Change Profile Picture">
-                  <ButtonBase
-                    component="label"
-                    htmlFor="profile-picture-upload"
-                    className="overlay position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center rounded-circle"
+      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <Typography variant="h5" component="h1" gutterBottom>
+            Profile Settings
+          </Typography>
+          <Box
+            component="form"
+            sx={{ display: "flex", flexDirection: { xs: 'column', md: 'row' }, width: "100%", mt: 3 }}
+            onSubmit={handleSubmit}
+            noValidate
+          >
+            <Box sx={{ mb: { xs: 3, md: 0 }, mr: { xs: 0, md: 4 }, display: 'flex', justifyContent: 'center' }}>
+              <Tooltip title="Change Profile Picture">
+                <IconButton
+                  color="primary"
+                  aria-label="upload picture"
+                  component="label"
+                  sx={{ width: 100, height: 100, p: 0 }}
+                >
+                  <input
+                    hidden
+                    accept="image/*"
+                    type="file"
+                    onChange={handleFileChange}
+                  />
+                  <Avatar
+                    src={preview || `https://placehold.co/100x100?text=${publicName.charAt(0)}`}
+                    sx={{ width: 100, height: 100 }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "rgba(0,0,0,0.4)",
+                      color: "white",
+                      opacity: 0,
+                      transition: "opacity 0.2s",
+                      "&:hover": {
+                        opacity: 1,
+                      },
+                    }}
                   >
-                    <i className="bi bi-camera-fill text-white fs-2"></i>
-                  </ButtonBase>
-                </Tooltip>
-              </div>
-            </div>
-            <div className="flex-grow-1 ms-4">
-              <div className="mb-3">
-                <TextField
-                  label="Public Name"
-                  fullWidth
-                  value={publicName}
-                  onChange={handlePublicNameChange}
-                  error={!!publicNameError}
-                  helperText={publicNameError}
-                  title="This will be displayed on your user profile and on the watch page."
-                />
-              </div>
-              <div className="mb-3">
-                <TextField
-                  label="Bio"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  title="Write some words about yourself; This will be displayed on your user profile page."
-                />
-              </div>
+                    <CameraAltIcon />
+                  </Box>
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <TextField
+                label="Public Name"
+                fullWidth
+                value={publicName}
+                onChange={handlePublicNameChange}
+                error={!!publicNameError}
+                helperText={publicNameError}
+                title="This will be displayed on your user profile and on the watch page."
+                sx={{ mb: 3 }}
+              />
+              <TextField
+                label="Bio"
+                fullWidth
+                multiline
+                rows={4}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                title="Write some words about yourself; This will be displayed on your user profile page."
+                sx={{ mb: 3 }}
+              />
               <Button type="submit" variant="contained" color="primary">
                 Save Changes
               </Button>
-            </div>
-          </form>
-        </div>
-      </div>
+            </Box>
+          </Box>
+        </Paper>
+      </Container>
     </>
   );
 }

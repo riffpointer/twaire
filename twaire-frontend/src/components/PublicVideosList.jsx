@@ -58,7 +58,7 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
             <Link
               key={video._id}
               to={`/watch/${video._id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
+              style={{ textDecoration: "none", color: "inherit", userSelect: "none" }}
             >
               <VideoCard video={video} />
             </Link>

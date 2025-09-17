@@ -7,7 +7,16 @@ import CommentSection from "../components/CommentSection.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
 import Button from '@mui/material/Button';
-import { Chip, CircularProgress } from "@mui/material";
+import { 
+  Chip, 
+  CircularProgress, 
+  Card,
+  Box,
+  Avatar,
+  Typography,
+  Link as MuiLink
+} from "@mui/material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SubscribeButton from "../components/SubscribeButton.jsx";
 import VideoActionBar from "../components/VideoActionBar.jsx";
 import Menu from '@mui/material/Menu';
@@ -223,66 +232,87 @@ function Watch() {
               )}
 
               {/* Title */}
-              <h2 className="mb-1">
-                <strong>{video.title}</strong>
-              </h2>
-              <div className="text-muted small mb-3">
+              <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 0 }}>
+                {video.title}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 1 }}
+              >
                 {video.views} views • Uploaded {uploadedAgo} ({formattedUploadDate})
-              </div>
+              </Typography>
 
               <VideoActionBar videoId={video._id} />
 
               {/* Uploader + subscribe */}
-              <div className="card p-3 d-flex flex-row justify-content-between align-items-center mb-3">
-                <div className="d-flex align-items-center">
-                  <img
+
+              <Card
+                sx={{
+                  p: 1.5,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar
                     src={
                       video.uploader?.profilePicture
                         ? `${ApiConfig.serverUrl}/${video.uploader.profilePicture}`
                         : `https://placehold.co/48x48?text=${video.channel?.charAt(0)}`
                     }
                     alt="Uploader profile"
-                    className="rounded-circle me-2"
-                    width={48}
-                    height={48}
+                    sx={{ width: 48, height: 48, mr: 2 }}
                   />
-                  <div>
-                    <Link
+
+                  <Box>
+                    <MuiLink
+                      component={Link}
                       to={`/user/${video.username}`}
-                      className="fw-bold text-dark text-decoration-none"
+                      underline="none"
+                      color="text.primary"
+                      sx={{ fontWeight: 'bold' }}
                     >
                       {video.channel}
-                    </Link>
-                    {video.verified && (
-                      <i
-                        className="bi bi-patch-check-fill text-primary ms-1"
-                        title="Verified channel"
-                      ></i>
-                    )}
-                    <div className="text-muted small">
-                      {uploaderSubs} subscribers
-                    </div>
-                  </div>
-                </div>
+                    </MuiLink>
 
-                <div>
+                    {video.verified && (
+                      <CheckCircleIcon
+                        fontSize="small"
+                        color="primary"
+                        sx={{ ml: 0.5, verticalAlign: 'middle' }}
+                        titleAccess="Verified channel"
+                      />
+                    )}
+
+                    <Typography variant="body2" color="text.secondary">
+                      {uploaderSubs} subscribers
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box>
                   <SubscribeButton
                     subscribed={subscribed}
                     subLoading={subLoading}
                     handleSubscribe={handleSubscribe}
                   />
-                </div>
-              </div>
+                </Box>
+              </Card>
 
               {/* Description */}
-              <div className="card p-3 mb-3">
+              <Card sx={{p:1.5,mb:3}}>
                 <p className="mb-1 fw-bold">Description</p>
                 {video.description ? (
                   <p className="mb-0">{video.description}</p>
                 ) : (
                   <i>No description provided.</i>
                 )}
-              </div>
+              </Card>
               <hr />
               <CommentSection videoId={video._id} />
             </div>

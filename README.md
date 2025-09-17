@@ -21,6 +21,8 @@ To run a local instance of Twaire, you must have the following installed on your
 - [Node.js](https://nodejs.org/) (v16 or higher recommended)
 - [Git](https://git-scm.com/)
 - [MongoDB Server](https://www.mongodb.com/try/download/community) (running locally or accessible remotely)
+- [pnpm](https://pnpm.io) can be installed with `npm install -g pnpm`
+- [nodemon](https://nodemon.io/) can be installed with `npm install -g nodemon` (optional)
 
 ### Running
 Twaire has two components: 
@@ -41,17 +43,16 @@ cd twaire
 
 ```bash
 cd twaire-backend
-npm install
-npm install -g nodemon  # (Optional: Only required if you wish to change index.js)
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 #### 3. Then start the frontend server
 ```bash
 cd ..                   # If you cd-ed into twaire-backend
 cd twaire-frontend
-npm install
-npm run dev             # Will start up Vite
+pnpm install
+pnpm run dev             # Will start up Vite
 ```
 
 ## Contributing

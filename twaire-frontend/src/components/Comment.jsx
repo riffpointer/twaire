@@ -1,6 +1,19 @@
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
-import { Box, Button, TextField } from "@mui/material";
+import {
+  Box,
+  Avatar,
+  Typography,
+  Button,
+  TextField,
+  IconButton,
+  Card
+} from '@mui/material';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function Comment({ comment, likedComments, dislikedComments, onToggle, replyingTo, replyText, onReplyTextChange, onReplySubmit, onReplyCancel, setReplyingTo, currentUser }) {
   const commentAuthorUsername = comment.user?.username || "Deleted User";
@@ -14,138 +27,218 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
     : "https://placehold.co/40?text=" + encodeURIComponent(commentAuthorShortName);
 
   return (
-    <div key={comment._id} className="mb-3">
-      <div className="d-flex w-100">
-        <img
+    <Box key={comment._id}>
+      <Box sx={{ display: 'flex', width: '100%' }}>
+        <Avatar
           src={commentAuthorProfilePicture}
           alt="User"
-          className="rounded-circle me-2"
-          width={40}
-          height={40}
+          sx={{ width: 40, height: 40, mr: 2 }}
         />
-        <div className="w-100">
-          <div className="d-flex align-items-center">
-            <Link to={`/user/${comment.user?.username}`} className="me-1 text-decoration-none">
-              <b>{commentAuthorPublicName}</b>
-            </Link>
-            <small className="text-muted"> commented</small>
-            {comment.user?.verified && <i className="bi bi-patch-check-fill text-primary"></i>}
-          </div>
-          <p className="mb-1 text-wrap text-break">{comment.text}</p>
-          <div className="d-flex align-items-center small text-muted gap-1">
-            <button
-              type="button"
-              className={`btn btn-sm ps-0 pe-0 ${likedComments.has(comment._id) ? 'text-primary' : ''} d-flex align-items-center`}
-              onClick={() => onToggle(comment._id, "like")}
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              component={Link}
+              to={`/user/${comment.user?.username}`}
+              sx={{
+                mr: 0.5,
+                textDecoration: 'none',
+                fontWeight: 'bold',
+                color: 'text.primary',
+              }}
+            >
+              {commentAuthorPublicName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              commented
+            </Typography>
+            {comment.user?.verified && (
+              <CheckCircleIcon
+                fontSize="small"
+                color="primary"
+                sx={{ ml: 0.5 }}
+              />
+            )}
+          </Box>
+
+          <Typography sx={{ mb: 0.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {comment.text}
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.4,
+              typography: 'body2',
+              color: 'text.secondary',
+            }}
+          >
+            <IconButton
+              size="small"
+              onClick={() => onToggle(comment._id, 'like')}
               title="I like this comment!"
+              color={likedComments.has(comment._id) ? 'primary' : 'default'}
             >
-              <i className={`bi bi-hand-thumbs-up${likedComments.has(comment._id) ? '-fill' : ''} me-1`}></i>
+              {likedComments.has(comment._id) ? (
+                <ThumbUpIcon fontSize="small" />
+              ) : (
+                <ThumbUpOffAltIcon fontSize="small" />
+              )}
+            </IconButton>
+            <Typography variant="caption">
               {Array.isArray(comment.likes) ? comment.likes.length : 0}
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm ms-1 ps-0 pe-0 ${dislikedComments.has(comment._id) ? 'text-danger' : ''} d-flex align-items-center`}
-              onClick={() => onToggle(comment._id, "dislike")}
+            </Typography>
+
+            <IconButton
+              size="small"
+              onClick={() => onToggle(comment._id, 'dislike')}
               title="I dislike this comment!"
+              color={dislikedComments.has(comment._id) ? 'error' : 'default'}
             >
-              <i className={`bi bi-hand-thumbs-down${dislikedComments.has(comment._id) ? '-fill' : ''} me-1`}></i>
+              {dislikedComments.has(comment._id) ? (
+                <ThumbDownIcon fontSize="small" />
+              ) : (
+                <ThumbDownOffAltIcon fontSize="small" />
+              )}
+            </IconButton>
+            <Typography variant="caption">
               {Array.isArray(comment.dislikes) ? comment.dislikes.length : 0}
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
+            </Typography>
+
+            <Button
+              size="small"
+              variant="text"
+              onClick={() =>
+                setReplyingTo(replyingTo === comment._id ? null : comment._id)
+              }
             >
               Reply
-            </button>
-          </div>
+            </Button>
+          </Box>
 
+          {/* Reply input box */}
           {replyingTo === comment._id && (
-            <form onSubmit={(e) => onReplySubmit(e, comment._id)} className="p-2 mt-2 ms-0 d-flex flex-row w-100">
-              <img
-                src={currentUser?.profilePicture ? `${ApiConfig.serverUrl}/${currentUser.profilePicture}` : `https://placehold.co/32?text=${currentUser?.username?.charAt(0)}`}
+            <Card
+              variant="outlined"
+              component="form"
+              onSubmit={(e) => onReplySubmit(e, comment._id)}
+              sx={{ p: 1.5, mt: 1, display: 'flex', width: '100%' }}>
+              <Avatar
+                src={
+                  currentUser?.profilePicture
+                    ? `${ApiConfig.serverUrl}/${currentUser.profilePicture}`
+                    : `https://placehold.co/32?text=${currentUser?.username?.charAt(0)}`
+                }
                 alt="User"
-                className="rounded-circle me-2 mt-1"
-                width={32}
-                height={32}
+                sx={{ width: 32, height: 32, mr: 2, mt: 1 }}
               />
-              <Box className="d-flex align-items-center mb-2 flex-column w-100">
+              <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                 <TextField
                   size="small"
-                  className="w-100 mb-2"
                   label="Write a reply..."
                   value={replyText}
                   onChange={onReplyTextChange}
+                  fullWidth
+                  sx={{ mb: 1 }}
                 />
-                <Box className="d-flex w-100">
+                <Box sx={{ display: 'flex' }}>
                   <Button
                     disableElevation
                     variant="contained"
-                    className="me-2"
-                    type="submit">
+                    sx={{ mr: 2 }}
+                    type="submit"
+                  >
                     Post Reply
                   </Button>
-                  <Button
-                    variant="text"
-                    type="button"
-                    onClick={onReplyCancel}
-                  >
+                  <Button variant="text" onClick={onReplyCancel}>
                     Cancel
                   </Button>
                 </Box>
               </Box>
-            </form>
+            </Card>
           )}
 
           {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-            <div className="ms-0 mt-2" style={{ borderLeft: '2px solid #ccc', paddingLeft: '10px' }}>
+            <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid', borderColor: 'divider' }}>
               {comment.replies.map((reply) => (
-                <div key={reply._id} className="d-flex mb-2">
-                  <img
+                <Box key={reply._id} sx={{ display: 'flex', mb: 2 }}>
+                  <Avatar
                     src={
                       reply.user?.profilePicture
                         ? `${ApiConfig.serverUrl}/${reply.user.profilePicture}`
                         : `https://placehold.co/32?text=${reply.user?.username?.charAt(0)}`
                     }
                     alt="User"
-                    className="rounded-circle me-2"
-                    width={32}
-                    height={32}
+                    sx={{ width: 32, height: 32, mr: 2 }}
                   />
-                  <div>
-                    <Link to={`/user/${reply.user?.username}`} className="me-1 text-decoration-none">
-                      <b>{reply.user?.publicName || reply.user?.username || "Deleted User"}</b>
-                    </Link>
-                    <small className="text-muted"> replied</small>
-                    <p className="mb-1">{reply.text}</p>
-                    <div className="d-flex align-items-center small text-muted gap-1">
-                      <button
-                        type="button"
-                        className={`btn btn-sm ${likedComments.has(reply._id) ? 'text-primary' : ''} d-flex align-items-center`}
-                        onClick={() => onToggle(reply._id, "like")}
-                        title="I like this reply!"
+                  <Box>
+                    <Box sx={{ display: "flex", alignItems: 'center', gap: 0.4 }}>
+                      <Typography
+                        component={Link}
+                        to={`/user/${reply.user?.username}`}
+                        sx={{
+                          textDecoration: 'none',
+                          fontWeight: 'bold',
+                          color: 'text.primary',
+                        }}
                       >
-                        <i className={`bi bi-hand-thumbs-up${likedComments.has(reply._id) ? '-fill' : ''} me-1`}></i>
+                        {reply.user?.publicName ||
+                          reply.user?.username ||
+                          'Deleted User'}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        replied
+                      </Typography>
+                    </Box>
+                    <Typography sx={{ mb: 0 }}>{reply.text}</Typography>
+
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.4,
+                        typography: 'body2',
+                        color: 'text.secondary',
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={() => onToggle(reply._id, 'like')}
+                        color={likedComments.has(reply._id) ? 'primary' : 'default'}
+                      >
+                        {likedComments.has(reply._id) ? (
+                          <ThumbUpIcon fontSize="small" />
+                        ) : (
+                          <ThumbUpOffAltIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                      <Typography variant="caption">
                         {Array.isArray(reply.likes) ? reply.likes.length : 0}
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn btn-sm ${dislikedComments.has(reply._id) ? 'text-danger' : ''} d-flex align-items-center`}
-                        onClick={() => onToggle(reply._id, "dislike")}
-                        title="I dislike this reply!"
+                      </Typography>
+
+                      <IconButton
+                        size="small"
+                        onClick={() => onToggle(reply._id, 'dislike')}
+                        color={dislikedComments.has(reply._id) ? 'error' : 'default'}
                       >
-                        <i className={`bi bi-hand-thumbs-down${dislikedComments.has(reply._id) ? '-fill' : ''} me-1`}></i>
+                        {dislikedComments.has(reply._id) ? (
+                          <ThumbDownIcon fontSize="small" />
+                        ) : (
+                          <ThumbDownOffAltIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                      <Typography variant="caption">
                         {Array.isArray(reply.dislikes) ? reply.dislikes.length : 0}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
               ))}
-            </div>
+            </Box>
           )}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 

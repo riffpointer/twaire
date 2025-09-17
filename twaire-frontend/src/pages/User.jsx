@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
-import { Button, CircularProgress, Snackbar } from "@mui/material";
+import { Button, CircularProgress, Snackbar, Card, Typography } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
 
 function User() {
@@ -151,7 +151,7 @@ function User() {
     <>
       <Navbar />
       <div className="container mt-4 mb-4">
-        <div className="card shadow-sm p-3 mb-4">
+        <Card className="p-3 mb-4">
           <div className="d-flex align-items-center mb-3">
             <img
               src={
@@ -166,9 +166,13 @@ function User() {
             />
             <div>
               <h3 className="mb-0">{user.publicName || user.username}</h3>
-              <p className="text-muted mb-1">@{user.username}</p>
+              <Typography color="text.secondary">@{user.username}</Typography>
               {user.verified && <span className="badge bg-success me-1">Verified</span>}
               {user.official && <span className="badge bg-primary">Official</span>}
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {user.subscribers || 0} subscribers &bull;&nbsp;
+                {user.views || 1} views
+              </Typography>
               <div className="mt-2">
                 <SubscribeButton
                   subscribed={subscribed}
@@ -180,17 +184,12 @@ function User() {
           </div>
 
           {user.bio && (
-            <div className="card p-3 mb-3">
+            <Card className="p-3 mb-3" variant="outlined">
               <strong>About this channel</strong>
               <p className="mb-0">{user.bio}</p>
-            </div>
+            </Card>
           )}
-
-          <div>
-            <strong>Subscribers:</strong> {user.subscribers} <br />
-            <strong>Profile views:</strong> {user.views || 0}
-          </div>
-        </div>
+        </Card>
 
         {videos.length > 0 && (
           <div>
@@ -222,8 +221,8 @@ function User() {
         ContentProps={{
           sx: {
             backgroundColor: snackbarSeverity === "error" ? "#d32f2f" : "#2e7d32",
-            display: 'flex',
-            alignItems: 'center'
+            display: "flex",
+            alignItems: "center",
           },
         }}
         message={
@@ -235,6 +234,7 @@ function User() {
       />
     </>
   );
+
 }
 
 export default User;

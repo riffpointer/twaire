@@ -25,7 +25,7 @@ const theme = createTheme({
     ].join(','),
   },
   palette: {
-    mode: 'light',
+    mode: 'dark',
   },
 });
 

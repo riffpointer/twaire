@@ -1,36 +1,26 @@
 import express from "express";
 import mongoose from "mongoose";
-import { Video, User, Comment } from "../models/models.js";
+import { Video, User, Comment, Autocomplete } from "../models/models.js";
 import { videoUpload } from "../providers/storage.js";
 import isAuthenticated from "../middleware/auth.js";
 
 const videoRouter = express.Router();
-const sample_autocomplete_info = [
-  "twaire",
-  "twaire official videos",
-  "twaire release videos",
-  "what is twaire?",
-  "twaire social platform",
-  "twaire video ideas",
-  "twaire content sharing",
-  "twaire open platform",
-  "create an account on twaire",
-  "twaire community guidelines",
-  "twaire for creators",
-  "upload videos to twaire",
-  "how to use twaire",
-  "twaire app download",
-  "twaire vs youtube",
-  "twaire monetization",
-  "twaire trending videos",
-  "twaire login",
-  "twaire sign up",
-  "discover creators on twaire",
-  "twaire vlog sharing",
-  "twaire video upload size",
-  "twaire privacy settings",
-  "twaire for social media",
-];
+
+const updateAutocomplete = async (terms) => {
+  try {
+    for (const term of terms) {
+      if (term && term.length > 2) { // Only process terms with more than 2 characters
+        await Autocomplete.findOneAndUpdate(
+          { term: term.toLowerCase() },
+          { $inc: { frequency: 1 } },
+          { upsert: true }
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error updating autocomplete terms:", error);
+  }
+};
 
 // POST API: Like a video of specified ID
 videoRouter.post('/:id/like', isAuthenticated, async (req, res) => {
@@ -254,11 +244,18 @@ videoRouter.post(
         channel: user.publicName?.trim() || user.username,
         username: user.username,
         views: 0,
-        tags: JSON.parse(sanitizedTags.toString().trim() || "[]"),
+        tags: sanitizedTags,
         uploader: userId,
       });
 
       await video.save();
+      
+      const autocompleteTerms = new Set();
+      video.title.split(/\s+/).forEach(t => autocompleteTerms.add(t.toLowerCase()));
+      video.description.split(/\s+/).forEach(t => autocompleteTerms.add(t.toLowerCase()));
+      video.tags.forEach(t => autocompleteTerms.add(t.toLowerCase()));
+      
+      await updateAutocomplete(Array.from(autocompleteTerms));
 
       // Respond with uploaderId explicitly
       res.json({
@@ -277,6 +274,8 @@ videoRouter.get("/search", async (req, res) => {
   try {
     const { q, sort } = req.query;
     if (!q) return res.status(400).json({ error: "Missing search query" });
+
+    await updateAutocomplete([q]);
 
     let query = {
       $or: [
@@ -305,18 +304,20 @@ videoRouter.get("/search/autocomplete", async (req, res) => {
   try {
     const { q } = req.query;
 
-    if (q) {
-      if (q.trim() === "nice try twaire") {
-        res.json(["You got us!"]);
-      }
-
-      const filtered_autocomplete_info = sample_autocomplete_info.filter(elem => elem.charAt(0) == q.charAt(0));
-      res.json(filtered_autocomplete_info);
+    if (!q || q.trim() === "") {
+      return res.json([]);
     }
 
-    res.json(sample_autocomplete_info);
+    const terms = await Autocomplete.find({
+      term: { $regex: `^${q}`, $options: "i" }
+    })
+    .sort({ frequency: -1 })
+    .limit(10);
+
+    res.json(terms.map(t => t.term));
+
   } catch (err) {
-    res.status(500).json({error:"Error while retrieving autocomplete info: " + err})
+    res.status(500).json({error: "Error while retrieving autocomplete info: " + err.message})
   }
 });
 

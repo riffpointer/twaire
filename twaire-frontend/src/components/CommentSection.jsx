@@ -4,8 +4,14 @@ import Strings from "../utils/Strings";
 import Comment from "./Comment";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "./Loading.jsx";
-import Button from '@mui/material/Button';
-import { TextField } from "@mui/material";
+import { 
+  Box,
+  Typography,
+  Alert,
+  TextField,
+  Button,
+  Card
+} from "@mui/material";
 
 function CommentSection({ videoId }) {
   const [comments, setComments] = useState([]);
@@ -155,15 +161,30 @@ function CommentSection({ videoId }) {
   };
 
   return (
-    <div className="mt-4">
-      <h5>Comments</h5>
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Comments
+      </Typography>
 
-      {postErr && <div className="alert alert-danger" role="alert">{postErr}</div>}
-      {reactErr && <div className="alert alert-danger" role="alert">{reactErr}</div>}
+      {postErr && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {postErr}
+        </Alert>
+      )}
+      {reactErr && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {reactErr}
+        </Alert>
+      )}
 
-      <form onSubmit={handlePost} className="mb-3 d-flex gap-3 align-items-center">
+      <Box
+        component="form"
+        onSubmit={handlePost}
+        sx={{ mb: 3, display: 'flex', gap: 1, alignItems: 'center' }}
+      >
         <TextField
-          fullWidth multiline
+          fullWidth
+          multiline
           size="small"
           placeholder="Write a comment..."
           value={text}
@@ -182,17 +203,23 @@ function CommentSection({ videoId }) {
           size="small"
           type="submit"
           disabled={!text.trim()}
-          style={{ height: 38, minWidth: 64 }}
+          sx={{ height: 38, minWidth: 64 }}
         >
           Post
         </Button>
-      </form>
+      </Box>
 
       {loading && <Loading label="Loading comments..." />}
-      {err && <p className="text-danger">Unable to load comments: {err}</p>}
-      {!loading && !err && comments.length === 0 && <p className="text-muted">No comments yet.</p>}
+      {err && (
+        <Typography color="error">
+          Unable to load comments: {err}
+        </Typography>
+      )}
+      {!loading && !err && comments.length === 0 && (
+        <Typography color="text.secondary">No comments yet.</Typography>
+      )}
 
-      <div>
+      <Card sx={{ p: 1 , display: "flex", flexDirection: "column", gap: 2}}>
         {comments.map((comment) => (
           <Comment
             key={comment._id}
@@ -209,8 +236,8 @@ function CommentSection({ videoId }) {
             currentUser={currentUser}
           />
         ))}
-      </div>
-    </div>
+      </Card>
+    </Box>
   );
 }
 

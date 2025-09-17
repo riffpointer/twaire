@@ -1,7 +1,7 @@
 {
   "name": "twaire-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend for Twaire",
   "main": "index.js",
   "scripts": {
     "dev": "node index.js"

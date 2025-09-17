@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Card, Button, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig";
@@ -185,16 +185,18 @@ function HomeNeo() {
                 </Button>
               </Stack>
             </form>
-            <div className="card p-2 shadow-sm mt-2 mb-4 d-flex flex-row align-items-center justify-content-center">
+            <Card className="p-2 shadow-sm mt-2 mb-4 d-flex flex-row align-items-center justify-content-center">
               {Object.keys(links).map((key, index, arr) => (
                 <div key={key}>
-                  <Link to={links[key]} className="text-decoration-none">
-                    <Typography variant="button">{key}</Typography>
+                  <Link to={links[key]} style={{ textDecoration: 'none' }}>
+                    <Typography variant="button" color="primary">
+                      {key}
+                    </Typography>
                   </Link>
                   {index < arr.length - 1 && <span>&nbsp;&bull;&nbsp;</span>}
                 </div>
               ))}
-            </div>
+            </Card>
           </div>
           {user && (
             <div className="me-2 mb-2 shadow-sm bottom-0 end-0 position-absolute d-flex flex-row gap-2 align-items-center justify-content-center">

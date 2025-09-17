@@ -2,6 +2,7 @@
   "name": "twaire-frontend",
   "private": true,
   "version": "0.0.0",
+  "description": "Frontend for Twaire",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "autosuggest-highlight": "^3.3.4",
     "bootstrap": "^5.3.8",

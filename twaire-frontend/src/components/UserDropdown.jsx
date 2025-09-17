@@ -11,7 +11,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import ApiConfig from '../utils/ApiConfig';
 
 // Assume user and handleLogout are passed as props
-const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline=false }) => {
+const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -41,7 +41,7 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline=false }
                 title="Account menu"
                 variant={hasOutline ? "contained" : ""}
             >
-                <i className="bi bi-person-fill me-2 mb-0" style={{lineHeight: 0}}></i>
+                <i className="bi bi-person-fill me-2 mb-0" style={{ lineHeight: 0 }}></i>
                 <Typography variant="body1" component="span">
                     {user.publicName || user.username}
                 </Typography>
@@ -82,7 +82,12 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline=false }
                     <i className="bi bi-arrow-bar-up me-2"></i> Upload a video
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={() => { handleLogout(); handleClose(); }} sx={{ color: 'error.main' }}>
+                <MenuItem
+                    onClick={() => { 
+                        handleLogout(); 
+                        handleClose(); 
+                    }}
+                    sx={{ color: (theme) => theme.palette.error.main }} >
                     <i className="bi bi-box-arrow-right me-2"></i> Logout
                 </MenuItem>
             </Menu>

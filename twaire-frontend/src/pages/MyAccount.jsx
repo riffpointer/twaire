@@ -10,9 +10,16 @@ import {
   DialogActions,
   DialogTitle,
   DialogContent,
-  DialogContentText
+  DialogContentText,
+  Container,
+  Paper,
+  Box,
+  Avatar,
+  Typography,
+  Grid,
+  Divider,
 } from "@mui/material";
-
+import PersonIcon from '@mui/icons-material/Person';
 
 function MyAccount() {
   const [user, setUser] = useState(null);
@@ -33,8 +40,9 @@ function MyAccount() {
         const data = await res.json();
         setUser(data);
 
-        // fetch user's uploaded videos
-        const vidRes = await fetch(`${ApiConfig.serverUrl}/api/videos?uploader=${data._id}`);
+        const vidRes = await fetch(
+          `${ApiConfig.serverUrl}/api/videos?uploader=${data._id}`
+        );
         if (vidRes.ok) {
           const vidData = await vidRes.json();
           setVideos(vidData);
@@ -62,81 +70,100 @@ function MyAccount() {
     }
   };
 
-  if (loading) return (
-    <>
-      <Navbar />
-      <div className="container mt-4">
-        <Loading label="Loading your account..." />
-      </div>
-    </>
-  );
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <Container sx={{ mt: 4 }}>
+          <Loading label="Loading your account..." />
+        </Container>
+      </>
+    );
+  }
 
   return (
     <>
       <Navbar />
-      <div className="container mt-4 mb-4">
-        <div className="card shadow-sm p-3">
-          <div className="d-flex align-items-center mb-3">
-            {user.profilePicture ? (
-              <img
-                src={`${ApiConfig.serverUrl}/${user.profilePicture}`}
-                alt="Profile"
-                className="rounded-circle me-3"
-                width={100}
-                height={100}
-              />
-            ) : (
-              <div className="me-3 no-profile-icon">
-                <i className="bi bi-person-fill"></i>
-              </div>
-            )}
-            <div>
-              <h3 className="mb-0">{user.publicName || user.username}</h3>
-              <p className="text-muted mb-0">@{user.username}</p>
-              <small className="text-muted mb-2 mt-0 d-block">
+      <Container sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={2} sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+            <Avatar
+              src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : undefined}
+              sx={{ width: 100, height: 100, mr: 3, fontSize: '4rem' }}
+            >
+              {!user.profilePicture && <PersonIcon fontSize="inherit" />}
+            </Avatar>
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ mb: 0 }}>
+                {user.publicName || user.username}
+              </Typography>
+              <Typography color="text.secondary" sx={{ mb: 0.5 }}>
+                @{user.username}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 {user.subscribers.length} subscribers &bull;&nbsp;
                 {user.accountViews || 0} views
-              </small>
-              <Link to="/editprofile">
-                <Button variant="outlined" size="small">Edit Profile</Button>
-              </Link>
-            </div>
-          </div>
+              </Typography>
+              <Button
+                component={Link}
+                to="/editprofile"
+                variant="outlined"
+                size="small"
+                sx={{mt:0.5}}
+              >
+                Edit Profile
+              </Button>
+            </Box>
+          </Box>
 
           {user.bio && (
-            <div className="card p-3 mb-3">
-              <strong>About this channel</strong>
-              <p className="mb-0">{user.bio}</p>
-            </div>
+            <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+              <Typography variant="subtitle1" component="strong">
+                About this channel
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                {user.bio}
+              </Typography>
+            </Paper>
           )}
 
-          <h2 className="mb-0 mt-2">Your videos</h2>
-          {videos.length === 0 && (
-            <i>No videos.</i>
+          <Typography variant="h6" component="h2" sx={{ mb: 2, mt: 3 }}>
+            Your videos
+          </Typography>
+          {videos.length === 0 ? (
+            <Typography variant="body2" fontStyle="italic">
+              No videos.
+            </Typography>
+          ) : (
+            <Grid container spacing={2}>
+              {videos.map((video) => (
+                <Grid item key={video._id}>
+                  <Link
+                    to={`/watch/${video._id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <VideoCard video={video} />
+                  </Link>
+                </Grid>
+              ))}
+            </Grid>
           )}
 
-          {videos.length > 0 && (
-            <div className="mt-3">
-              <div className="row g-3">
-                {videos.map((video) => (
-                  <div key={video._id} className="col-md-4">
-                    <Link to={`/watch/${video._id}`} className="text-decoration-none">
-                      <VideoCard video={video} />
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <Divider sx={{ my: 3 }} />
+          <Box sx={{display:"flex", width: "100%", justifyContent:"center"}}>
+            <Button
+              variant="contained"
+              color="error"
+              disableElevation
+              onClick={() => setShowLogoutModal(true)}
+              sx={{width:"100%"}}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
 
-          <hr />
-          <Button variant="contained" color="error" disableElevation onClick={() => setShowLogoutModal(true)}>
-            Logout
-          </Button>
-        </div>
-      </div>
-
-      {/* MUI Dialog for logout confirmation */}
       <Dialog
         open={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
@@ -146,20 +173,18 @@ function MyAccount() {
         <DialogTitle id="logout-dialog-title">Logout</DialogTitle>
         <DialogContent>
           <DialogContentText id="logout-dialog-description">
-            Are you sure you want to log out? This action will redirect you to the login page.
+            Are you sure you want to log out? This action will redirect you to
+            the login page.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowLogoutModal(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setShowLogoutModal(false)}>Cancel</Button>
           <Button
             onClick={() => {
               setShowLogoutModal(false);
               handleLogout();
             }}
             color="error"
-            variant="text"
           >
             Logout
           </Button>
