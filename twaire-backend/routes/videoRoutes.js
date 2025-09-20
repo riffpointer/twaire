@@ -12,6 +12,7 @@ const updateAutocomplete = async (terms) => {
       if (term && term.length > 2) { // Only process terms with more than 2 characters
         await Autocomplete.findOneAndUpdate(
           { term: term.toLowerCase() },
+          { createdAt: Date.now() },
           { $inc: { frequency: 1 } },
           { upsert: true }
         );
@@ -285,6 +286,20 @@ videoRouter.get("/search", async (req, res) => {
       ]
     };
 
+    // TODO: Put under a debug flag
+    const terms = await Autocomplete.find({
+      term: { $regex: `.*`, $options: "i" }
+    })
+    .sort({ frequency: -1 })
+    .limit(10);
+
+    console.log("New search query added to autocomplete database! All search queries: ");
+    terms.forEach(term => {
+      console.log("Term: " + term.term);
+      console.log("Frequency: " + term.frequency);
+      console.log("Created At: " + term.createdAt);
+    })
+
     let sortOption = {};
     if (sort === "date") sortOption = { uploadedAt: -1 };
     else if (sort === "views") sortOption = { views: -1 };
@@ -312,8 +327,9 @@ videoRouter.get("/search/autocomplete", async (req, res) => {
       term: { $regex: `^${q}`, $options: "i" }
     })
     .sort({ frequency: -1 })
-    .limit(10);
+    .limit(10); 
 
+    // TODO: Only return terms if the frequency is greater than a popularity threshold e.g 5000
     res.json(terms.map(t => t.term));
 
   } catch (err) {

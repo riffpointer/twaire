@@ -6,7 +6,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
  * @param {object} props - The component props.
  * @param {object} props.user - The user object, which may have a 'verified' property.
  */
-function VerifiedUserBadge({ user }) {
+function VerifiedUserBadge({ user, verticalAlign="text-center" }) {
   // This component will only render its output if user exists and user.verified is true.
   // Otherwise, it returns nothing (null).
   return (
@@ -15,7 +15,7 @@ function VerifiedUserBadge({ user }) {
         <CheckCircleIcon
           fontSize="inherit"
           color="primary"
-          sx={{ ml: 0.5, verticalAlign: 'text-center' }} // Aligns icon with text
+          sx={{ ml: 0.5, verticalAlign: verticalAlign, height: "100%" }} // Aligns icon with text
           title="Verified"
         />
       )}

@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
-import { TextField, MenuItem } from "@mui/material";
+import { TextField, MenuItem, Typography } from "@mui/material";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -69,7 +69,9 @@ function Search() {
         {error && <p className="text-danger">Unable to fetch search results: {error}</p>}
 
         {!loading && !error && videos.length === 0 && (
-          <p className="text-muted">No videos found for search term <b>"{searchTerm}"</b>.</p>
+          <Typography variant="body1" color="text.secondary">
+            No videos found for search term <b>"{searchTerm}"</b>.
+          </Typography>
         )}
 
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-3">

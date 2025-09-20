@@ -52,6 +52,10 @@ function HomeNeo() {
 
     fetchUser();
   }, []);
+  
+  useEffect(() => {
+    fetchOptions();
+  }, [searchTerm]);
 
   const handleLogout = async () => {
     try {

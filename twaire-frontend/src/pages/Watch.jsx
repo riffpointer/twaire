@@ -23,6 +23,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import VerifiedUserBadge from "../components/VerifiedUserBadge.jsx";
 
 function Watch() {
   const { id } = useParams();
@@ -277,17 +278,9 @@ function Watch() {
                       color="text.primary"
                       sx={{ fontWeight: 'bold' }}
                     >
-                      {video.channel}
+                      {video.uploader.publicName || video.channel}
+                      <VerifiedUserBadge user={video.uploader} verticalAlign="text-center" />
                     </MuiLink>
-
-                    {video.verified && (
-                      <CheckCircleIcon
-                        fontSize="small"
-                        color="primary"
-                        sx={{ ml: 0.5, verticalAlign: 'middle' }}
-                        titleAccess="Verified channel"
-                      />
-                    )}
 
                     <Typography variant="body2" color="text.secondary">
                       {uploaderSubs} subscribers
