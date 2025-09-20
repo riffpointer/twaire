@@ -155,6 +155,7 @@ function VideoActionBar({ videoId }) {
           </Box>
         </DialogTitle>
         <DialogContent>
+          Share this video to your favourite social media platforms:
           <Stack direction="row" spacing={2} justifyContent="center">
             <IconButton
               component="a"
@@ -200,6 +201,7 @@ function VideoActionBar({ videoId }) {
               <Reddit sx={{ fontSize: 40 }} />
             </IconButton>
           </Stack>
+          <hr />
           <Stack direction="row" justifyContent="center" alignItems="center" mb={1}>
             <Typography variant="button">OR</Typography>
           </Stack>

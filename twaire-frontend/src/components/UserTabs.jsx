@@ -27,8 +27,8 @@ function UserTabs({ user, videos }) {
         {/* Videos Tab Panel */}
         <TabPanel value="0" sx={{ p: 0, m: 0, mt: 2 }}>
           {videos.length === 0 ? (
-            <Typography variant="body2" fontStyle="italic">
-              No videos.
+            <Typography variant="body2" color="text.secondary" fontStyle="italic">
+              This user has not uploaded any videos yet.
             </Typography>
           ) : (
             <Grid container spacing={2}>

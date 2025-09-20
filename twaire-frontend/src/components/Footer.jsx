@@ -1,12 +1,28 @@
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Link from '@mui/material/Link';
+import Divider from '@mui/material/Divider';
+
 function Footer() {
     return (
-        <footer className="container mt-auto flex-1">
-            <hr />
-            <div className="d-flex justify-content-center text-center text-muted mb-4">
-                <small>&copy; 2025 <a href="http://github.com/theonlyasdk">theonlyasdk</a></small>
-            </div>
-        </footer>
-    )
+        <Box component="footer" sx={{ marginTop: 'auto', flexGrow: 1, px: 2, py: 1 }} >
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                textAlign: 'center',
+                marginBottom: 4,
+            }}>
+                <Typography variant="caption" color="text.secondary">
+                    &copy; 2025{' '}
+                    <Link href="http://github.com/theonlyasdk" color="inherit" underline="hover">
+                        theonlyasdk
+                    </Link>
+                </Typography>
+            </Box>
+        </Box>
+    );
 }
 
 export default Footer;

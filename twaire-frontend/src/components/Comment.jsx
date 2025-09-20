@@ -132,6 +132,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                 }
                 alt="User"
                 sx={{ width: 32, height: 32, mr: 2, mt: 1 }}
+                title={`Commenting as ${currentUser.publicName}`}
               />
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                 <TextField

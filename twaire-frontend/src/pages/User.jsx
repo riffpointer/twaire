@@ -7,6 +7,7 @@ import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
 import { Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
+import UserTabs from "../components/UserTabs.jsx";
 
 function User() {
   const { username } = useParams(); // URL: /user/:username
@@ -164,27 +165,7 @@ function User() {
           </UserHeader>
         )}
 
-        {videos.length > 0 && (
-          <div>
-            <h4 className="mb-3">Uploaded Videos</h4>
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-              {videos.map((video) => (
-                <div key={video._id} className="col">
-                  <Link
-                    to={`/watch/${video._id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <VideoCard video={video} />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {videos.length === 0 && (
-          <p className="text-muted">This user has not uploaded any videos yet.</p>
-        )}
+        <UserTabs user={user} videos={videos} />
       </div>
       <Snackbar
         open={snackbarOpen}
