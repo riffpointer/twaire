@@ -246,4 +246,49 @@ userRouter.post("/:id/subscribe", isAuthenticated, async (req, res) => {
   }
 });
 
+userRouter.delete("/me", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Delete user's videos
+    await Video.deleteMany({ uploader: userId });
+
+    // Delete user's comments
+    await Comment.deleteMany({ author: userId });
+
+    // Delete user's replies
+    await Reply.deleteMany({ author: userId });
+
+    // Remove user from other users' subscribers list
+    await User.updateMany(
+      { subscribers: userId },
+      { $pull: { subscribers: userId } }
+    );
+
+    // Remove user from other users' subscriptions list
+    await User.updateMany(
+      { subscriptions: userId },
+      { $pull: { subscriptions: userId } }
+    );
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    // Logout the user
+    req.session.destroy(err => {
+      if (err) return res.status(500).json({ error: "Failed to logout after account deletion" });
+      res.clearCookie("connect.sid"); // default cookie name
+      res.json({ message: "Account deleted successfully" });
+    });
+  } catch (error) {
+    console.error("Account deletion error:", error);
+    res.status(500).json({ error: "Server error during account deletion" });
+  }
+});
+
 export default userRouter;

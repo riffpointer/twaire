@@ -60,7 +60,7 @@ function UserTabs({ user, videos }) {
               )}
             </Typography>
           </Box>
-          <Box>
+          <Box mb={2}>
             <Typography variant="h6">
               More links
             </Typography>
@@ -71,6 +71,9 @@ function UserTabs({ user, videos }) {
                 </Box>
               )}
             </Typography>
+          </Box>
+          <Box>
+            <small><Box component="i" sx={{ color: 'text.secondary' }}>Account created at {user.createdAt || "unknown date"}.</Box></small>
           </Box>
         </TabPanel>
       </TabContext>

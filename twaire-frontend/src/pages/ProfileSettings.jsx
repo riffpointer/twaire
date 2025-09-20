@@ -14,6 +14,11 @@ import {
   Box,
   IconButton,
   Alert,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
 } from "@mui/material";
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import CheckIcon from '@mui/icons-material/Check';
@@ -27,6 +32,8 @@ function ProfileSettings() {
   const [bio, setBio] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,7 +77,18 @@ function ProfileSettings() {
       setPublicNameError("");
     }
   };
-
+  const handleDeleteAccount = async () => {
+    try {
+      await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      navigate("/signup");
+    } catch (err) {
+      console.error("Account deletion failed", err);
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -193,13 +211,50 @@ function ProfileSettings() {
                 title="Write some words about yourself; This will be displayed on your user profile page."
                 sx={{ mb: 3 }}
               />
-              <Button type="submit" variant="contained" color="primary">
-                Save Changes
-              </Button>
+
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Button type="submit" variant="contained" color="primary">
+                  Save Changes
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  disableElevation
+                  onClick={() => setShowDeleteModal(true)}
+                  size="small"
+                >
+                  Delete Account
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Paper>
       </Container>
+      <Dialog
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Account</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete your account? This action is irreversible and will delete all your data, including videos and comments.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setShowDeleteModal(false);
+              handleDeleteAccount();
+            }}
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

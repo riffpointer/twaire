@@ -76,6 +76,12 @@ function MyAccount() {
     }
   };
 
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTabIndex(newValue);
+  };
+
   if (loading) {
     return (
       <>

@@ -13,6 +13,7 @@ function Signup() {
   const [alert, setAlert] = useState(null);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const redirectTimeout = 0;
 
   useEffect(() => {
     document.title = "Sign Up - Twaire";
@@ -50,7 +51,7 @@ function Signup() {
       if (!res.ok) throw new Error(data.error || "Signup failed");
 
       setAlert({ type: "success", message: "Signup successful! Redirecting to login..." });
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => navigate("/login"), redirectTimeout);
 
     } catch (err) {
       setAlert({ type: "danger", message: err.message });

@@ -11,6 +11,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
+  const redirectTimeout = 0;
 
   useEffect(() => {
     document.title = "Login - Twaire";
@@ -43,7 +44,7 @@ function Login() {
       setAlert({ type: "success", message: "Login successful! Redirecting..." });
 
       // Redirect after short delay
-      setTimeout(() => navigate("/myaccount"), 1500);
+      setTimeout(() => navigate("/myaccount"), redirectTimeout);
 
     } catch (err) {
       console.error(err);

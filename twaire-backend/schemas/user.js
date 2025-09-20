@@ -10,13 +10,14 @@ const userSchema = new mongoose.Schema({
   publicName: { type: String, default: null },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  verified: { type: Boolean, default: false },
+  verified: { type: Boolean, default: true },
   official: { type: Boolean, default: false },
   subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   accountViews: { type: Number, default: 0 },
   profilePicture: { type: String, default: null },
   bio: { type: String, default: null },
+  createdAt: { type: Date, default: Date.now },
 });
 
 export default userSchema;
