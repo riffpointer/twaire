@@ -6,6 +6,7 @@ import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { Link } from 'react-router-dom';
 
 import VideoCard from './VideoCard';
+import { getRelativeTime } from '../utils/DateUtils';
 
 function UserTabs({ user, videos }) {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -13,6 +14,22 @@ function UserTabs({ user, videos }) {
   const handleTabChange = (event, newValue) => {
     setSelectedTabIndex(newValue);
   };
+
+  const userCreationDate = new Date(user.createdAt);
+  const localUserCreationDate = userCreationDate.toLocaleDateString(undefined, {
+    // Date options
+    year: 'numeric',
+    month: 'short', // e.g., 'Sep'
+    day: '2-digit', // e.g., '20'
+    
+    // Time options
+    hour: '2-digit',   // e.g., '08' or '08' PM
+    minute: '2-digit', // e.g., '00'
+    second: '2-digit', // e.g., '00'
+
+    // Time Zone options
+    timeZoneName: 'short' // e.g., 'IST'
+  });
 
   return (
     <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
@@ -73,7 +90,7 @@ function UserTabs({ user, videos }) {
             </Typography>
           </Box>
           <Box>
-            <small><Box component="i" sx={{ color: 'text.secondary' }}>Account created at {user.createdAt || "unknown date"}.</Box></small>
+            <small><Box component="i" sx={{ color: 'text.secondary' }}>Account created at {user.createdAt ? localUserCreationDate : "unknown date"} ({getRelativeTime(user.createdAt) || "unknown days ago"}).</Box></small>
           </Box>
         </TabPanel>
       </TabContext>

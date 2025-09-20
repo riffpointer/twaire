@@ -162,7 +162,7 @@ function ProfileSettings() {
                     onChange={handleFileChange}
                   />
                   <Avatar
-                    src={preview || `https://placehold.co/100x100?text=${publicName.charAt(0)}`}
+                    src={preview || `${ApiConfig.serverUrl}/api/helper/placeholder/100x100?text=${publicName.charAt(0)}`}
                     sx={{ width: 100, height: 100 }}
                   />
                   <Box

@@ -202,7 +202,7 @@ videoRouter.post("/:id/comments", isAuthenticated, async (req, res) => {
 
 // POST API: Upload a new video with optional thumbnail
 videoRouter.post(
-  "/videos",
+  "/",
   isAuthenticated,
   videoUpload.fields([
     { name: "video", maxCount: 1 },

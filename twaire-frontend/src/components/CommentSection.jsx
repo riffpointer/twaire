@@ -215,11 +215,12 @@ function CommentSection({ videoId }) {
           Unable to load comments: {err}
         </Typography>
       )}
-      {!loading && !err && comments.length === 0 && (
-        <Typography color="text.secondary">No comments yet.</Typography>
-      )}
 
-      <Card sx={{ p: 1 , display: "flex", flexDirection: "column", gap: 2}}>
+      <Card sx={{ p: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+        {!loading && !err && comments.length === 0 && (
+          <Typography color="text.secondary">No comments yet, it's empty here...</Typography>
+        )}
+
         {comments.map((comment) => (
           <Comment
             key={comment._id}

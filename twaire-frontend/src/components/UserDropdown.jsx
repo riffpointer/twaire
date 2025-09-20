@@ -62,7 +62,7 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false
                 <MenuItem component={NavLink} sx={{ pointerEvents: 'none' }}>
                     <Typography variant="h6" component="span" className="d-flex align-items-center">
                         <img
-                            src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : `https://placehold.co/48x48?text=${shortName}`}
+                            src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : `${ApiConfig.serverUrl}/api/helper/placeholder/48x48?text=${shortName}`}
                             alt={user.publicName || user.username}
                             className="rounded-circle me-2"
                             width={48}

@@ -44,6 +44,7 @@ cd twaire
 ```bash
 cd twaire-backend
 pnpm install
+pnpm approve-builds # Select the "canvas" package and hit enter
 pnpm run dev
 ```
 

@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   accountViews: { type: Number, default: 0 },
   profilePicture: { type: String, default: null },
   bio: { type: String, default: null },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: null },
 });
 
 export default userSchema;

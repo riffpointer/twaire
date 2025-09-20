@@ -263,7 +263,7 @@ function Watch() {
                     src={
                       video.uploader?.profilePicture
                         ? `${ApiConfig.serverUrl}/${video.uploader.profilePicture}`
-                        : `https://placehold.co/48x48?text=${video.channel?.charAt(0)}`
+                        : `${ApiConfig.serverUrl}/api/helper/placeholder/48x48?text=${video.channel?.charAt(0)}`
                     }
                     alt="Uploader profile"
                     sx={{ width: 48, height: 48, mr: 2 }}

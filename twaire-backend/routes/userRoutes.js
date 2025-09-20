@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { User, Video } from "../models/models.js";
+import { User, Video, Comment, Reply } from "../models/models.js";
 import isAuthenticated from "../middleware/auth.js";
 import { userUpload } from "../providers/storage.js";
 
@@ -54,6 +54,7 @@ userRouter.post("/signup", async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      createdAt: Date.now()
     });
 
     await newUser.save();
@@ -82,10 +83,12 @@ userRouter.get("/me", isAuthenticated, async (req, res) => {
     _id: user._id,
     username: user.username,
     publicName: user.publicName || user.username,
+    verified: user.verified,
+    subscribers: user.subscribers.length,
+    accountViews: user.accountViews,
     profilePicture: user.profilePicture,
     bio: user.bio,
-    subscribers: user.subscribers,
-    verified: user.verified,
+    createdAt: user.createdAt,
   });
 });
 
@@ -150,7 +153,8 @@ userRouter.get("/:username", async (req, res) => {
       subscribers: user.subscribers.length,
       accountViews: user.accountViews,
       profilePicture: user.profilePicture,
-      bio: user.bio
+      bio: user.bio,
+      createdAt: user.createdAt,
     });
   } catch (err) {
     console.error(err);

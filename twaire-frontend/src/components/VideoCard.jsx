@@ -6,7 +6,7 @@ import { Card, CardActionArea, Paper, Box, Typography } from "@mui/material";
 function VideoCard({ video }) {
   const safeThumbnail = video.thumbnail
     ? `${ApiConfig.serverUrl}/thumbnails/${video.thumbnail}`
-    : `https://placehold.co/320x180?text=${encodeURIComponent(video.title)}`;
+    : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(video.title)}`;
 
   // Format uploaded date
   //   const formattedDate = uploadedAt ? new Date(uploadedAt).toLocaleDateString() : "";

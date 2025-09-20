@@ -12,7 +12,7 @@ function UserHeader({ user, children }) {
     <Paper elevation={2} sx={{ p: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <Avatar
-          src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : undefined}
+          src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : `${ApiConfig.serverUrl}/api/helper/placeholder/128x128?text=${user.publicName.charAt(0)}`}
           sx={{ width: 100, height: 100, mr: 3, fontSize: '4rem' }}
         >
           {!user.profilePicture && <PersonIcon fontSize="inherit" />}

@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import commentsRouter from "./routes/commentsRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import videoRouter from "./routes/videoRoutes.js";
+import helperRouter from "./routes/helperRoutes.js";
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -47,6 +48,7 @@ app.use("/profile_pictures", express.static("profile_pictures"));
 app.use("/api/users", userRouter);
 app.use("/api/videos", videoRouter);
 app.use("/api/comments", commentsRouter);
+app.use("/api/helper", helperRouter);
 
 app.listen(PORT, () => {
   console.log("You are now running the Twaire backend server. https://github.com/theonlyasdk/twaire");
