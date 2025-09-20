@@ -14,6 +14,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { getRelativeTime } from "../utils/DateUtils.jsx";
 
 function Comment({ comment, likedComments, dislikedComments, onToggle, replyingTo, replyText, onReplyTextChange, onReplySubmit, onReplyCancel, setReplyingTo, currentUser }) {
   const commentAuthorUsername = comment.user?.username || "Deleted User";
@@ -49,7 +50,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
               {commentAuthorPublicName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              commented
+              {getRelativeTime(comment.createdAt)}
             </Typography>
             {comment.user?.verified && (
               <CheckCircleIcon
@@ -187,7 +188,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                           'Deleted User'}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        replied
+                        {getRelativeTime(reply.createdAt)}
                       </Typography>
                     </Box>
                     <Typography sx={{ mb: 0 }}>{reply.text}</Typography>

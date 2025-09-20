@@ -180,7 +180,7 @@ function CommentSection({ videoId }) {
       <Box
         component="form"
         onSubmit={handlePost}
-        sx={{ mb: 3, display: 'flex', gap: 1, alignItems: 'center' }}
+        sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}
       >
         <TextField
           fullWidth
