@@ -55,9 +55,11 @@ pnpm install
 pnpm run dev             # Will start up Vite
 ```
 
+> Note: If you're on Windows, you can start MongoDB, frontend and backend server at the same time by running `start.bat`. There is also a `start.sh` but it has not been yet tested, so use it carefully and please report any bugs related to it if you find some.
+
 ## Contributing
 
-Contributions are welcome! Please open issues or submit pull requests.
+Contributions are welcome! You can submit new features by forking the repository and creating a pull request. If you find any minor or major bug or glitch, feel free to open an issue!
 
 ## License
 

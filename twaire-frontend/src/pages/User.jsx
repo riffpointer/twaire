@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
+import UserHeader from "../components/UserHeader.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
-import { Button, CircularProgress, Snackbar, Card, Typography } from "@mui/material";
+import { Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
 
 function User() {
@@ -151,45 +152,17 @@ function User() {
     <>
       <Navbar />
       <div className="container mt-4 mb-4">
-        <Card className="p-3 mb-4">
-          <div className="d-flex align-items-center mb-3">
-            <img
-              src={
-                user.profilePicture
-                  ? `${ApiConfig.serverUrl}/${user.profilePicture}`
-                  : `https://placehold.co/100x100?text=${user.publicName?.charAt(0)}`
-              }
-              alt="Profile"
-              className="rounded-circle me-3"
-              width={100}
-              height={100}
-            />
-            <div>
-              <h3 className="mb-0">{user.publicName || user.username}</h3>
-              <Typography color="text.secondary">@{user.username}</Typography>
-              {user.verified && <span className="badge bg-success me-1">Verified</span>}
-              {user.official && <span className="badge bg-primary">Official</span>}
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {user.subscribers || 0} subscribers &bull;&nbsp;
-                {user.views || 1} views
-              </Typography>
-              <div className="mt-2">
-                <SubscribeButton
-                  subscribed={subscribed}
-                  subLoading={subLoading}
-                  handleSubscribe={handleSubscribe}
-                />
-              </div>
+        {user && (
+          <UserHeader user={user}>
+            <div className="mt-2">
+              <SubscribeButton
+                subscribed={subscribed}
+                subLoading={subLoading}
+                handleSubscribe={handleSubscribe}
+              />
             </div>
-          </div>
-
-          {user.bio && (
-            <Card className="p-3 mb-3" variant="outlined">
-              <strong>About this channel</strong>
-              <p className="mb-0">{user.bio}</p>
-            </Card>
-          )}
-        </Card>
+          </UserHeader>
+        )}
 
         {videos.length > 0 && (
           <div>

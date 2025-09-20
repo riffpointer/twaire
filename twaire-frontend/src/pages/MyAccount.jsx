@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import VideoCard from "../components/VideoCard.jsx";
+import UserHeader from "../components/UserHeader.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
 import {
@@ -14,12 +15,17 @@ import {
   Container,
   Paper,
   Box,
-  Avatar,
   Typography,
   Grid,
   Divider,
+  Tab,
 } from "@mui/material";
-import PersonIcon from '@mui/icons-material/Person';
+import {
+  TabContext,
+  TabList,
+  TabPanel,
+} from '@mui/lab';
+import UserTabs from "../components/UserTabs.jsx";
 
 function MyAccount() {
   const [user, setUser] = useState(null);
@@ -85,83 +91,30 @@ function MyAccount() {
     <>
       <Navbar />
       <Container sx={{ mt: 4, mb: 4 }}>
-        <Paper elevation={2} sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-            <Avatar
-              src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : undefined}
-              sx={{ width: 100, height: 100, mr: 3, fontSize: '4rem' }}
-            >
-              {!user.profilePicture && <PersonIcon fontSize="inherit" />}
-            </Avatar>
-            <Box>
-              <Typography variant="h4" component="h1" sx={{ mb: 0 }}>
-                {user.publicName || user.username}
-              </Typography>
-              <Typography color="text.secondary" sx={{ mb: 0.5 }}>
-                @{user.username}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {user.subscribers.length} subscribers &bull;&nbsp;
-                {user.accountViews || 0} views
-              </Typography>
+        {user && (
+          <UserHeader user={user}>
+            <Box sx={{ display: "flex", gap: 1 }}>
               <Button
                 component={Link}
                 to="/editprofile"
                 variant="outlined"
                 size="small"
-                sx={{mt:0.5}}
               >
                 Edit Profile
               </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                disableElevation
+                onClick={() => setShowLogoutModal(true)}
+                size="small"
+              >
+                Logout
+              </Button>
             </Box>
-          </Box>
-
-          {user.bio && (
-            <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-              <Typography variant="subtitle1" component="strong">
-                About this channel
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {user.bio}
-              </Typography>
-            </Paper>
-          )}
-
-          <Typography variant="h6" component="h2" sx={{ mb: 2, mt: 3 }}>
-            Your videos
-          </Typography>
-          {videos.length === 0 ? (
-            <Typography variant="body2" fontStyle="italic">
-              No videos.
-            </Typography>
-          ) : (
-            <Grid container spacing={2}>
-              {videos.map((video) => (
-                <Grid item key={video._id}>
-                  <Link
-                    to={`/watch/${video._id}`}
-                    style={{ textDecoration: "none" }}
-                  >
-                    <VideoCard video={video} />
-                  </Link>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-
-          <Divider sx={{ my: 3 }} />
-          <Box sx={{display:"flex", width: "100%", justifyContent:"center"}}>
-            <Button
-              variant="contained"
-              color="error"
-              disableElevation
-              onClick={() => setShowLogoutModal(true)}
-              sx={{width:"100%"}}
-            >
-              Logout
-            </Button>
-          </Box>
-        </Paper>
+          </UserHeader>
+        )}
+        <UserTabs user={user} videos={videos} />
       </Container>
 
       <Dialog

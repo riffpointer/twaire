@@ -13,8 +13,11 @@ import {
   Typography,
   Box,
   IconButton,
+  Alert,
 } from "@mui/material";
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CheckIcon from '@mui/icons-material/Check';
+
 
 function ProfileSettings() {
   const [user, setUser] = useState(null);
@@ -112,11 +115,14 @@ function ProfileSettings() {
   return (
     <>
       <Navbar />
-      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h5" component="h1" gutterBottom>
+          <Typography variant="h5" component="h1" mb={2} gutterBottom>
             Profile Settings
           </Typography>
+          <Alert severity="info" mb={2}>
+            You cannot change your username once you have created your account. To request a username change, please contact the Twaire team.
+          </Alert>
           <Box
             component="form"
             sx={{ display: "flex", flexDirection: { xs: 'column', md: 'row' }, width: "100%", mt: 3 }}
