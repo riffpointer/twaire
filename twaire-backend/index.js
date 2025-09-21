@@ -49,23 +49,19 @@ app.use(
   })
 );
 
+const localIpRegex = /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/;
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow Postman or server-to-server requests
-      if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true); // allow Postman or server-to-server
 
-      // Allowed origins: localhost, dev port, and your machine's LAN IP
-      const allowedOrigins = [
-        process.env.CLIENT_URL || `http://localhost:5173`,
-        `http://${localIP}:5173`, // the LAN-accessible client URL
-      ];
-
-      if (allowedOrigins.includes(origin)) {
+      if (localIpRegex.test(origin)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
       }
+
+      console.warn(`CORS blocked: ${origin}`);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true, // allow cookies
   })

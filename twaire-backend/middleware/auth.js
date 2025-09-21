@@ -1,6 +1,17 @@
 function isAuthenticated(req, res, next) {
-  if (req.session.userId) return next();
-  res.status(401).json({ error: "Not authenticated" });
+  if (req.session && req.session.userId) {
+    return next();
+  }
+
+  console.warn("Unauthorized access attempt", {
+    path: req.originalUrl,
+    method: req.method,
+  });
+
+  res.status(401).json({
+    success: false,
+    error: "Not authenticated",
+  });
 }
 
 export default isAuthenticated;

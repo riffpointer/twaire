@@ -114,7 +114,7 @@ function VideoActionBar({ videoId }) {
             startIcon={liked ? <ThumbUp /> : <ThumbUpOutlined />}
             title="Like the video"
           >
-            {likes} Likes
+            {likes}
           </Button>
           <Button
             onClick={() => handleReaction('dislike')}
@@ -124,7 +124,7 @@ function VideoActionBar({ videoId }) {
             startIcon={disliked ? <ThumbDown /> : <ThumbDownOutlined />}
             title="Dislike the video"
           >
-            {dislikes} Dislikes
+            {dislikes}
           </Button>
         </ButtonGroup>
 

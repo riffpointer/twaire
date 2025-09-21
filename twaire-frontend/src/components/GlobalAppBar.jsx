@@ -141,7 +141,7 @@ export default function GlobalAppBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ mr: 2, flexGrow: { xs: 1, md: 0 } }}>
+          <Typography variant="h6" component={Link} color="textPrimary" to="/" sx={{ textDecoration: "none", mr: 2, flexGrow: { xs: 1, md: 0 } }}>
             Twaire
           </Typography>
           <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: "start", flexGrow: 1 }}>

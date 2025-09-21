@@ -37,7 +37,7 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false
                 onClick={handleClick}
                 className={textWhite ? "text-white" : ""}
                 disableElevation={hasOutline}
-                sx={{ textTransform: 'none' }}
+                sx={{ textTransform: 'none', pr: 0.2, pl: 0.2 }}
                 title="Account menu"
                 variant={hasOutline ? "contained" : ""}
             >
