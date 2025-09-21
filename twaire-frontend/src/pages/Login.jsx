@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from '../components/Navbar.jsx';
 import Strings from "../utils/Strings.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import { Container, Typography, TextField, Button, Alert, Box, Stack } from "@mui/material";
@@ -54,7 +53,6 @@ function Login() {
 
   return (
     <>
-      <Navbar />
       <Container maxWidth="sm" sx={{ mt: 4 }}>
         <Typography variant="h4" gutterBottom>
           Login to Twaire

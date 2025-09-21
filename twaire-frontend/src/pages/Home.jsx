@@ -1,4 +1,3 @@
-import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import Strings from '../utils/Strings.jsx';
 import VideoCard from '../components/VideoCard.jsx';
@@ -7,6 +6,7 @@ import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
 import { Box, Divider, MenuItem, TextField, Typography } from '@mui/material';
+import GlobalAppBar from '../components/GlobalAppBar.jsx';
 
 
 function Home() {
@@ -35,9 +35,8 @@ function Home() {
   };
 
   return (
-    <Box className="d-flex flex-column min-vh-100">
-      <Navbar />
-      <div className="container mt-4">
+    <>
+      <div className="container">
         <Typography variant="h2">
           Welcome to Twaire!
         </Typography>
@@ -83,7 +82,7 @@ function Home() {
         </div>
       </div>
       <Footer />
-    </Box>
+    </>
   );
 }
 

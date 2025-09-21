@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
 import {
@@ -22,7 +21,6 @@ import {
 } from "@mui/material";
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import CheckIcon from '@mui/icons-material/Check';
-
 
 function ProfileSettings() {
   const [user, setUser] = useState(null);
@@ -122,7 +120,6 @@ function ProfileSettings() {
   if (loading) {
     return (
       <>
-        <Navbar />
         <Container maxWidth="md" sx={{ mt: 4 }}>
           <Loading label="Loading profile settings..." />
         </Container>
@@ -132,8 +129,7 @@ function ProfileSettings() {
 
   return (
     <>
-      <Navbar />
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="lg" sx={{ mb: 4 }}>
         <Paper elevation={3} sx={{ p: 3 }}>
           <Typography variant="h5" component="h1" mb={2} gutterBottom>
             Profile Settings

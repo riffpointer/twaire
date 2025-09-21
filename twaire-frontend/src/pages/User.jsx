@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
+
 import VideoCard from "../components/VideoCard.jsx";
 import UserHeader from "../components/UserHeader.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
-import { Button, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Container, Snackbar, Typography } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
 import UserTabs from "../components/UserTabs.jsx";
 
@@ -110,63 +110,49 @@ function User() {
     }
   };
 
-  if (loading)
-    return (
-      <>
-        <Navbar />
-        <div className="container mt-4">
-          <Loading label="Loading user..." />
-        </div>
-      </>
-    );
+  if (loading) return <Loading label="Loading user..." />;
 
   if (!user)
     return (
       <>
-        <Navbar />
-        <div className="container mt-4">
-          <h1>User not found.</h1>
-          <Snackbar
-            open={snackbarOpen}
-            autoHideDuration={6000}
-            onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            ContentProps={{
-              sx: {
-                backgroundColor: snackbarSeverity === "error" ? "#d32f2f" : "#2e7d32",
-                display: 'flex',
-                alignItems: 'center'
-              },
-            }}
-            message={
-              <span className="d-flex align-items-center">
-                {getSnackbarIcon(snackbarSeverity)}
-                {snackbarMessage}
-              </span>
-            }
-          />
-        </div>
+        <h1>User not found.</h1>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          ContentProps={{
+            sx: {
+              backgroundColor: snackbarSeverity === "error" ? "#d32f2f" : "#2e7d32",
+              display: 'flex',
+              alignItems: 'center'
+            },
+          }}
+          message={
+            <span className="d-flex align-items-center">
+              {getSnackbarIcon(snackbarSeverity)}
+              {snackbarMessage}
+            </span>
+          }
+        />
       </>
     );
 
   return (
-    <>
-      <Navbar />
-      <div className="container mt-4 mb-4">
-        {user && (
-          <UserHeader user={user}>
-            <div className="mt-2">
-              <SubscribeButton
-                subscribed={subscribed}
-                subLoading={subLoading}
-                handleSubscribe={handleSubscribe}
-              />
-            </div>
-          </UserHeader>
-        )}
+    <Container sx={{ mb: 10 }}>
+      {user && (
+        <UserHeader user={user}>
+          <div className="mt-2">
+            <SubscribeButton
+              subscribed={subscribed}
+              subLoading={subLoading}
+              handleSubscribe={handleSubscribe}
+            />
+          </div>
+        </UserHeader>
+      )}
 
-        <UserTabs user={user} videos={videos} />
-      </div>
+      <UserTabs user={user} videos={videos} />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
@@ -186,7 +172,7 @@ function User() {
           </span>
         }
       />
-    </>
+    </Container>
   );
 
 }

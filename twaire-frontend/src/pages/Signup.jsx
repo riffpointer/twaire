@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
+
 import ApiConfig from "../utils/ApiConfig.jsx";
 import { Container, Typography, TextField, Button, Alert, Box, Stack, Checkbox, FormControlLabel } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
@@ -60,7 +60,6 @@ function Signup() {
 
   return (
     <>
-      <Navbar />
       <Container maxWidth="sm" sx={{ mt: 4 }}>
         <Typography variant="h4" gutterBottom>
           Create an Account

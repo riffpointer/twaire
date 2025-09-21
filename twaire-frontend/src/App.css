@@ -24,6 +24,7 @@
 #root {
   margin: 0 auto;
   font-family: "Vend Sans", "Inter", "Arial", sans-serif !important;
+  display: block;
 }
 
 .verified-check {

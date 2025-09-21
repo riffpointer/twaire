@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
+
 import VideoCard from "../components/VideoCard.jsx";
 import UserHeader from "../components/UserHeader.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
@@ -82,21 +82,11 @@ function MyAccount() {
     setSelectedTabIndex(newValue);
   };
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <Container sx={{ mt: 4 }}>
-          <Loading label="Loading your account..." />
-        </Container>
-      </>
-    );
-  }
+  if (loading) return <Loading label="Loading your account..." />;
 
   return (
     <>
-      <Navbar />
-      <Container sx={{ mt: 4, mb: 4 }}>
+      <Container sx={{ mb: 4 }}>
         {user && (
           <UserHeader user={user}>
             <Box sx={{ display: "flex", gap: 1 }}>

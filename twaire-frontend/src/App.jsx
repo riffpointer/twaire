@@ -13,7 +13,8 @@ import Search from './pages/Search.jsx';
 import Trending from './pages/Trending.jsx';
 import ProfileSettings from './pages/ProfileSettings.jsx';
 import HomeNeo from './pages/HomeNeo.jsx';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { createTheme, CssBaseline, ThemeProvider, Toolbar } from '@mui/material';
+import GlobalAppBar from './components/GlobalAppBar.jsx';
 
 const theme = createTheme({
   typography: {
@@ -32,9 +33,11 @@ const theme = createTheme({
 function App() {
   return (
     <>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme} noSsr>
         <CssBaseline />
         <BrowserRouter>
+          <GlobalAppBar />
+          <Toolbar />
           <Routes>
             {/* Public links so no authentication needed */}
             <Route path="/" element={<Home />} />

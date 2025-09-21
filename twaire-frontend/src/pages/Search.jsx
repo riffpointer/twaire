@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
+
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "../components/Loading.jsx";
@@ -47,7 +47,6 @@ function Search() {
 
   return (
     <>
-      <Navbar />
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="mb-0">Search Results for: <b>{searchTerm}</b></h2>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
+
 import ApiConfig from "../utils/ApiConfig.jsx";
 import {
   Alert,
@@ -192,8 +192,7 @@ function Upload() {
 
   return (
     <>
-      <Navbar />
-      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="md" sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Upload your video!
         </Typography>

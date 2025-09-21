@@ -26,7 +26,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
     .join("") || commentAuthorUsername.charAt(0).toUpperCase();
   const commentAuthorProfilePicture = comment.user?.profilePicture
     ? `${ApiConfig.serverUrl}/${comment.user.profilePicture}`
-    : "${ApiConfig.serverUrl}/api/helper/placeholder/40?text=" + encodeURIComponent(commentAuthorShortName);
+    : "${ApiConfig.serverUrl}/api/helper/placeholder/40x40?text=" + encodeURIComponent(commentAuthorShortName);
 
   return (
     <Box key={comment._id}>
@@ -123,7 +123,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                 src={
                   currentUser?.profilePicture
                     ? `${ApiConfig.serverUrl}/${currentUser.profilePicture}`
-                    : `${ApiConfig.serverUrl}/api/helper/placeholder/32?text=${currentUser?.username?.charAt(0)}`
+                    : `${ApiConfig.serverUrl}/api/helper/placeholder/32x32?text=${currentUser?.username?.charAt(0)}`
                 }
                 alt="User"
                 sx={{ width: 32, height: 32, mr: 2, mt: 1 }}
@@ -163,7 +163,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                     src={
                       reply.user?.profilePicture
                         ? `${ApiConfig.serverUrl}/${reply.user.profilePicture}`
-                        : `${ApiConfig.serverUrl}/api/helper/placeholder/32?text=${reply.user?.username?.charAt(0)}`
+                        : `${ApiConfig.serverUrl}/api/helper/placeholder/32x32?text=${reply.user?.username?.charAt(0)}`
                     }
                     alt="User"
                     sx={{ width: 32, height: 32, mr: 2 }}

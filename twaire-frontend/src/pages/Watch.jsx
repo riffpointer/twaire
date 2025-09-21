@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Navbar from "../components/Navbar.jsx";
+
 import PublicVideosList from "../components/PublicVideosList.jsx";
 import { getRelativeTime } from "../utils/DateUtils.jsx";
 import CommentSection from "../components/CommentSection.jsx";
@@ -14,7 +14,9 @@ import {
   Box,
   Avatar,
   Typography,
-  Link as MuiLink
+  Link as MuiLink,
+  Container,
+  Divider
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SubscribeButton from "../components/SubscribeButton.jsx";
@@ -24,6 +26,7 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import VerifiedUserBadge from "../components/VerifiedUserBadge.jsx";
+import VideoPlayer from "../components/VideoPlayer.jsx";
 
 function Watch() {
   const { id } = useParams();
@@ -96,7 +99,7 @@ function Watch() {
           }
 
           const uploaderDataRequest = await fetch(
-            `${ApiConfig.serverUrl}/api/users/${data.channel}`
+            `${ApiConfig.serverUrl}/api/users/${data.uploader.username}`
           );
 
           if (uploaderDataRequest.ok) {
@@ -144,20 +147,11 @@ function Watch() {
     }
   };
 
-  if (loading)
-    return (
-      <>
-        <Navbar />
-        <div className="container mt-4">
-          <Loading label="Loading video..." />
-        </div>
-      </>
-    );
+  if (loading) return <Loading label="Loading video..." />;
 
   if (!video)
     return (
       <>
-        <Navbar />
         <div className="container mt-4">
           <h1>Video not found.</h1>
         </div>
@@ -170,21 +164,14 @@ function Watch() {
 
   return (
     <>
-      <Navbar />
-      <div className="container mt-4 mb-4">
+      <Container sx={{ mb: 4 }}>
         <div className="row">
           {/* Left column: video player and details */}
           <div className="col-lg-8 mb-4">
             <div className="card-body">
               {/* Video player */}
-              <div className="ratio ratio-16x9 mb-3">
-                <video
-                  id="main-video-player"
-                  controls
-                  src={`${ApiConfig.serverUrl}/uploads/${video.filename}`}
-                  className="w-100"
-                  onContextMenu={handleContextMenu}
-                />
+              <Box sx={{mb: 2}}>
+                <VideoPlayer onContextMenu={handleContextMenu} src={`${ApiConfig.serverUrl}/uploads/${video.filename}`} autoPlay={true} />
                 <Menu
                   open={contextMenu !== null}
                   onClose={handleClose}
@@ -221,7 +208,7 @@ function Watch() {
                     <ListItemText>Restart</ListItemText>
                   </MenuItem>
                 </Menu>
-              </div>
+              </Box>
 
               {/* Tags */}
               {video.tags && video.tags.length > 0 && (
@@ -233,7 +220,7 @@ function Watch() {
               )}
 
               {/* Title */}
-              <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 0 }}>
+              <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
                 {video.title}
               </Typography>
 
@@ -306,7 +293,7 @@ function Watch() {
                   <i>No description provided.</i>
                 )}
               </Card>
-              <hr />
+              <Divider />
               <CommentSection videoId={video._id} />
             </div>
           </div>
@@ -316,7 +303,7 @@ function Watch() {
             <PublicVideosList limit={10} />
           </div>
         </div>
-      </div>
+      </Container>
     </>
   );
 }

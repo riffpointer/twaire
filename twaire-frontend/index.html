@@ -15,14 +15,15 @@
   <title>Twaire</title>
 
   <style>
-    html,
-    body,
-    #root,
     ._loading-wrapper {
       padding: 0;
       margin: 0;
       width: 100%;
       height: 100%;
+    }
+
+    #root, html, body {
+        background: #111;
     }
 
     .loading-svg {
@@ -32,7 +33,7 @@
       top: calc(50vh - var(--s) / 2);
       width: var(--s);
       height: var(--s);
-      transform: scale(0.2);
+      transform: scale(0.1);
     }
 
     .loading-svg circle {
@@ -85,9 +86,6 @@
   <div id="root">
     <div class="_loading-wrapper">
       <!-- Thanks to: https://dev.to/alekseiberezkin/creating-a-material-spinner-with-pure-and-simple-css-1b60 -->
-      <div style="display: flex;justify-content: center;width: 100%;font-family: sans-serif;padding-top: 1em;">
-        Hang on, Twaire is loading...
-      </div>
       <svg viewBox='0 0 100 100' xmlns="http://www.w3.org/2000/svg" class="loading-svg">
         <circle cx='50' cy='50' r='47' stroke="#333" fill='none' />
       </svg>
