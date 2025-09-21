@@ -133,7 +133,7 @@ function Navbar() {
 
           {user ? (
             <UserDropdown user={user} handleLogout={handleLogout} />
-          ) : (
+          ) : ((!user && loading) && 
             <CircularProgress size="20px" />
           )}
         </ul>

@@ -26,6 +26,7 @@ import Facebook from '@mui/icons-material/Facebook';
 import WhatsApp from '@mui/icons-material/WhatsApp';
 import Twitter from '@mui/icons-material/Twitter';
 import Reddit from '@mui/icons-material/Reddit';
+import { Divider } from '@mui/material';
 
 function VideoActionBar({ videoId }) {
   const [likes, setLikes] = useState(0);
@@ -201,11 +202,11 @@ function VideoActionBar({ videoId }) {
               <Reddit sx={{ fontSize: 40 }} />
             </IconButton>
           </Stack>
-          <hr />
+          <Divider sx={{ my: 2 }} />
           <Stack direction="row" justifyContent="center" alignItems="center" mb={1}>
             <Typography variant="button">OR</Typography>
           </Stack>
-          <hr />
+          <Divider sx={{ my: 2 }} />
           <Typography>Share this video to other platforms by copying the link below.</Typography>
           <Stack direction="row" spacing={1} alignItems="center" mt={1}>
             <TextField

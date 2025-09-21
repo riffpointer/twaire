@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
-import { Box, MenuItem, TextField, Typography } from '@mui/material';
+import { Box, Divider, MenuItem, TextField, Typography } from '@mui/material';
 
 
 function Home() {
@@ -42,7 +42,7 @@ function Home() {
           Welcome to Twaire!
         </Typography>
         <Typography variant="subtitle1">{Strings.branding.description}</Typography>
-        <hr />
+        <Divider sx={{ my: 2 }} />
 
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h3 className="mb-0">
