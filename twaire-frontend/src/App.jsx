@@ -24,8 +24,8 @@ const theme = createTheme({
       'sans-serif',
     ].join(','),
   },
-  palette: {
-    mode: 'dark',
+  colorSchemes: {
+    dark: true,
   },
 });
 
