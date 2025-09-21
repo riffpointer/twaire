@@ -31,3 +31,4 @@ dist-ssr
 *.mp4
 *.mp3
 /resources/sample_videos
+*.sublime-workspace
