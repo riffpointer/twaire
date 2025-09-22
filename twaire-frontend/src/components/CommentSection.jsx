@@ -1,17 +1,16 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  TextField,
+  Typography
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import ApiConfig from "../utils/ApiConfig.jsx";
 import Strings from "../utils/Strings";
 import Comment from "./Comment";
-import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "./Loading.jsx";
-import { 
-  Box,
-  Typography,
-  Alert,
-  TextField,
-  Button,
-  Card
-} from "@mui/material";
 
 function CommentSection({ videoId }) {
   const [comments, setComments] = useState([]);

@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-import VideoCard from "../components/VideoCard.jsx";
-import UserHeader from "../components/UserHeader.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import { Container, Snackbar } from "@mui/material";
 import Loading from "../components/Loading.jsx";
-import { Box, Button, CircularProgress, Container, Snackbar, Typography } from "@mui/material";
 import SubscribeButton from "../components/SubscribeButton.jsx";
+import UserHeader from "../components/UserHeader.jsx";
 import UserTabs from "../components/UserTabs.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
 
 function User() {
   const { username } = useParams(); // URL: /user/:username

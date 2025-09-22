@@ -1,10 +1,10 @@
-import { Autocomplete, Box, Card, Button, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig";
-import UserDropdown from "../components/UserDropdown";
-import parse from 'autosuggest-highlight/parse';
+import { Autocomplete, Button, Card, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import match from 'autosuggest-highlight/match';
+import parse from 'autosuggest-highlight/parse';
+import { Fragment, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import UserDropdown from "../components/UserDropdown";
+import ApiConfig from "../utils/ApiConfig";
 
 /**
  * The new Twaire homepage

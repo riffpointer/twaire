@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { MenuItem, TextField } from "@mui/material";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import VideoCard from "./VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from "./Loading.jsx";
-import { TextField, MenuItem } from "@mui/material";
+import VideoCard from "./VideoCard.jsx";
 
 function PublicVideosList({ defaultSort = "trending", limit }) {
   const [videos, setVideos] = useState([]);

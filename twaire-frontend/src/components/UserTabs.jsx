@@ -1,12 +1,9 @@
 import { useState } from 'react';
-
-import { Paper, Box, Grid, Typography, Tab } from '@mui/material';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-
+import { Box, Grid, Paper, Tab, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-
-import VideoCard from './VideoCard';
 import { getRelativeTime } from '../utils/DateUtils';
+import VideoCard from './VideoCard';
 
 function UserTabs({ user, videos }) {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -16,6 +13,8 @@ function UserTabs({ user, videos }) {
   };
 
   const userCreationDate = new Date(user.createdAt);
+
+  // Formatted date according to user locale settings
   const localUserCreationDate = userCreationDate.toLocaleDateString(undefined, {
     // Date options
     year: 'numeric',

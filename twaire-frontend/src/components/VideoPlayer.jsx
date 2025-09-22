@@ -1,10 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
-import { Box, IconButton, Slider, Typography, Fade, Slide, CircularProgress } from "@mui/material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import PauseIcon from "@mui/icons-material/Pause";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import { Box, CircularProgress, Fade, IconButton, Slide, Slider, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 
 const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
   const videoRef = useRef(null);

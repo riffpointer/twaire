@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import Footer from "../components/Footer.jsx";
-import { Alert, Typography } from "@mui/material";
+import { Alert } from "@mui/material";
 import { Link } from "react-router-dom";
-import GlobalAppBar from "../components/GlobalAppBar.jsx";
 
 function About() {
   useEffect(() => {

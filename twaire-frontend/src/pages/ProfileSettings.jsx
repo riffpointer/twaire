@@ -1,26 +1,25 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import Loading from "../components/Loading.jsx";
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import {
-  Button,
-  TextField,
-  Avatar,
-  Tooltip,
-  Container,
-  Paper,
-  Typography,
-  Box,
-  IconButton,
   Alert,
+  Avatar,
+  Box,
+  Button,
+  Container,
   Dialog,
   DialogActions,
-  DialogTitle,
   DialogContent,
   DialogContentText,
+  DialogTitle,
+  IconButton,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import CheckIcon from '@mui/icons-material/Check';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Loading from "../components/Loading.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
 
 function ProfileSettings() {
   const [user, setUser] = useState(null);

@@ -1,6 +1,6 @@
 import { getRelativeTime } from "../utils/DateUtils";
 import ApiConfig from "../utils/ApiConfig.jsx";
-import { Card, CardActionArea, Paper, Box, Typography } from "@mui/material";
+import { Card, CardActionArea, Box, Typography } from "@mui/material";
 
 
 function VideoCard({ video }) {

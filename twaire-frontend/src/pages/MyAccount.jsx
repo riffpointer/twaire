@@ -1,31 +1,19 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-
-import VideoCard from "../components/VideoCard.jsx";
-import UserHeader from "../components/UserHeader.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import Loading from "../components/Loading.jsx";
 import {
+  Box,
   Button,
+  Container,
   Dialog,
   DialogActions,
-  DialogTitle,
   DialogContent,
   DialogContentText,
-  Container,
-  Paper,
-  Box,
-  Typography,
-  Grid,
-  Divider,
-  Tab,
+  DialogTitle,
 } from "@mui/material";
-import {
-  TabContext,
-  TabList,
-  TabPanel,
-} from '@mui/lab';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Loading from "../components/Loading.jsx";
+import UserHeader from "../components/UserHeader.jsx";
 import UserTabs from "../components/UserTabs.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
 
 function MyAccount() {
   const [user, setUser] = useState(null);

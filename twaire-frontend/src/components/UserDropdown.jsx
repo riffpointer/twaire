@@ -1,13 +1,11 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import Divider from '@mui/material/Divider';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import ApiConfig from '../utils/ApiConfig';
 
 // Assume user and handleLogout are passed as props

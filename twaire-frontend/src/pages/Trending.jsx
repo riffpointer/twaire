@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer.jsx";
+import Loading from "../components/Loading.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
-import Loading from "../components/Loading.jsx";
-import Footer from "../components/Footer.jsx";
-import GlobalAppBar from "../components/GlobalAppBar.jsx";
 
 function Trending() {
   const [videos, setVideos] = useState([]);

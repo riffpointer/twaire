@@ -5,8 +5,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
-import { Box, Divider, MenuItem, TextField, Typography } from '@mui/material';
-import GlobalAppBar from '../components/GlobalAppBar.jsx';
+import { Divider, MenuItem, TextField, Typography } from '@mui/material';
 
 
 function Home() {

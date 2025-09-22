@@ -1,32 +1,29 @@
-import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
-import PublicVideosList from "../components/PublicVideosList.jsx";
-import { getRelativeTime } from "../utils/DateUtils.jsx";
-import CommentSection from "../components/CommentSection.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import Loading from "../components/Loading.jsx";
-import Button from '@mui/material/Button';
-import { 
-  Chip, 
-  CircularProgress, 
-  Card,
-  Box,
+import {
   Avatar,
-  Typography,
-  Link as MuiLink,
+  Box,
+  Card,
+  Chip,
   Container,
-  Divider
+  Divider,
+  Link as MuiLink,
+  Typography
 } from "@mui/material";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SubscribeButton from "../components/SubscribeButton.jsx";
-import VideoActionBar from "../components/VideoActionBar.jsx";
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import CommentSection from "../components/CommentSection.jsx";
+import Loading from "../components/Loading.jsx";
+import PublicVideosList from "../components/PublicVideosList.jsx";
+import SubscribeButton from "../components/SubscribeButton.jsx";
 import VerifiedUserBadge from "../components/VerifiedUserBadge.jsx";
+import VideoActionBar from "../components/VideoActionBar.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
+import ApiConfig from "../utils/ApiConfig.jsx";
+import { getRelativeTime } from "../utils/DateUtils.jsx";
 
 function Watch() {
   const { id } = useParams();

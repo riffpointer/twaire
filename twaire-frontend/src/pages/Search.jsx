@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
+import { MenuItem, TextField, Typography } from "@mui/material";
+import Loading from "../components/Loading.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
-import Loading from "../components/Loading.jsx";
-import { TextField, MenuItem, Typography } from "@mui/material";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
