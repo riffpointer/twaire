@@ -33,7 +33,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
       <Box sx={{ display: 'flex', width: '100%' }}>
         <Avatar
           src={commentAuthorProfilePicture}
-          alt="User"
+          alt={comment.user.publicName}
           sx={{ width: 40, height: 40, mr: 2 }}
         />
         <Box sx={{ flex: 1 }}>
@@ -161,11 +161,9 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                 <Box key={reply._id} sx={{ display: 'flex', mb: 2 }}>
                   <Avatar
                     src={
-                      reply.user?.profilePicture
-                        ? `${ApiConfig.serverUrl}/${reply.user.profilePicture}`
-                        : `${ApiConfig.serverUrl}/api/helper/placeholder/32x32?text=${reply.user?.username?.charAt(0)}`
+                      reply.user?.profilePicture ?? `${ApiConfig.serverUrl}/${reply.user.profilePicture}`
                     }
-                    alt="User"
+                    alt={reply.user.publicName}
                     sx={{ width: 32, height: 32, mr: 2 }}
                   />
                   <Box>
@@ -182,6 +180,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                         {reply.user?.publicName ||
                           reply.user?.username ||
                           'Deleted User'}
+                        <VerifiedUserBadge user={comment.user} />
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {getRelativeTime(reply.createdAt)}

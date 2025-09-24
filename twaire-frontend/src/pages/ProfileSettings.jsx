@@ -32,6 +32,7 @@ function ProfileSettings() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const navigate = (location) => { window.location.href = location };
+  const routerNavigate = useNavigate();
 
   useEffect(() => {
     document.title = "Profile Settings - Twaire";
@@ -58,7 +59,7 @@ function ProfileSettings() {
     };
 
     fetchUser();
-  }, [navigate]);
+  }, [routerNavigate]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

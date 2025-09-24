@@ -8,7 +8,7 @@ function VerifiedUserBadge({ user, verticalAlign="text-center" }) {
           fontSize="inherit"
           color="primary"
           sx={{ ml: 0.5, verticalAlign: verticalAlign, height: "100%" }}
-          title="Verified"
+          title="Verified user"
         />
       )}
     </>

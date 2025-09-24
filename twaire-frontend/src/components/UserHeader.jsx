@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
 import ApiConfig from "../utils/ApiConfig.jsx";
+import VerifiedUserBadge from "./VerifiedUserBadge.jsx";
 
 function UserHeader({ user, children }) {
   return (
@@ -18,14 +19,15 @@ function UserHeader({ user, children }) {
           {!user.profilePicture && <PersonIcon fontSize="inherit" />}
         </Avatar>
         <Box>
-          <Typography variant="h4" component="h1" sx={{ mb: 0 }}>
+          <Typography variant="h4" component="h1" sx={{ mb: 0, display: "flex", alignItems: "center" }}>
             {user.publicName || user.username}
+            <VerifiedUserBadge user={user} />
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 0.5 }}>
             @{user.username}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {user.subscribers?.length || 0} subscribers &bull;&nbsp;
+            {user.subscribers || 0} subscriber{user.subscribers == 1 || "s"} &bull;&nbsp;
             {user.accountViews || user.views || 0} views
           </Typography>
           {children}

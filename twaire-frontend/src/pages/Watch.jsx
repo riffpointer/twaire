@@ -267,14 +267,14 @@ function Watch() {
                       to={`/user/${video.username}`}
                       underline="none"
                       color="text.primary"
-                      sx={{ fontWeight: 'bold' }}
+                      sx={{ fontWeight: 'bold', display: "flex", alignItems: "center" }}
                     >
                       {video.uploader.publicName || video.channel}
                       <VerifiedUserBadge user={video.uploader} verticalAlign="text-center" />
                     </MuiLink>
 
                     <Typography variant="body2" color="text.secondary">
-                      {uploaderSubs} subscribers
+                      {uploaderSubs} subscriber{uploaderSubs === 1 || "s"}
                     </Typography>
                   </Box>
                 </Box>
