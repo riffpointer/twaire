@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CardMedia, Container, Divider, Typography } from "@mui/material";
+import { Avatar, Box, Card, CardContent, CardMedia, Container, Divider, Typography } from "@mui/material";
 import { useEffect } from "react";
 import Footer from "../components/Footer.jsx";
 
@@ -43,7 +43,6 @@ function FeatureCards() {
       overflowX: "auto",
       flexWrap: "nowrap",
       pb: 1,
-      "&::-webkit-scrollbar": { display: "none" },
     }}>
       {features.map((f, idx) => (
         <Card key={idx} sx={{ minWidth: 270, width: 270, borderRadius: 2, boxShadow: 3 }}>
@@ -54,7 +53,7 @@ function FeatureCards() {
             alt={f.title}
           />
           <CardContent>
-            <Typography gutterBottom variant="h6" component="div">
+            <Typography gutterBottom variant="h5" component="div">
               {f.title}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -76,7 +75,7 @@ function About() {
   return (
     <>
       <Container sx={{ mt: 2 }}>
-        <Box>
+        <Box mb={4}>
           <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
             About Twaire
           </Typography>
@@ -87,17 +86,15 @@ function About() {
           </Typography>
         </Box>
 
-        <Divider sx={{ mt: 2, mb: 2 }} />
-
-        <Box>
-          <Typography variant="h4" gutterBottom fontWeight="bold">
+        <Box mb={4}>
+          <Typography variant="h4" gutterBottom>
             Features
           </Typography>
           <FeatureCards />
         </Box>
 
-        <h3 className="mt-4">Tech Stack</h3>
-        <p>
+        <Typography variant="h4" gutterBottom>Tech Stack</Typography>
+        <Box mb={4}>
           <strong>Frontend:</strong>{" "}
           <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">React (Vite)</a>,{" "}
           <a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap</a>,{" "}
@@ -111,15 +108,21 @@ function About() {
           <strong>Database:</strong>{" "}
           <a href="https://www.mongodb.com/" target="_blank" rel="noopener noreferrer">MongoDB</a> (
           <a href="https://mongoosejs.com/" target="_blank" rel="noopener noreferrer">Mongoose</a>)
-        </p>
+        </Box>
 
-        <h3 className="mt-4">Author</h3>
-        <p>
-          Twaire is primarily developed and maintained by <a href="https://github.com/theonlyasdk" target="_blank" rel="noopener noreferrer">theonlyasdk</a>.
-        </p>
+        <Typography variant="h4" gutterBottom>Author</Typography>
+        <Card sx={{ mb: 4, p: 2, borderRadius: 2, display: "flex", flexDirection: "row", alignItems: "center", gap: 1 }}>        
+          <Avatar src="https://placehold.co/128" sx={{ width: 64, height: 64 }} />
+          <Box>
+            <Typography variant="h5">theonlyasdk</Typography>
+            <Typography variant="subtitle1">
+              Twaire is primarily developed and maintained by <a href="https://github.com/theonlyasdk" target="_blank" rel="noopener noreferrer">theonlyasdk</a>.
+            </Typography>            
+          </Box>
+        </Card>
 
         {/* Add license info and link to https://github.com/theonlyasdk/twaire */}
-        <h3 className="mt-4">License</h3>
+        <Typography variant="h4" gutterBottom>License</Typography>
         <p>
           Twaire is open source software licensed under the{" "}
           <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT License</a>.

@@ -1,9 +1,9 @@
-import { MenuItem, TextField } from "@mui/material";
+import { MenuItem, TextField, Box, Typography, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
-import Loading from "./Loading.jsx";
 import VideoCard from "./VideoCard.jsx";
+import Loading from "./Loading.jsx";
 
 function PublicVideosList({ defaultSort = "trending", limit }) {
   const [videos, setVideos] = useState([]);
@@ -20,7 +20,7 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
       let url = `${ApiConfig.serverUrl}/api/videos?sort=${sortOption}`;
       if (limit) url += `&limit=${limit}`;
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch videos");
+      if (!res.ok) throw new Error("Failed to load videos");
       const data = await res.json();
       setVideos(data);
     } catch (err) {
@@ -31,29 +31,30 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
   };
 
   return (
-    <div className="public-videos-list">
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <h5 className="mb-0">{sort === "latest" ? "Latest uploads" : "Trending now"}</h5>
+    <Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6">
+          {sort === "latest" ? "Latest uploads" : "Trending now"}
+        </Typography>
         <TextField
           select
           size="small"
           value={sort}
           onChange={(e) => setSort(e.target.value)}
           variant="outlined"
-          sx={{ width: 'auto', minWidth: 120 }}
+          sx={{ width: "auto", minWidth: 120 }}
         >
           <MenuItem value="latest">Latest</MenuItem>
           <MenuItem value="trending">Trending</MenuItem>
         </TextField>
-
-      </div>
+      </Box>
 
       {loading ? (
         <Loading label="Loading videos..." />
       ) : videos.length === 0 ? (
-        <p>No videos available.</p>
+        <Typography>No videos available.</Typography>
       ) : (
-        <div className="d-flex flex-column gap-3">
+        <Box display="flex" flexDirection="column" gap={2}>
           {videos.map((video) => (
             <Link
               key={video._id}
@@ -63,9 +64,9 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
               <VideoCard video={video} />
             </Link>
           ))}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
 

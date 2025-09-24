@@ -67,6 +67,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/res", express.static("../resources"));
 app.use("/data/uploads", express.static("data/uploads"));
 app.use("/data/thumbnails", express.static("data/thumbnails"));
 app.use("/data/profile_pictures", express.static("data/profile_pictures"));

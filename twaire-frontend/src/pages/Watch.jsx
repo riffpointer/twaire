@@ -24,6 +24,7 @@ import VideoActionBar from "../components/VideoActionBar.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import { getRelativeTime } from "../utils/DateUtils.jsx";
+import PromptLoginDialog from "../components/PromptLoginDialog.jsx";
 
 function Watch() {
   const { id } = useParams();
@@ -33,6 +34,7 @@ function Watch() {
   const [subLoading, setSubLoading] = useState(false);
   const [uploaderSubs, setUploaderSubs] = useState(0);
   const [contextMenu, setContextMenu] = useState(null);
+  const [promptLoginDialogShown, showPromptLogin] = useState(false);
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -109,7 +111,6 @@ function Watch() {
       } finally {
         setLoading(false);
       }
-      alert(video.uploader.profilePicture);
     };
 
     fetchVideo();
@@ -127,6 +128,11 @@ function Watch() {
           credentials: "include",
         }
       );
+
+      if (res.status === 401) {
+        showPromptLogin(true);
+        return;
+      }
 
       const data = await res.json();
       if (!res.ok) {
@@ -168,7 +174,7 @@ function Watch() {
           <div className="col-lg-8 mb-4">
             <div className="card-body">
               {/* Video player */}
-              <Box sx={{mb: 2}}>
+              <Box sx={{ mb: 2 }}>
                 <VideoPlayer onContextMenu={handleContextMenu} src={`${ApiConfig.serverUrl}/data/uploads/${video.filename}`} autoPlay={true} />
                 <Menu
                   open={contextMenu !== null}
@@ -283,7 +289,7 @@ function Watch() {
               </Card>
 
               {/* Description */}
-              <Card sx={{p:1.5,mb:3}}>
+              <Card sx={{ p: 1.5, mb: 3 }}>
                 <p className="mb-1 fw-bold">Description</p>
                 {video.description ? (
                   <p className="mb-0">{video.description}</p>
@@ -302,6 +308,7 @@ function Watch() {
           </div>
         </div>
       </Container>
+      <PromptLoginDialog action="subscribe to this channel" open={promptLoginDialogShown} onClose={() => showPromptLogin(false)} />
     </>
   );
 }

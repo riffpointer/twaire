@@ -30,7 +30,7 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
         document.body.style.cursor = "none";
       }
       setShowControls(false);
-    }, 1500);
+    }, 2500);
   };
 
   useEffect(() => {
@@ -214,10 +214,12 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             zIndex: 3,
           }}
         >
-          <IconButton onClick={togglePlay} sx={{ color: "white" }}>
+          <IconButton onClick={togglePlay} sx={{ color: "white" }} title={playing ? "Pause" : "Play"}>
             {playing ? <PauseIcon /> : <PlayArrowIcon />}
           </IconButton>
-
+          <Typography sx={{ color: "white", ml: 1, minWidth: 50 }}>
+            {formatTime(currentTime)}
+          </Typography>
           <Slider
             min={0}
             max={duration || 0}
@@ -238,6 +240,7 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
               resetHideTimeout();
             }}
             sx={{ color: "white" }}
+            title={muted ? "Unmute" : "Mute"}
           >
             {muted || volume === 0 ? <VolumeOffIcon /> : <VolumeUpIcon />}
           </IconButton>
@@ -250,11 +253,9 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             sx={{ width: 100, mr: 1 }}
             size="small"
           />
-          <Typography sx={{ color: "white", ml: 2, minWidth: 50 }}>
-            {formatTime(currentTime)}
-          </Typography>
 
-          <IconButton onClick={handleFullscreen} sx={{ color: "white", mr: 1, p: 0 }} title="Fullscreen">
+          {/* Full Screen button */}
+          <IconButton onClick={handleFullscreen} sx={{ color: "white" }} title="Fullscreen">
             <FullscreenIcon />
           </IconButton>
         </Box>

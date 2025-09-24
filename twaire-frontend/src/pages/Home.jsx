@@ -35,6 +35,7 @@ function Home() {
 
   return (
     <>
+      <img src={`${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`} alt="Banner" style={{width:"100%",marginBottom:32,marginTop:-32}} />
       <div className="container">
         <Typography variant="h2">
           Welcome to Twaire!

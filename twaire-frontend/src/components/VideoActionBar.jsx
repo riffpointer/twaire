@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ApiConfig from '../utils/ApiConfig.jsx';
+import PromptLoginDialog from "../components/PromptLoginDialog.jsx";
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -36,6 +37,7 @@ function VideoActionBar({ videoId }) {
   const [loading, setLoading] = useState(false);
   const [openShare, setOpenShare] = useState(false);
   const [copyButtonText, setCopyButtonText] = useState('Copy');
+  const [promptLoginDialogShown, showPromptLogin] = useState(false);
 
   useEffect(() => {
     if (!videoId) return;
@@ -65,10 +67,14 @@ function VideoActionBar({ videoId }) {
     setLoading(true);
     try {
       const res = await fetch(`${ApiConfig.serverUrl}/api/videos/${videoId}/${type}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
       });
+      if (res.status === 401) {
+        showPromptLogin(true);
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setLikes(data.likes);
@@ -80,6 +86,7 @@ function VideoActionBar({ videoId }) {
       setLoading(false);
     }
   };
+
 
   const handleShareClick = () => {
     setOpenShare(true);
@@ -229,6 +236,7 @@ function VideoActionBar({ videoId }) {
           </Stack>
         </DialogContent>
       </Dialog>
+      <PromptLoginDialog action="like this video" open={promptLoginDialogShown} onClose={() => showPromptLogin(false)} />
     </>
   );
 }
