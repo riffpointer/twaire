@@ -43,7 +43,7 @@ function Login() {
       setAlert({ type: "success", message: "Login successful! Redirecting..." });
 
       // Redirect after short delay
-      setTimeout(() => navigate("/myaccount"), redirectTimeout);
+      setTimeout(() => window.location.href = "/myaccount", redirectTimeout);
 
     } catch (err) {
       console.error(err);
@@ -53,12 +53,12 @@ function Login() {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Container maxWidth="sm">
         <Typography variant="h4" gutterBottom>
           Login to Twaire
         </Typography>
         <Typography variant="body1" gutterBottom>
-          {Strings.branding.description} To share your videos, please login to continue.
+          {Strings.branding.description} To upload videos and share your opinions and reactions, please login.
         </Typography>
 
         {alert && (

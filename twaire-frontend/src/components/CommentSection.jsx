@@ -208,7 +208,6 @@ function CommentSection({ videoId }) {
         </Button>
       </Box>
 
-      {loading && <Loading label="Loading comments..." />}
       {err && (
         <Typography color="error">
           Unable to load comments: {err}
@@ -216,6 +215,8 @@ function CommentSection({ videoId }) {
       )}
 
       <Card sx={{ p: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+        {loading && <Loading label="Loading comments..." />}
+        
         {!loading && !err && comments.length === 0 && (
           <Typography color="text.secondary">No comments yet, it's empty here...</Typography>
         )}

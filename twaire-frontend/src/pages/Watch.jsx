@@ -109,6 +109,7 @@ function Watch() {
       } finally {
         setLoading(false);
       }
+      alert(video.uploader.profilePicture);
     };
 
     fetchVideo();
@@ -168,7 +169,7 @@ function Watch() {
             <div className="card-body">
               {/* Video player */}
               <Box sx={{mb: 2}}>
-                <VideoPlayer onContextMenu={handleContextMenu} src={`${ApiConfig.serverUrl}/uploads/${video.filename}`} autoPlay={true} />
+                <VideoPlayer onContextMenu={handleContextMenu} src={`${ApiConfig.serverUrl}/data/uploads/${video.filename}`} autoPlay={true} />
                 <Menu
                   open={contextMenu !== null}
                   onClose={handleClose}

@@ -5,7 +5,7 @@ import { Card, CardActionArea, Box, Typography } from "@mui/material";
 
 function VideoCard({ video }) {
   const safeThumbnail = video.thumbnail
-    ? `${ApiConfig.serverUrl}/thumbnails/${video.thumbnail}`
+    ? `${ApiConfig.serverUrl}/data/thumbnails/${video.thumbnail}`
     : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(video.title)}`;
 
   // Format uploaded date

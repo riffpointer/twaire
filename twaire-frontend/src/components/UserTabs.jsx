@@ -49,7 +49,7 @@ function UserTabs({ user, videos }) {
           ) : (
             <Grid container spacing={2}>
               {videos.map((video) => (
-                <Grid item key={video._id} width={300}>
+                <Grid key={video._id} width={300}>
                   <Link
                     to={`/watch/${video._id}`}
                     style={{ textDecoration: "none" }}

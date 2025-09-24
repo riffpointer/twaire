@@ -31,7 +31,7 @@ function ProfileSettings() {
   const [preview, setPreview] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const navigate = useNavigate();
+  const navigate = (location) => { window.location.href = location };
 
   useEffect(() => {
     document.title = "Profile Settings - Twaire";

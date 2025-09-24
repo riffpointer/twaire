@@ -8,8 +8,8 @@ import fs from "fs";
 // multer setup for profile picture uploads
 const userStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = "profile_pictures";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    const dir = "data/profile_pictures";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
@@ -22,10 +22,10 @@ const userUpload = multer({ storage: userStorage });
 // multer setup for file uploads
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let uploadDir = "uploads";
+    let uploadDir = "data/uploads";
     if (file.fieldname === "thumbnail") 
-      uploadDir = "thumbnails"; // lets use a seperate folder for thumbnails
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+      uploadDir = "data/thumbnails"; // lets use a seperate folder for thumbnails
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {

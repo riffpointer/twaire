@@ -1,7 +1,72 @@
+import { Box, Card, CardContent, CardMedia, Container, Divider, Typography } from "@mui/material";
 import { useEffect } from "react";
 import Footer from "../components/Footer.jsx";
-import { Alert } from "@mui/material";
-import { Link } from "react-router-dom";
+
+function FeatureCards() {
+  const features = [
+    {
+      title: "Upload videos",
+      desc: "Upload videos with custom thumbnails",
+      img: "https://placehold.co/150?text=Upload",
+    },
+    {
+      title: "Responsive Player",
+      desc: "Watch videos in a responsive player",
+      img: "https://placehold.co/150?text=Player",
+    },
+    {
+      title: "View Tracking",
+      desc: "Automatic view tracking",
+      img: "https://placehold.co/150?text=Tracking",
+    },
+    {
+      title: "Sorting Options",
+      desc: "Trending vs. latest sorting on the home page",
+      img: "https://placehold.co/150?text=Sorting",
+    },
+    {
+      title: "Sorting Options",
+      desc: "Trending vs. latest sorting on the home page",
+      img: "https://placehold.co/150?text=Sorting",
+    },
+    {
+      title: "Sorting Options",
+      desc: "Trending vs. latest sorting on the home page",
+      img: "https://placehold.co/150?text=Sorting",
+    },
+  ];
+
+  return (
+    <Box sx={{
+      display: "flex",
+      gap: 2,
+      overflowX: "auto",
+      flexWrap: "nowrap",
+      pb: 1,
+      "&::-webkit-scrollbar": { display: "none" },
+    }}>
+      {features.map((f, idx) => (
+        <Card key={idx} sx={{ minWidth: 270, width: 270, borderRadius: 2, boxShadow: 3 }}>
+          <CardMedia
+            component="img"
+            height="140"
+            image={f.img}
+            alt={f.title}
+          />
+          <CardContent>
+            <Typography gutterBottom variant="h6" component="div">
+              {f.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {f.desc}
+            </Typography>
+          </CardContent>
+        </Card>
+      ))}
+    </Box>
+  );
+}
+
 
 function About() {
   useEffect(() => {
@@ -10,27 +75,27 @@ function About() {
 
   return (
     <>
-      <div className="container mb-4 vend-sans">
-        <h1 className="display-4">About Twaire</h1>
-        <Alert icon={<i className="bi bi-check"></i>} severity="success" className="mb-2 shadow-sm round-2">
-          <h4 className="vend-sans">Check out the new homepage!</h4>
-          <p className="mb-0">We are rolling out a new homepage! Check it out <Link to="/homeneo">here!</Link></p>
-        </Alert>
-        <p className="lead">
-          Twaire is an open source video sharing platform built with React, Node.js,
-          Express, and MongoDB. It’s designed as a lightweight YouTube-style
-          video platform where users can upload, watch, and explore videos.
-        </p>
+      <Container sx={{ mt: 2 }}>
+        <Box>
+          <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+            About Twaire
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            Twaire is an open-source video sharing platform built with React,
+            Node.js, Express, and MongoDB. It’s a lightweight alternative to
+            YouTube where users can upload, watch, and explore videos.
+          </Typography>
+        </Box>
 
-        <hr />
+        <Divider sx={{ mt: 2, mb: 2 }} />
 
-        <h3>Features</h3>
-        <ul>
-          <li>Upload videos with custom thumbnails</li>
-          <li>Watch videos in a responsive player</li>
-          <li>Automatic view tracking</li>
-          <li>Trending vs. latest sorting on the home page</li>
-        </ul>
+        <Box>
+          <Typography variant="h4" gutterBottom fontWeight="bold">
+            Features
+          </Typography>
+          <FeatureCards />
+        </Box>
+
         <h3 className="mt-4">Tech Stack</h3>
         <p>
           <strong>Frontend:</strong>{" "}
@@ -61,7 +126,7 @@ function About() {
           You can find the source code on{" "}
           <a href="https://github.com/theonlyasdk/twaire" target="_blank" rel="noopener noreferrer">GitHub</a>.
         </p>
-      </div>
+      </Container>
       <Footer />
     </>
   );

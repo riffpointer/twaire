@@ -99,6 +99,7 @@ userRouter.put("/profile", isAuthenticated, userUpload.single("profilePicture"),
     const user = await User.findById(req.session.userId);
 
     if (!user) {
+      console.log("[PUT /profile] User not found");
       return res.status(404).json({ error: "User not found" });
     }
 
@@ -107,10 +108,12 @@ userRouter.put("/profile", isAuthenticated, userUpload.single("profilePicture"),
 
     if (req.file) {
       user.profilePicture = req.file.path;
+      console.log("saving file to " + req.file.path);
     }
 
     await user.save();
 
+    console.log("[PUT /profile] Updated profile");
     res.json({
       message: "Profile updated successfully",
       user: {
@@ -121,7 +124,7 @@ userRouter.put("/profile", isAuthenticated, userUpload.single("profilePicture"),
       },
     });
   } catch (error) {
-    console.error("Profile update error:", error);
+    console.error("[PUT /profile] Profile update error:", error);
     res.status(500).json({ error: "Server error during profile update" });
   }
 });

@@ -1,20 +1,19 @@
 import LoginIcon from '@mui/icons-material/Login';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Button, CircularProgress, Drawer, useTheme } from '@mui/material';
+import { Button, CircularProgress, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import ApiConfig from '../utils/ApiConfig';
+import AppDrawer from './AppDrawer';
 import UserDropdown from './UserDropdown';
+import HomeIcon from '@mui/icons-material/Home';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function GlobalAppBar() {
   const [auth, setAuth] = useState(true);
@@ -95,28 +94,19 @@ export default function GlobalAppBar() {
   };
 
   const navLinkPages = {
-    "Home": "/",
-    "Trending": "/trending",
-    "About": "/about",
+    "Home": {
+      path: "/",
+      icon: <HomeIcon/>
+    },
+    "Trending": {
+      path: "/trending",
+      icon: <WhatshotIcon />
+    },
+    "About": {
+      path: "/about",
+      icon: <InfoIcon />
+    },
   };
-  
-  const DrawerList = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-      <List>
-        <ListItem>
-          <Typography variant="h5">Twaire</Typography>
-        </ListItem>
-        <Divider />
-        {Object.entries(navLinkPages).map(([label, path]) => (
-          <ListItem key={label} disablePadding>
-            <ListItemButton component={NavLink} to={path}>
-              <ListItemText primary={label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
 
   return (
     <Box mb={4}>
@@ -136,11 +126,11 @@ export default function GlobalAppBar() {
             Twaire
           </Typography>
           <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: "start", flexGrow: 1 }}>
-            {Object.entries(navLinkPages).map(([label, path]) => (
+            {Object.entries(navLinkPages).map(([label, navLink]) => (
               <Button
                 key={label}
                 onClick={() => {
-                  navigate(path);
+                  navigate(navLink.path);
                 }}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
@@ -170,9 +160,7 @@ export default function GlobalAppBar() {
           </Box>
         </Toolbar>
       </AppBar>
-      <Drawer open={drawerOpen} onClose={toggleDrawer(false)}>
-        {DrawerList}
-      </Drawer>
+      <AppDrawer navLinkPages={navLinkPages} open={drawerOpen} toggleDrawer={toggleDrawer} />
     </Box>
   );
 }

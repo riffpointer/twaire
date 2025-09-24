@@ -3,7 +3,7 @@ function isAuthenticated(req, res, next) {
     return next();
   }
 
-  console.warn("Unauthorized access attempt", {
+  console.warn("[isAuthenticated] Unauthorized access attempt!", {
     path: req.originalUrl,
     method: req.method,
   });

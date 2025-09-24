@@ -1,7 +1,5 @@
 node_modules
-/twaire-backend/thumbnails
-/twaire-backend/uploads
-/twaire-backend/profile_pictures
+/twaire-backend/data
 .env
 
 # Logs

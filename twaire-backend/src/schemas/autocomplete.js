@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const AutocompleteSchema = new mongoose.Schema({

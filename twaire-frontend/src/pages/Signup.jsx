@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Checkbox, Container, Divider, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import ApiConfig from "../utils/ApiConfig.jsx";
 
@@ -59,7 +59,7 @@ function Signup() {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Container maxWidth="sm" sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom>
           Create an Account
         </Typography>
@@ -82,8 +82,15 @@ function Signup() {
             {alert.message}
           </Alert>
         )}
-
+        <Alert severity="info">
+          By signing up, <b>you agree to our terms and conditions</b>. Currently there are no terms and conditions as this is alpha software, so feel free to test out the software. No guarantee is provided and responsibilities taken for any damages or data loss caused by the use of this pre-release software. 
+          <hr />
+          <i>Have fun!</i>
+        </Alert>
         <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Typography sx={{mt:2}}>
+            Please fill out the following fields. Note that the username you choose is permanent and you will not be able to change it later.
+          </Typography>
           <TextField
             label="Username"
             value={username}
@@ -119,7 +126,7 @@ function Signup() {
           />
           <FormControlLabel
             control={<Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} />}
-            label="I agree to the terms and conditions"
+            label="I have read and agreed to the terms and conditions."
           />
           {errors.agree && <Typography color="error" variant="caption">{errors.agree}</Typography>}
 

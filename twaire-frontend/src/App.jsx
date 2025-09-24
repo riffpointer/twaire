@@ -12,7 +12,6 @@ import MyAccount from './pages/MyAccount.jsx';
 import Search from './pages/Search.jsx';
 import Trending from './pages/Trending.jsx';
 import ProfileSettings from './pages/ProfileSettings.jsx';
-import HomeNeo from './pages/HomeNeo.jsx';
 import { createTheme, CssBaseline, ThemeProvider, Toolbar } from '@mui/material';
 import GlobalAppBar from './components/GlobalAppBar.jsx';
 
@@ -41,7 +40,6 @@ function App() {
           <Routes>
             {/* Public links so no authentication needed */}
             <Route path="/" element={<Home />} />
-            <Route path="/homeneo" element={<HomeNeo />} />
             <Route path="/home" element={<Home />} />
             <Route path="/search" element={<Search />} />
             <Route path="/trending" element={<Trending />} />
