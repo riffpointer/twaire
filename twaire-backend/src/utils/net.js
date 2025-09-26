@@ -12,6 +12,8 @@ function obtainLocalIPAddress() {
       }
     }
   }
+  
+  return localIP;
 }
 
 export { obtainLocalIPAddress };

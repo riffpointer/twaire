@@ -41,7 +41,7 @@ function Trending() {
         <h2><i class="bi bi-fire"></i> Trending Videos</h2>
         <p className="mb-1">Have a look at the latest trending videos!</p>
 
-        {loading && <Loading />}
+        {loading && <Loading label="Loading videos" />}
         {error && <p className="text-danger">Error: {error}</p>}
 
         {!loading && !error && videos.length === 0 && (

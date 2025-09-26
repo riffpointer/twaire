@@ -73,7 +73,7 @@ function Home() {
 
         <div className="mb-3">
           {loading ? (
-            <Loading />
+            <Loading label="Loading videos" />
           ) : videos.length === 0 ? (
             <p>No videos uploaded yet.</p>
           ) : (

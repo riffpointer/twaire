@@ -59,6 +59,7 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
             <Link
               key={video._id}
               to={`/watch/${video._id}`}
+              onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }) }}
               style={{ textDecoration: "none", color: "inherit", userSelect: "none" }}
             >
               <VideoCard video={video} />

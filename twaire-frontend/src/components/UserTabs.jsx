@@ -14,21 +14,14 @@ function UserTabs({ user, videos }) {
   };
 
   const userCreationDate = new Date(user.createdAt);
-
-  // Formatted date according to user locale settings
   const localUserCreationDate = userCreationDate.toLocaleDateString(undefined, {
-    // Date options
     year: 'numeric',
-    month: 'short', // e.g., 'Sep'
-    day: '2-digit', // e.g., '20'
-    
-    // Time options
-    hour: '2-digit',   // e.g., '08' or '08' PM
-    minute: '2-digit', // e.g., '00'
-    second: '2-digit', // e.g., '00'
-
-    // Time Zone options
-    timeZoneName: 'short' // e.g., 'IST'
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short'
   });
 
   return (
@@ -41,7 +34,6 @@ function UserTabs({ user, videos }) {
           </TabList>
         </Box>
 
-        {/* Videos Tab Panel */}
         <TabPanel value="0" sx={{ p: 0, m: 0, mt: 2 }}>
           {videos.length === 0 ? (
             <Typography variant="body2" color="text.secondary" fontStyle="italic">
@@ -51,11 +43,12 @@ function UserTabs({ user, videos }) {
             <>
               <TextField
                 select
-                label="Sort by"
+                size="small"
+                label="Sort by..."
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 variant="outlined"
-                sx={{ minWidth: 200 }}
+                sx={{ width: "auto", minWidth: 160, mb: 1.5 }}
               >
                 <MenuItem value="relevance">Relevance</MenuItem>
                 <MenuItem value="date">Upload date (Newest first)</MenuItem>
@@ -63,10 +56,10 @@ function UserTabs({ user, videos }) {
               </TextField>
               <Grid container spacing={2}>
                 {videos.map((video) => (
-                  <Grid key={video._id} width={300}>
+                  <Grid key={video._id}>
                     <Link
                       to={`/watch/${video._id}`}
-                      style={{ textDecoration: "none" }}
+                      style={{ textDecoration: "none", color: "inherit" }}
                     >
                       <VideoCard video={video} />
                     </Link>
@@ -77,12 +70,9 @@ function UserTabs({ user, videos }) {
           )}
         </TabPanel>
 
-        {/* About Tab Panel */}
         <TabPanel value="1" sx={{ p: 1, mt: 1 }}>
           <Box mb={2}>
-            <Typography variant="h6">
-              About this channel
-            </Typography>
+            <Typography variant="h6">About this channel</Typography>
             <Typography component="div" variant="body2">
               {user.bio || (
                 <Box component="i" sx={{ color: 'text.secondary' }}>
@@ -92,9 +82,7 @@ function UserTabs({ user, videos }) {
             </Typography>
           </Box>
           <Box mb={2}>
-            <Typography variant="h6">
-              More links
-            </Typography>
+            <Typography variant="h6">More links</Typography>
             <Typography component="div" variant="body2">
               {user.moreLinks || (
                 <Box component="i" sx={{ color: 'text.secondary' }}>
@@ -104,12 +92,16 @@ function UserTabs({ user, videos }) {
             </Typography>
           </Box>
           <Box>
-            <small><Box component="i" sx={{ color: 'text.secondary' }}>Account created at {user.createdAt ? localUserCreationDate : "unknown date"} ({getRelativeTime(user.createdAt) || "unknown days ago"}).</Box></small>
+            <small>
+              <Box component="i" sx={{ color: 'text.secondary' }}>
+                Account created at {user.createdAt ? localUserCreationDate : "unknown date"} ({getRelativeTime(user.createdAt) || "unknown days ago"}).
+              </Box>
+            </small>
           </Box>
         </TabPanel>
       </TabContext>
     </Paper>
   );
-};
+}
 
 export default UserTabs;

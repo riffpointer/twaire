@@ -28,7 +28,7 @@ function UserHeader({ user, children }) {
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {user.subscribers || 0} subscriber{user.subscribers == 1 || "s"} &bull;&nbsp;
-            {user.accountViews || user.views || 0} views
+            {user.accountViews || user.views || 0} channel views
           </Typography>
           {children}
         </Box>

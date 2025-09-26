@@ -32,15 +32,13 @@ function Comment({
   setReplyText,
   currentUser
 }) {
-  const commentAuthorUsername = comment.user?.username || "Deleted User";
-  const commentAuthorPublicName = comment.user?.publicName || commentAuthorUsername;
+  const commentAuthorUsername = comment.user.username || "Deleted User";
+  const commentAuthorPublicName = comment.user.publicName || commentAuthorUsername;
   const commentAuthorShortName = commentAuthorPublicName
     .split(" ")
     .map((name) => name.charAt(0).toUpperCase())
     .join("") || commentAuthorUsername.charAt(0).toUpperCase();
-  const commentAuthorProfilePicture = comment.user?.profilePicture
-    ? `${ApiConfig.serverUrl}/${comment.user.profilePicture}`
-    : "${ApiConfig.serverUrl}/api/helper/placeholder/40x40?text=" + encodeURIComponent(commentAuthorShortName);
+  const commentAuthorProfilePicture = comment.user.profilePicture && `${ApiConfig.serverUrl}/${comment.user.profilePicture}`;
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -149,11 +147,7 @@ function Comment({
               sx={{ p: 1.5, mt: 1, display: "flex", width: "100%" }}
             >
               <Avatar
-                src={
-                  currentUser?.profilePicture
-                    ? `${ApiConfig.serverUrl}/${currentUser.profilePicture}`
-                    : `${ApiConfig.serverUrl}/api/helper/placeholder/32x32?text=${currentUser?.username?.charAt(0)}`
-                }
+                src={currentUser?.profilePicture && `${ApiConfig.serverUrl}/${currentUser.profilePicture}`}
                 alt="User"
                 sx={{ width: 32, height: 32, mr: 2, mt: 1 }}
                 title={`Commenting as ${currentUser.publicName}`}
@@ -198,9 +192,7 @@ function Comment({
               {comment.replies.map((reply) => (
                 <Box key={reply._id} sx={{ display: 'flex', mb: 2 }}>
                   <Avatar
-                    src={
-                      reply.user?.profilePicture ?? `${ApiConfig.serverUrl}/${reply.user.profilePicture}`
-                    }
+                    src={reply.user.profilePicture && `${ApiConfig.serverUrl}/${reply.user.profilePicture}`}
                     alt={reply.user.publicName}
                     sx={{ width: 32, height: 32, mr: 2 }}
                   />

@@ -1,9 +1,11 @@
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Alert,
   Avatar,
   Box,
   Button,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -30,6 +32,8 @@ function ProfileSettings() {
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [removeProfilePictureButtonDisabled, setRemoveProfileButtonDisabled] = useState(false);
+  const [saveInProgress, setSaveInProgress] = useState(false);
 
   const navigate = (location) => { window.location.href = location };
   const routerNavigate = useNavigate();
@@ -47,6 +51,7 @@ function ProfileSettings() {
         setUser(data);
         setPublicName(data.publicName || data.username);
         setBio(data.bio || "");
+        setRemoveProfileButtonDisabled(data.profilePicture == null);
         if (data.profilePicture) {
           setPreview(`${ApiConfig.serverUrl}/${data.profilePicture}`);
         }
@@ -90,6 +95,8 @@ function ProfileSettings() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setSaveInProgress(true);
+
     if (!publicName.trim()) {
       setPublicNameError("Public name cannot be empty.");
       return;
@@ -114,6 +121,23 @@ function ProfileSettings() {
       }
     } catch (error) {
       console.error("Failed to update profile", error);
+    }
+  };
+
+  const handleRemoveProfilePicture = async () => {
+    try {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/users/me/delete/profile_picture`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        setProfilePicture(null);
+        setPreview(null);
+        setRemoveProfileButtonDisabled(false);
+      }
+    } catch (err) {
+      console.error("Failed to remove profile picture", err);
     }
   };
 
@@ -143,7 +167,7 @@ function ProfileSettings() {
             onSubmit={handleSubmit}
             noValidate
           >
-            <Box sx={{ mb: { xs: 3, md: 0 }, mr: { xs: 0, md: 4 }, display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ mb: { xs: 3, md: 0 }, mr: { xs: 0, md: 4 }, display: 'flex', justifyContent: 'start', alignItems: "center", flexDirection: "column", gap: 2 }}>
               <Tooltip title="Change Profile Picture">
                 <IconButton
                   color="primary"
@@ -185,6 +209,15 @@ function ProfileSettings() {
                   </Box>
                 </IconButton>
               </Tooltip>
+              <Button
+                disabled={removeProfilePictureButtonDisabled}
+                variant="contained"
+                size="small"
+                title="Remove the profile picture from your profile"
+                onClick={handleRemoveProfilePicture}
+              >
+                <DeleteIcon fontSize="small" /> Remove picture
+              </Button>            
             </Box>
             <Box sx={{ flexGrow: 1 }}>
               <TextField
@@ -196,6 +229,7 @@ function ProfileSettings() {
                 helperText={publicNameError}
                 title="This will be displayed on your user profile and on the watch page."
                 sx={{ mb: 3 }}
+                disabled={saveInProgress}
               />
               <TextField
                 label="Bio"
@@ -206,11 +240,12 @@ function ProfileSettings() {
                 onChange={(e) => setBio(e.target.value)}
                 title="Write some words about yourself; This will be displayed on your user profile page."
                 sx={{ mb: 3 }}
+                disabled={saveInProgress}
               />
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Button type="submit" variant="contained" color="primary">
-                  Save Changes
+                <Button type="submit" variant="contained" color="primary" disabled={saveInProgress}>
+                  {saveInProgress && <CircularProgress size={20} sx={{mr:1}} />}{" "}Save Changes
                 </Button>
                 <Button
                   variant="outlined"
@@ -218,6 +253,7 @@ function ProfileSettings() {
                   disableElevation
                   onClick={() => setShowDeleteModal(true)}
                   size="small"
+                  disabled={saveInProgress}
                 >
                   Delete Account
                 </Button>

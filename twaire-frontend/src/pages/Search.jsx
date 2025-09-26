@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Box, MenuItem, TextField, Typography, Grid, Container } from "@mui/material";
+import { Box, MenuItem, TextField, Typography, Grid, Container, useTheme, useMediaQuery } from "@mui/material";
 import Loading from "../components/Loading.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
@@ -16,6 +16,9 @@ function Search() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sort, setSort] = useState("relevance");
+
+  const theme = useTheme();
+  const displaySizeMd = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     document.title = `${searchTerm} - Search - Twaire`;
@@ -52,11 +55,12 @@ function Search() {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: displaySizeMd ? "start" : "center",
+          flexDirection: displaySizeMd ? "column" : "row",
           mb: 3,
         }}
       >
-        <Typography variant="h5">
+        <Typography variant="h5" mb={displaySizeMd && 4}>
           Search Results for: <b>{searchTerm}</b>
         </Typography>
         <TextField

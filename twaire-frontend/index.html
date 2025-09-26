@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,7 +18,10 @@
       padding: 0;
       margin: 0;
       width: 100%;
-      height: 100%;
+      height: 95vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #root,
@@ -26,70 +30,65 @@
       background: #111;
     }
 
-    .loading-svg {
-      --s: 80vmin;
-      position: absolute;
-      left: calc(50vw - var(--s) / 2);
-      top: calc(50vh - var(--s) / 2);
-      width: var(--s);
-      height: var(--s);
-      transform: scale(0.1);
-    }
-
-    .loading-svg circle {
-      --r: 47px;
-      --1deg: calc(2 * pi * var(--r) / 360);
-      stroke-width: calc((50% - var(--r)) * 2);
-      stroke: #111;
-      animation: dash-anim 1400ms ease-in-out infinite, full-rotation-anim 2000ms linear infinite;
-      transform-origin: 50% 50%;
-    }
-
-    @keyframes dash-anim {
-      0% {
-        stroke-dasharray: 0 0 calc(2 * var(--1deg)) calc(358 * var(--1deg));
-      }
-
-      50% {
-        stroke-dasharray: 0 calc(35 * var(--1deg)) calc(290 * var(--1deg)) calc(35 * var(--1deg));
-      }
-
-      100% {
-        stroke-dasharray: 0 calc(358 * var(--1deg)) calc(2 * var(--1deg));
-      }
-    }
-
-    @keyframes full-rotation-anim {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
     @media (prefers-color-scheme: dark) {
-      .loading-svg circle {
-        stroke: #fff;
-      }
-
       ._loading-wrapper {
         background: #111;
         color: #fff;
       }
     }
+
+    ._loading-svg {
+      --uib-size: 55px;
+      --uib-color: #fff;
+      --uib-speed: 1.3s;
+      --uib-bg-opacity: .1;
+      height: calc(var(--uib-size) * (2.1 / 5));
+      width: var(--uib-size);
+      transform-origin: center;
+      overflow: visible;
+    }
+
+    .car {
+      fill: none;
+      stroke: var(--uib-color);
+      stroke-dasharray: 15, 85;
+      stroke-dashoffset: 0;
+      stroke-linecap: round;
+      animation: travel var(--uib-speed) linear infinite;
+      will-change: stroke-dasharray, stroke-dashoffset;
+      transition: stroke 0.5s ease;
+    }
+
+    .track {
+      stroke: var(--uib-color);
+      opacity: var(--uib-bg-opacity);
+    }
+
+    @keyframes travel {
+      0% {
+        stroke-dashoffset: 0;
+      }
+
+      100% {
+        stroke-dashoffset: 100;
+      }
+    }
   </style>
 </head>
+
 <body>
   <div id="root">
     <div class="_loading-wrapper">
-      <!-- Thanks to: https://dev.to/alekseiberezkin/creating-a-material-spinner-with-pure-and-simple-css-1b60 -->
-      <svg viewBox='0 0 100 100' xmlns="http://www.w3.org/2000/svg" class="loading-svg">
-        <circle cx='50' cy='50' r='47' stroke="#333" fill='none' />
+      <svg class="_loading-svg" x="0px" y="0px" viewBox="0 0 55 23.1" height="23.1" width="55"
+        preserveAspectRatio='xMidYMid meet'>
+        <path class="track" fill="none" stroke-width="4" pathlength="100"
+          d="M26.7,12.2c3.5,3.4,7.4,7.8,12.7,7.8c5.5,0,9.6-4.4,9.6-9.5C49,5,45.1,1,39.8,1c-5.5,0-9.5,4.2-13.1,7.8l-3.4,3.3c-3.6,3.6-7.6,7.8-13.1,7.8C4.9,20,1,16,1,10.5C1,5.4,5.1,1,10.6,1c5.3,0,9.2,4.5,12.7,7.8L26.7,12.2z" />
+        <path class="car" fill="none" stroke-width="4" pathlength="100"
+          d="M26.7,12.2c3.5,3.4,7.4,7.8,12.7,7.8c5.5,0,9.6-4.4,9.6-9.5C49,5,45.1,1,39.8,1c-5.5,0-9.5,4.2-13.1,7.8l-3.4,3.3c-3.6,3.6-7.6,7.8-13.1,7.8C4.9,20,1,16,1,10.5C1,5.4,5.1,1,10.6,1c5.3,0,9.2,4.5,12.7,7.8L26.7,12.2z" />
       </svg>
     </div>
   </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
+
 </html>

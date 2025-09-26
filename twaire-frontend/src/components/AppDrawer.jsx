@@ -1,4 +1,4 @@
-import { Box, List, ListItem, Typography, Divider, ListItemButton, ListItemText, Drawer, ListItemIcon } from "@mui/material";
+import { Box, List, Link, ListItem, Typography, Divider, ListItemButton, ListItemText, Drawer, ListItemIcon } from "@mui/material";
 import { NavLink } from "react-router-dom";
 
 function AppDrawer({ navLinkPages, open, toggleDrawer }) {
@@ -13,7 +13,7 @@ function AppDrawer({ navLinkPages, open, toggleDrawer }) {
 					{Object.entries(navLinkPages).map(([label, navLink]) => (
 						<ListItem key={label} disablePadding>
 							<ListItemButton component={NavLink} to={navLink.path}>
-								<ListItemIcon sx={{minWidth:40}}>
+								<ListItemIcon sx={{ minWidth: 40 }}>
 									{navLink.icon || null}
 								</ListItemIcon>
 								<ListItemText primary={label} />
@@ -21,8 +21,11 @@ function AppDrawer({ navLinkPages, open, toggleDrawer }) {
 						</ListItem>
 					))}
 				</List>
-				<Typography p={2} color="text.secondary" fontSize={14}>
-					(c) Twaire 2025
+				<Typography variant="caption" color="text.secondary" p={2}>
+					&copy; 2025{' '}
+					<Link href="http://github.com/theonlyasdk" color="inherit" underline="hover">
+						theonlyasdk
+					</Link>
 				</Typography>
 			</Box>
 		</Drawer>
