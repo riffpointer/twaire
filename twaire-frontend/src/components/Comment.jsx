@@ -218,7 +218,7 @@ function Comment({
                         </Typography>
                       </Typography>
                     </Box>
-                    <Typography sx={{ mb: 0 }}>{reply.text}</Typography>
+                    <Typography sx={{ mb: 0.5 }}>{reply.text}</Typography>
 
                     <Box
                       sx={{

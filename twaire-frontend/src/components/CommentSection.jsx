@@ -160,7 +160,7 @@ function CommentSection({ videoId }) {
   };
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box sx={{ mt: 2, overflowX: "auto" }}>
       <Typography variant="h5" gutterBottom>
         Comments
       </Typography>
