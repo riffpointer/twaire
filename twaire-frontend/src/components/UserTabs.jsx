@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, Grid, Paper, Tab, Typography } from '@mui/material';
+import { Box, Grid, MenuItem, Paper, Tab, TextField, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { getRelativeTime } from '../utils/DateUtils';
 import VideoCard from './VideoCard';
 
 function UserTabs({ user, videos }) {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const [sort, setSort] = useState("relevance");
 
   const handleTabChange = (event, newValue) => {
     setSelectedTabIndex(newValue);
@@ -47,18 +48,32 @@ function UserTabs({ user, videos }) {
               This user has not uploaded any videos yet.
             </Typography>
           ) : (
-            <Grid container spacing={2}>
-              {videos.map((video) => (
-                <Grid key={video._id} width={300}>
-                  <Link
-                    to={`/watch/${video._id}`}
-                    style={{ textDecoration: "none" }}
-                  >
-                    <VideoCard video={video} />
-                  </Link>
-                </Grid>
-              ))}
-            </Grid>
+            <>
+              <TextField
+                select
+                label="Sort by"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                variant="outlined"
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="relevance">Relevance</MenuItem>
+                <MenuItem value="date">Upload date (Newest first)</MenuItem>
+                <MenuItem value="views">Most viewed</MenuItem>
+              </TextField>
+              <Grid container spacing={2}>
+                {videos.map((video) => (
+                  <Grid key={video._id} width={300}>
+                    <Link
+                      to={`/watch/${video._id}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <VideoCard video={video} />
+                    </Link>
+                  </Grid>
+                ))}
+              </Grid>
+            </>
           )}
         </TabPanel>
 

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-import { MenuItem, TextField, Typography } from "@mui/material";
+import { Box, MenuItem, TextField, Typography, Grid, Container } from "@mui/material";
 import Loading from "../components/Loading.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import ApiConfig from "../utils/ApiConfig.jsx";
@@ -16,7 +15,7 @@ function Search() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sort, setSort] = useState("relevance"); // default sort
+  const [sort, setSort] = useState("relevance");
 
   useEffect(() => {
     document.title = `${searchTerm} - Search - Twaire`;
@@ -26,7 +25,9 @@ function Search() {
         setError(null);
 
         const res = await fetch(
-          `${ApiConfig.serverUrl}/api/videos/search?q=${encodeURIComponent(searchTerm)}&sort=${sort}`
+          `${ApiConfig.serverUrl}/api/videos/search?q=${encodeURIComponent(
+            searchTerm
+          )}&sort=${sort}`
         );
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -43,50 +44,61 @@ function Search() {
     };
 
     if (searchTerm.trim()) fetchSearch();
-  }, [searchTerm, sort]); // refetch when sort changes
+  }, [searchTerm, sort]);
 
   return (
-    <>
-      <div className="container mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="mb-0">Search Results for: <b>{searchTerm}</b></h2>
-          <TextField
-            select
-            label="Sort by"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            variant="outlined"
-            sx={{ minWidth: 200 }}
-          >
-            <MenuItem value="relevance">Relevance</MenuItem>
-            <MenuItem value="date">Upload date (Newest first)</MenuItem>
-            <MenuItem value="views">Most viewed</MenuItem>
-          </TextField>
-        </div>
+    <Container>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h5">
+          Search Results for: <b>{searchTerm}</b>
+        </Typography>
+        <TextField
+          select
+          label="Sort by"
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          variant="outlined"
+          sx={{ minWidth: 200 }}
+        >
+          <MenuItem value="relevance">Relevance</MenuItem>
+          <MenuItem value="date">Upload date (Newest first)</MenuItem>
+          <MenuItem value="views">Most viewed</MenuItem>
+        </TextField>
+      </Box>
 
-        {loading && <Loading label="Loading search results..." />}
-        {error && <p className="text-danger">Unable to fetch search results: {error}</p>}
+      {loading && <Loading label="Loading search results..." />}
+      {error && (
+        <Typography variant="body1" color="error">
+          Unable to fetch search results: {error}
+        </Typography>
+      )}
 
-        {!loading && !error && videos.length === 0 && (
-          <Typography variant="body1" color="text.secondary">
-            No videos found for search term <b>"{searchTerm}"</b>.
-          </Typography>
-        )}
+      {!loading && !error && videos.length === 0 && (
+        <Typography variant="body1" color="text.secondary">
+          No videos found for search term <b>"{searchTerm}"</b>.
+        </Typography>
+      )}
 
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-3">
-          {videos.map((video) => (
-            <div key={video._id} className="col">
-              <Link
-                to={`/watch/${video._id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <VideoCard video={video} />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
+      <Grid container spacing={3} mt={1}>
+        {videos.map((video) => (
+          <Grid item xs={12} md={6} lg={3} key={video._id}>
+            <Link
+              to={`/watch/${video._id}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <VideoCard video={video} />
+            </Link>
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
   );
 }
 

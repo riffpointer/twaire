@@ -5,13 +5,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import Loading from '../components/Loading.jsx';
-import { Divider, MenuItem, TextField, Typography } from '@mui/material';
+import { Box, Container, Divider, MenuItem, Skeleton, TextField, Typography } from '@mui/material';
 
 
 function Home() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState("latest");
+  const [bannerLoaded, setBannerLoaded] = useState(false);
 
   useEffect(() => {
     document.title = "Home - Twaire";
@@ -35,8 +36,18 @@ function Home() {
 
   return (
     <>
-      <img src={`${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`} alt="Banner" style={{width:"100%",marginBottom:32,marginTop:-32}} />
-      <div className="container">
+      {/* Banner*/}
+      <Box sx={{ width: "100%", mb: 4, mt: -4 }}>
+        {!bannerLoaded && <Skeleton variant="rectangular" width="100%" height={360} />}
+        <img
+          src={`${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`}
+          alt="Banner"
+          style={{ width: "100%", display: bannerLoaded ? "block" : "none" }}
+          onLoad={() => setBannerLoaded(true)}
+        />
+      </Box>
+
+      <Container>
         <Typography variant="h2">
           Welcome to Twaire!
         </Typography>
@@ -80,7 +91,7 @@ function Home() {
             </div>
           )}
         </div>
-      </div>
+      </Container>
       <Footer />
     </>
   );

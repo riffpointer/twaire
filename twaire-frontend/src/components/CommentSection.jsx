@@ -235,6 +235,7 @@ function CommentSection({ videoId }) {
             onReplyCancel={() => setReplyingTo(null)}
             setReplyingTo={setReplyingTo}
             currentUser={currentUser}
+            setReplyText={setReplyText}
           />
         ))}
       </Card>

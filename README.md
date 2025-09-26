@@ -1,15 +1,17 @@
 # Twaire
 
-Twaire is an open source video sharing platform, where users are free to share their videos, watch other videos and post their opinions about the videos they watch.
+Twaire is an open source video sharing platform, where users can share their videos, watch other videos and post their opinions about the videos they watch.
 
-## Tech stack
+### Tech stack
 Twaire is built with [Node.js](https://nodejs.org/) and [Express](https://expressjs.com/) and uses [MongoDB](https://www.mongodb.com/) for storage. The frontend is powered by [React](https://reactjs.org/) and communicates with the backend via [RESTful APIs](https://restfulapi.net/).
-
 
 ## Features
 
-- Upload your own videos, with custom thumbnails and tags
-- Watch videos and post comments to share your opinions about the video
+- Watch, search and discover videos
+- Add your reactions in form of likes and dislikes
+- Post your opinions and clarifications to the uploader through comments
+- Customize your account with bio and a custom profile picture
+- Upload your own videos with custom thumbnails
 - More features coming soon...!
 
 ## Installation
@@ -20,18 +22,15 @@ To run a local instance of Twaire, you must have the following installed on your
 
 - [Node.js](https://nodejs.org/) (v16 or higher recommended)
 - [Git](https://git-scm.com/)
-- [MongoDB Server](https://www.mongodb.com/try/download/community) (running locally or accessible remotely)
+- [MongoDB Server](https://www.mongodb.com/try/download/community)
 - [pnpm](https://pnpm.io) can be installed with `npm install -g pnpm`
-- [nodemon](https://nodemon.io/) can be installed with `npm install -g nodemon` (optional)
 
 ### Running
 Twaire has two components: 
  - the **backend server** 
- - and a **ReactJS powered frontend**.
+ - and a **Vite/ReactJS powered frontend**.
 
-To start up a Twaire instance, you must start both the frontend and the backend.
-
-The installation is quite easy, just follow the instructions below and run the commands (works on most operating systems, assuming you have Git and NodeJS installed)
+Running the project is quite easy, just follow the instructions below and run the commands (works on most operating systems, assuming you have Git and NodeJS installed)
 
 #### 1. Clone the repository:
 ```bash
@@ -44,19 +43,18 @@ cd twaire
 ```bash
 cd twaire-backend
 pnpm install
-pnpm approve-builds # Select the "canvas" package and hit enter
+pnpm approve-builds  # Select all packages hit enter
 pnpm run dev
 ```
 
 #### 3. Then start the frontend server
 ```bash
-cd ..                   # If you cd-ed into twaire-backend
 cd twaire-frontend
 pnpm install
-pnpm run dev             # Will start up Vite
+pnpm run dev # Will start up Vite
 ```
 
-> Note: If you're on Windows, you can start MongoDB, frontend and backend server at the same time by running `start.bat`. There is also a `start.sh` but it has not been yet tested, so use it carefully and please report any bugs related to it if you find some.
+> Note: If you're on Windows, you can start the MongoDB server, the frontend and backend server at the same time by running `start.bat`.
 
 ## Contributing
 

@@ -23,7 +23,7 @@
 
 #root {
   margin: 0 auto;
-  font-family: "Vend Sans", "Inter", "Arial", sans-serif !important;
+  font-family: "Inter", "Arial", sans-serif !important;
   display: block;
 }
 
@@ -37,10 +37,6 @@
 
 .inter {
   font-family: "Inter", sans-serif;
-}
-
-.vend-sans {
-  font-family: "Vend Sans", sans-serif;
 }
 
 .dm-sans {

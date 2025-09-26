@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import ApiConfig from '../utils/ApiConfig';
+import { Avatar, IconButton } from '@mui/material';
 
 // Assume user and handleLogout are passed as props
 const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false }) => {
@@ -28,22 +29,21 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false
 
     return (
         <Box>
-            <Button
+            <IconButton
                 aria-controls={open ? 'user-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
                 onClick={handleClick}
-                className={textWhite ? "text-white" : ""}
                 disableElevation={hasOutline}
-                sx={{ textTransform: 'none', pr: 0.2, pl: 0.2 }}
                 title="Account menu"
-                variant={hasOutline ? "contained" : ""}
+                sx={{mr:-1,ml:-1}}
             >
-                <i className="bi bi-person-fill me-2 mb-0" style={{ lineHeight: 0 }}></i>
-                <Typography variant="body1" component="span">
-                    {user.publicName || user.username}
-                </Typography>
-            </Button>
+                <Avatar
+                    src={user.profilePicture && `${ApiConfig.serverUrl}/api/helper/placeholder/48x48?text=${shortName}`}
+                    alt={user.publicName || user.username}
+                    sx={{ width: 38, height: 38}}
+                />
+            </IconButton>
             <Menu
                 id="user-menu"
                 anchorEl={anchorEl}
@@ -59,14 +59,15 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false
                 }}>
                 <MenuItem component={NavLink} sx={{ pointerEvents: 'none' }}>
                     <Typography variant="h6" component="span" className="d-flex align-items-center">
-                        <img
-                            src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : `${ApiConfig.serverUrl}/api/helper/placeholder/48x48?text=${shortName}`}
-                            alt={user.publicName || user.username}
-                            className="rounded-circle me-2"
-                            width={48}
-                            height={48}
+                        <Avatar
+                            src={user.profilePicture && `${ApiConfig.serverUrl}/api/helper/placeholder/48x48?text=${shortName}`}
+                            alt={user.publicName}
+                            sx={{ width: 48, height: 48, mr: 1 }}
                         />
-                        {user.publicName || user.username}
+                        <Box>
+                            <Typography variant="h5">{user.publicName}</Typography>   
+                            <Typography fontSize={14}>@{user.username}</Typography>                            
+                        </Box>
                     </Typography>
                 </MenuItem>
                 <Divider />

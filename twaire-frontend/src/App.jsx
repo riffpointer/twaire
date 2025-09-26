@@ -13,19 +13,37 @@ import Search from './pages/Search.jsx';
 import Trending from './pages/Trending.jsx';
 import ProfileSettings from './pages/ProfileSettings.jsx';
 import { createTheme, CssBaseline, ThemeProvider, Toolbar } from '@mui/material';
-import GlobalAppBar from './components/GlobalAppBar.jsx';
+import AppBar from './components/AppBarHeader.jsx';
+import { extendTheme } from '@mui/material/styles';
 
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      'Vend Sans',
-      'Inter',
-      'Roboto',
-      'sans-serif',
-    ].join(','),
-  },
+const theme = extendTheme({
   colorSchemes: {
-    dark: true,
+    light: {
+      palette: {
+        primary: {
+          main: '#6750A4',
+        },
+        secondary: {
+          main: '#625B71',
+        },
+      },
+    },
+    dark: {
+      palette: {
+        primary: {
+          main: '#D0BCFF',
+        },
+        secondary: {
+          main: '#CCC2DC',
+        },
+      },
+    },
+  },
+  shape: {
+    borderRadius: 7,
+  },
+  typography: {
+    fontFamily: 'Inter, Roboto, Arial, sans-serif',
   },
 });
 
@@ -35,7 +53,7 @@ function App() {
       <ThemeProvider theme={theme} noSsr>
         <CssBaseline />
         <BrowserRouter>
-          <GlobalAppBar />
+          <AppBar />
           <Toolbar />
           <Routes>
             {/* Public links so no authentication needed */}

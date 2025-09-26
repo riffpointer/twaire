@@ -16,8 +16,22 @@ import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.jsx";
 import { getRelativeTime } from "../utils/DateUtils.jsx";
 import VerifiedUserBadge from "./VerifiedUserBadge.jsx";
+import { useRef, useState } from 'react';
 
-function Comment({ comment, likedComments, dislikedComments, onToggle, replyingTo, replyText, onReplyTextChange, onReplySubmit, onReplyCancel, setReplyingTo, currentUser }) {
+function Comment({ 
+  comment, 
+  likedComments, 
+  dislikedComments, 
+  onToggle, 
+  replyingTo, 
+  replyText, 
+  onReplyTextChange, 
+  onReplySubmit, 
+  onReplyCancel, 
+  setReplyingTo, 
+  setReplyText,
+  currentUser
+}) {
   const commentAuthorUsername = comment.user?.username || "Deleted User";
   const commentAuthorPublicName = comment.user?.publicName || commentAuthorUsername;
   const commentAuthorShortName = commentAuthorPublicName
@@ -27,6 +41,17 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
   const commentAuthorProfilePicture = comment.user?.profilePicture
     ? `${ApiConfig.serverUrl}/${comment.user.profilePicture}`
     : "${ApiConfig.serverUrl}/api/helper/placeholder/40x40?text=" + encodeURIComponent(commentAuthorShortName);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await onReplySubmit(e, comment._id);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Box key={comment._id}>
@@ -46,13 +71,15 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                 textDecoration: 'none',
                 fontWeight: 'bold',
                 color: 'text.primary',
+                display: "flex",
+                alignItems: "center"
               }}
             >
               {commentAuthorPublicName}
               <VerifiedUserBadge user={comment.user} />
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {getRelativeTime(comment.createdAt)}
+              <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                {getRelativeTime(comment.createdAt)}
+              </Typography>
             </Typography>
           </Box>
 
@@ -67,6 +94,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
               gap: 0.4,
               typography: 'body2',
               color: 'text.secondary',
+              ml: -1
             }}
           >
             <IconButton
@@ -117,8 +145,9 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
             <Card
               variant="outlined"
               component="form"
-              onSubmit={(e) => onReplySubmit(e, comment._id)}
-              sx={{ p: 1.5, mt: 1, display: 'flex', width: '100%' }}>
+              onSubmit={handleSubmit}
+              sx={{ p: 1.5, mt: 1, display: "flex", width: "100%" }}
+            >
               <Avatar
                 src={
                   currentUser?.profilePicture
@@ -129,7 +158,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                 sx={{ width: 32, height: 32, mr: 2, mt: 1 }}
                 title={`Commenting as ${currentUser.publicName}`}
               />
-              <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+              <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
                 <TextField
                   size="small"
                   label="Write a reply..."
@@ -137,17 +166,26 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                   onChange={onReplyTextChange}
                   fullWidth
                   sx={{ mb: 1 }}
+                  inputRef={(input) => input && input.focus()}
+                  disabled={submitting}
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
                 />
-                <Box sx={{ display: 'flex' }}>
+                <Box sx={{ display: "flex" }}>
                   <Button
                     disableElevation
                     variant="contained"
-                    sx={{ mr: 2 }}
+                    sx={{ mr: 1 }}
                     type="submit"
+                    disabled={submitting}
                   >
                     Post Reply
                   </Button>
-                  <Button variant="text" onClick={onReplyCancel}>
+                  <Button variant="text" onClick={onReplyCancel} disabled={submitting}>
                     Cancel
                   </Button>
                 </Box>
@@ -175,15 +213,17 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                           textDecoration: 'none',
                           fontWeight: 'bold',
                           color: 'text.primary',
+                          display: "flex",
+                          alignItems: "center"
                         }}
                       >
                         {reply.user?.publicName ||
                           reply.user?.username ||
                           'Deleted User'}
                         <VerifiedUserBadge user={comment.user} />
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {getRelativeTime(reply.createdAt)}
+                        <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                          {getRelativeTime(reply.createdAt)}
+                        </Typography>
                       </Typography>
                     </Box>
                     <Typography sx={{ mb: 0 }}>{reply.text}</Typography>
@@ -195,6 +235,7 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                         gap: 0.4,
                         typography: 'body2',
                         color: 'text.secondary',
+                        ml: -1
                       }}
                     >
                       <IconButton
@@ -226,6 +267,15 @@ function Comment({ comment, likedComments, dislikedComments, onToggle, replyingT
                       <Typography variant="caption">
                         {Array.isArray(reply.dislikes) ? reply.dislikes.length : 0}
                       </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => {
+                          setReplyingTo(replyingTo === comment._id ? null : comment._id);
+                          setReplyText(`@${reply.user.username} `);
+                        }}>
+                        Reply
+                      </Button>
                     </Box>
                   </Box>
                 </Box>

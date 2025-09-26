@@ -1,6 +1,6 @@
 import LoginIcon from '@mui/icons-material/Login';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Button, CircularProgress, useTheme } from '@mui/material';
+import { Button, CircularProgress, InputAdornment, TextField, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -14,8 +14,9 @@ import UserDropdown from './UserDropdown';
 import HomeIcon from '@mui/icons-material/Home';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import InfoIcon from '@mui/icons-material/Info';
+import SearchIcon from '@mui/icons-material/Search';
 
-export default function GlobalAppBar() {
+export default function AppBarHeader() {
   const [auth, setAuth] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [user, setUser] = useState(null);
@@ -96,7 +97,7 @@ export default function GlobalAppBar() {
   const navLinkPages = {
     "Home": {
       path: "/",
-      icon: <HomeIcon/>
+      icon: <HomeIcon />
     },
     "Trending": {
       path: "/trending",
@@ -110,7 +111,7 @@ export default function GlobalAppBar() {
 
   return (
     <Box mb={4}>
-      <AppBar position="fixed" variant="outlined">
+      <AppBar position="fixed">
         <Toolbar variant="dense">
           <IconButton
             size="large"
@@ -137,6 +138,33 @@ export default function GlobalAppBar() {
                 {label}
               </Button>
             ))}
+          </Box>
+          <Box
+            component="form"
+            onSubmit={handleSearch}
+            sx={{ marginRight: 2, width: "100%", maxWidth: 400 }}
+          >
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Search videos..."
+              value={searchTerm}
+              size='small'
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      type="submit"
+                      edge="end"
+                      aria-label="search"
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Box>
           <Box>
             {!user && !loading && (

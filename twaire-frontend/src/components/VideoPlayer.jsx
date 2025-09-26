@@ -205,12 +205,12 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             bottom: 0,
             left: 0,
             width: "100%",
-            bgcolor: "rgba(0,0,0,0.6)",
-            backdropFilter: "blur(5px)",
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(5, 5, 5, 1) 100%)",
+            // backdropFilter: "blur(5px)",
             display: "flex",
             alignItems: "center",
             px: 1,
-            py: 0,
+            py: 1,
             zIndex: 3,
           }}
         >

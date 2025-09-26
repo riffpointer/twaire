@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 function AppDrawer({ navLinkPages, open, toggleDrawer }) {
 	return (
 		<Drawer open={open} onClose={toggleDrawer(false)}>
-			<Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+			<Box sx={{ width: 250, height: "100%", display: "flex", justifyContent: "space-between", flexDirection: "column" }} role="presentation" onClick={toggleDrawer(false)}>
 				<List>
 					<ListItem>
 						<Typography variant="h5">Twaire</Typography>
@@ -21,6 +21,9 @@ function AppDrawer({ navLinkPages, open, toggleDrawer }) {
 						</ListItem>
 					))}
 				</List>
+				<Typography p={2} color="text.secondary" fontSize={14}>
+					(c) Twaire 2025
+				</Typography>
 			</Box>
 		</Drawer>
 	)
