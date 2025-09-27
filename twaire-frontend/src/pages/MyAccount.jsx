@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import UserHeader from "../components/UserHeader.jsx";
 import UserTabs from "../components/UserTabs.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
 
 function MyAccount() {
   const [user, setUser] = useState(null);

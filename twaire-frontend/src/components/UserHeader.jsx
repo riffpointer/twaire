@@ -1,27 +1,20 @@
 import {
-  Paper,
   Box,
-  Avatar,
-  Typography,
+  Paper,
+  Typography
 } from "@mui/material";
-import PersonIcon from '@mui/icons-material/Person';
-import ApiConfig from "../utils/ApiConfig.jsx";
+import UserAvatar from "./UserAvatar.jsx";
 import VerifiedUserBadge from "./VerifiedUserBadge.jsx";
 
 function UserHeader({ user, children }) {
   return (
     <Paper elevation={2} sx={{ p: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        <Avatar
-          src={user.profilePicture ? `${ApiConfig.serverUrl}/${user.profilePicture}` : `${ApiConfig.serverUrl}/api/helper/placeholder/128x128?text=${user.publicName.charAt(0)}`}
-          sx={{ width: 100, height: 100, mr: 3, fontSize: '4rem' }}
-        >
-          {!user.profilePicture && <PersonIcon fontSize="inherit" />}
-        </Avatar>
+        <UserAvatar user={user} size={112} sx={{ mr: 2 }} />
         <Box>
           <Typography variant="h4" component="h1" sx={{ mb: 0, display: "flex", alignItems: "center" }}>
             {user.publicName || user.username}
-            <VerifiedUserBadge user={user} />
+            <VerifiedUserBadge user={user} sx={{ fontSize: 24 }} />
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 0.5 }}>
             @{user.username}

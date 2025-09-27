@@ -20,4 +20,12 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: null },
 });
 
+userSchema.pre('save', function (next) {
+  // Check if publicName is null/undefined AND username is set
+  if ((this.publicName === null || this.publicName === undefined) && this.username) {
+    this.publicName = this.username;
+  }
+  next();
+});
+
 export default userSchema;

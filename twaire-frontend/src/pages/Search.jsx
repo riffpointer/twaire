@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Box, MenuItem, TextField, Typography, Grid, Container, useTheme, useMediaQuery } from "@mui/material";
 import Loading from "../components/Loading.jsx";
 import VideoCard from "../components/VideoCard.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);

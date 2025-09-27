@@ -6,11 +6,13 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import ApiConfig from '../utils/ApiConfig';
+import ApiConfig from '../utils/ApiConfig.js';
 import { Avatar, IconButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import React from 'react';
+import UserAvatar from './UserAvatar.jsx';
 
 // Assume user and handleLogout are passed as props
 const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false }) => {
@@ -41,11 +43,7 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false
         title="Account menu"
         sx={{ mr: -1, ml: -1 }}
       >
-        <Avatar
-          src={user.profilePicture ?? `${ApiConfig.serverUrl}/${user.profilePicture}`}
-          alt={user.publicName}
-          sx={{ width: 38, height: 38 }}
-        />
+        <UserAvatar user={user} />
       </IconButton>
       <Menu
         id="user-menu"
@@ -62,11 +60,7 @@ const UserDropdown = ({ user, handleLogout, textWhite = true, hasOutline = false
         }}>
         <MenuItem component={NavLink} sx={{ pointerEvents: 'none' }}>
           <Typography variant="h6" component="span" className="d-flex align-items-center">
-            <Avatar
-              src={user.profilePicture ?? `${ApiConfig.serverUrl}/${user.profilePicture}`}
-              alt={user.publicName}
-              sx={{ width: 48, height: 48, mr: 1 }}
-            />
+            <UserAvatar user={user} size={48} sx={{ mr: 1 }} />
             <Box>
               <Typography variant="h5">{user.publicName}</Typography>   
               <Typography fontSize={14}>@{user.username}</Typography>                            

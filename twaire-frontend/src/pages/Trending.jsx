@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import Footer from "../components/Footer.jsx";
 import Loading from "../components/Loading.jsx";
 import VideoCard from "../components/VideoCard.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
+import React from "react";
 
 function Trending() {
   const [videos, setVideos] = useState([]);
@@ -38,7 +39,7 @@ function Trending() {
   return (
     <>
       <div className="container mb-4">
-        <h2><i class="bi bi-fire"></i> Trending Videos</h2>
+        <h2><i className="bi bi-fire"></i> Trending Videos</h2>
         <p className="mb-1">Have a look at the latest trending videos!</p>
 
         {loading && <Loading label="Loading videos" />}

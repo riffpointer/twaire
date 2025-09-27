@@ -1,7 +1,9 @@
-import { getRelativeTime } from "../utils/DateUtils";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import { Card, CardActionArea, Box, Typography, CardMedia, CardContent } from "@mui/material";
+import { getRelativeTime } from "../utils/DateUtils.js";
+import ApiConfig from "../utils/ApiConfig.js";
+import { Card, CardActionArea, Box, Typography, CardMedia, CardContent, Avatar } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import React from "react";
+import UserAvatar from "./UserAvatar.jsx";
 
 
 function VideoCard({ video }) {
@@ -22,7 +24,7 @@ function VideoCard({ video }) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        width: "100%", // stretch to parent Grid item
+        width: "100%",
         minWidth: 200,
       }}
     >
@@ -45,9 +47,10 @@ function VideoCard({ video }) {
           />
         </Box>
 
-        <CardContent sx={{ p: 1 }}>
+        <CardContent sx={{ p: 1.5, pt:1 }}>
           <Typography
-            variant="subtitle2"
+            variant="h6"
+            gutterBottom
             noWrap
             sx={{ mb: 0.5, fontWeight: 500 }}
             title={video.description || ""}
@@ -64,12 +67,13 @@ function VideoCard({ video }) {
               color: "text.secondary",
             }}
           >
+            <UserAvatar user={video.uploader} size={24} />
             <Typography
               variant="body2"
               noWrap
               sx={{ fontSize: "inherit", color: "inherit" }}
             >
-              {video.channel}
+              {video.uploader.publicName}
             </Typography>
 
             {video.uploader.verified && (

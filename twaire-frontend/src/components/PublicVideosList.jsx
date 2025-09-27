@@ -1,7 +1,7 @@
 import { MenuItem, TextField, Box, Typography, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
 import VideoCard from "./VideoCard.jsx";
 import Loading from "./Loading.jsx";
 

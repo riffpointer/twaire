@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Alert, Box, Button, Card, CardContent, Checkbox, Container, Divider, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
 
 function Signup() {
   const [username, setUsername] = useState("");

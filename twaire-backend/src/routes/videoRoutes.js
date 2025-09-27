@@ -134,7 +134,9 @@ videoRouter.get("/", async (req, res) => {
       query.uploader = new mongoose.Types.ObjectId(uploader);
     }
 
-    const videos = await Video.find(query).sort(sortOption);
+    const videos = await Video.find(query)
+                            .sort(sortOption)
+                            .populate("uploader", "_id username publicName verified subscribers profilePicture");
     res.json(videos);
   } catch (err) {
     console.error(err);
@@ -242,11 +244,9 @@ videoRouter.post(
         description,
         filename: videoFile.filename,
         thumbnail: thumbnailFile?.filename || "",
-        channel: user.publicName?.trim() || user.username,
-        username: user.username,
         views: 0,
         tags: sanitizedTags,
-        uploader: userId,
+        uploader: user,
       });
 
       await video.save();

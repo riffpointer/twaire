@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { Box, Grid, MenuItem, Paper, Tab, TextField, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { getRelativeTime } from '../utils/DateUtils';
+import { getRelativeTime } from '../utils/DateUtils.js';
 import VideoCard from './VideoCard';
 
 function UserTabs({ user, videos }) {
@@ -48,7 +48,7 @@ function UserTabs({ user, videos }) {
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 variant="outlined"
-                sx={{ width: "auto", minWidth: 160, mb: 1.5 }}
+                sx={{ width: "auto", minWidth: 160, mb: 2, mt: 1 }}
               >
                 <MenuItem value="relevance">Relevance</MenuItem>
                 <MenuItem value="date">Upload date (Newest first)</MenuItem>

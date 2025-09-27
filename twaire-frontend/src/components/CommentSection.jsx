@@ -7,8 +7,8 @@ import {
   Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import Strings from "../utils/Strings";
+import ApiConfig from "../utils/ApiConfig.js";
+import Strings from "../utils/Strings.js";
 import Comment from "./Comment";
 import Loading from "./Loading.jsx";
 

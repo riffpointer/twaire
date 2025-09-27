@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import ApiConfig from '../utils/ApiConfig.jsx';
+import ApiConfig from '../utils/ApiConfig.js';
 import PromptLoginDialog from "../components/PromptLoginDialog.jsx";
 
 import Box from '@mui/material/Box';

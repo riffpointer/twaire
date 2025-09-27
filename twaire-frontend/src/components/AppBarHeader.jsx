@@ -1,6 +1,6 @@
 import LoginIcon from '@mui/icons-material/Login';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Button, CircularProgress, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
+import { Button, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -8,7 +8,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import ApiConfig from '../utils/ApiConfig';
+import ApiConfig from '../utils/ApiConfig.js';
 import AppDrawer from './AppDrawer';
 import UserDropdown from './UserDropdown';
 import HomeIcon from '@mui/icons-material/Home';
@@ -16,6 +16,7 @@ import WhatshotIcon from '@mui/icons-material/Whatshot';
 import InfoIcon from '@mui/icons-material/Info';
 import SearchIcon from '@mui/icons-material/Search';
 import Loading from './Loading';
+import React from 'react';
 
 export default function AppBarHeader() {
   const [auth, setAuth] = useState(true);
@@ -127,7 +128,7 @@ export default function AppBarHeader() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography display={searchBarOpen ? "none" : "block"} variant="h6" component={Link} color="textPrimary" to="/" sx={{ textDecoration: "none", mr: 2, flexGrow: { xs: 1, md: 0 } }}>
+          <Typography variant="h6" component={Link} color="textPrimary" to="/" sx={{ display: { xs: 'none', sm: 'block' }, textDecoration: "none", mr: 2, flexGrow: { xs: 1, md: 0 } }}>
             Twaire
           </Typography>
           <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: "start", flexGrow: 1 }}>
@@ -146,12 +147,12 @@ export default function AppBarHeader() {
           <Box
             component="form"
             onSubmit={handleSearch}
-            sx={{ transition: "width 500ms ease-out", marginRight: 2, width: "100%", maxWidth: searchBarOpen ? "100%" : (displaySizeMd ? 80 : 400) }}
+            sx={{ marginRight: 2, width: "100%", maxWidth: {xs: "100%", sm: 300, md: 400}, flexGrow: { xs: 1, md: 0 }}}
           >
             <TextField
               fullWidth
               variant="outlined"
-              placeholder={displaySizeMd ? (searchBarOpen ? "Search videos..." : "...") : "Search videos..."}
+              placeholder="Search videos..."
               value={searchTerm}
               size='small'
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -162,7 +163,6 @@ export default function AppBarHeader() {
                       type="submit"
                       edge="end"
                       aria-label="search"
-                      onClick={() => displaySizeMd ? setSearchBarOpen(!searchBarOpen) : null}
                     >
                       <SearchIcon />
                     </IconButton>
@@ -188,7 +188,7 @@ export default function AppBarHeader() {
             {user ? (
               <UserDropdown user={user} handleLogout={handleLogout} />
             ) : ((!user && loading) && 
-              <Loading size="20px" />
+              <Loading />
             )}
           </Box>
         </Toolbar>

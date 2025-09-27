@@ -13,8 +13,8 @@ import {
   Typography
 } from '@mui/material';
 import { Link } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import { getRelativeTime } from "../utils/DateUtils.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
+import { getRelativeTime } from "../utils/DateUtils.js";
 import VerifiedUserBadge from "./VerifiedUserBadge.jsx";
 import { useRef, useState } from 'react';
 

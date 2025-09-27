@@ -28,9 +28,9 @@ import {
 import { grey } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
 import Loading from '../components/Loading.jsx';
-import { getRelativeTime } from '../utils/DateUtils.jsx';
+import { getRelativeTime } from '../utils/DateUtils.js';
 
 function Dashboard() {
   const [title, setTitle] = useState("");

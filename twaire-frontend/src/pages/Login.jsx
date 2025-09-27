@@ -2,8 +2,8 @@ import { Alert, Box, Button, Container, Stack, TextField, Typography } from "@mu
 import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import Strings from "../utils/Strings.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
+import Strings from "../utils/Strings.js";
 
 function Login() {
   const [email, setEmail] = useState("");

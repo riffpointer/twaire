@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import {
-  Avatar,
   Box,
   Card,
   Chip,
   Container,
   Divider,
-  Link as MuiLink,
   Typography
 } from "@mui/material";
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -18,13 +16,13 @@ import MenuItem from '@mui/material/MenuItem';
 import CommentSection from "../components/CommentSection.jsx";
 import Loading from "../components/Loading.jsx";
 import PublicVideosList from "../components/PublicVideosList.jsx";
-import SubscribeButton from "../components/SubscribeButton.jsx";
-import VerifiedUserBadge from "../components/VerifiedUserBadge.jsx";
 import VideoActionBar from "../components/VideoActionBar.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
-import ApiConfig from "../utils/ApiConfig.jsx";
-import { getRelativeTime } from "../utils/DateUtils.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
+import { getRelativeTime } from "../utils/DateUtils.js";
 import PromptLoginDialog from "../components/PromptLoginDialog.jsx";
+import ChannelBar from "../components/ChannelBar.jsx";
+import React from "react";
 
 function Watch() {
   const { id } = useParams();
@@ -83,6 +81,7 @@ function Watch() {
         }
 
         const data = await videoDataRequest.json();
+        console.log(data);
         setVideo(data);
         document.title = `${data.title} - Twaire`;
 
@@ -228,6 +227,7 @@ function Watch() {
                 {video.title}
               </Typography>
 
+              {/* Video statistics */}
               <Typography
                 variant="body2"
                 color="text.secondary"
@@ -236,57 +236,17 @@ function Watch() {
                 {video.views} views • Uploaded {uploadedAgo} ({formattedUploadDate})
               </Typography>
 
+              {/* Video action bar i.e like dislike share etc */}
               <VideoActionBar videoId={video._id} />
 
               {/* Uploader + subscribe */}
-
-              <Card
-                sx={{
-                  p: 1.5,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 2,
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Avatar
-                    src={
-                      video.uploader?.profilePicture
-                        ? `${ApiConfig.serverUrl}/${video.uploader.profilePicture}`
-                        : `${ApiConfig.serverUrl}/api/helper/placeholder/48x48?text=${video.channel?.charAt(0)}`
-                    }
-                    alt="Uploader profile"
-                    sx={{ width: 48, height: 48, mr: 2 }}
-                  />
-
-                  <Box>
-                    <MuiLink
-                      component={Link}
-                      to={`/user/${video.username}`}
-                      underline="none"
-                      color="text.primary"
-                      sx={{ fontWeight: 'bold', display: "flex", alignItems: "center" }}
-                    >
-                      {video.uploader.publicName || video.channel}
-                      <VerifiedUserBadge user={video.uploader} verticalAlign="text-center" />
-                    </MuiLink>
-
-                    <Typography variant="body2" color="text.secondary">
-                      {uploaderSubs} subscriber{uploaderSubs === 1 || "s"}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box>
-                  <SubscribeButton
-                    subscribed={subscribed}
-                    subLoading={subLoading}
-                    handleSubscribe={handleSubscribe}
-                  />
-                </Box>
-              </Card>
+              <ChannelBar
+                video={video}
+                uploaderSubs={uploaderSubs}
+                subscribed={subscribed}
+                subLoading={subLoading}
+                handleSubscribe={handleSubscribe}
+              />
 
               {/* Description */}
               <Card sx={{ p: 1.5, mb: 3 }}>
@@ -298,6 +258,8 @@ function Watch() {
                 )}
               </Card>
               <Divider />
+
+              {/* Comment section */}
               <CommentSection videoId={video._id} />
             </div>
           </div>
@@ -314,3 +276,4 @@ function Watch() {
 }
 
 export default Watch;
+

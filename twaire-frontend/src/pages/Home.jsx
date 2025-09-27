@@ -1,9 +1,9 @@
 import Footer from '../components/Footer.jsx';
-import Strings from '../utils/Strings.jsx';
+import Strings from '../utils/Strings.js';
 import VideoCard from '../components/VideoCard.jsx';
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
 import Loading from '../components/Loading.jsx';
 import { Box, Container, Divider, MenuItem, Skeleton, TextField, Typography } from '@mui/material';
 
@@ -47,11 +47,13 @@ function Home() {
         />
       </Box>
 
-      <Container>
-        <Typography variant="h2">
+      <Box sx={{px:{xs:2,md:6}}}>
+        <Typography variant="h2" sx={{mb: 1, fontWeight: 'bold'}}>
           Welcome to Twaire!
         </Typography>
-        <Typography variant="subtitle1">{Strings.branding.description}</Typography>
+        <Typography variant="subtitle1">
+          Twaire is an open platform where you can share your vlogs, videos and much more!
+        </Typography>
         <Divider sx={{ my: 2 }} />
 
         <div className="d-flex justify-content-between align-items-center mb-3">
@@ -91,7 +93,7 @@ function Home() {
             </div>
           )}
         </div>
-      </Container>
+      </Box>
       <Footer />
     </>
   );
