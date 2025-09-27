@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Video, User, Comment, Autocomplete } from "../models/models.js";
 import { videoUpload } from "../providers/storage.js";
 import isAuthenticated from "../middleware/auth.js";
+import { apiError, apiMessage } from "../utils/logging.js";
 
 const videoRouter = express.Router();
 
@@ -293,11 +294,11 @@ videoRouter.get("/search", async (req, res) => {
     .sort({ frequency: -1 })
     .limit(10);
 
-    console.log("New search query added to autocomplete database! All search queries: ");
+    apiMessage("GET", "/search?q=" + q, "New search query added to autocomplete database! All search queries: ");
     terms.forEach(term => {
-      console.log("Term: " + term.term);
-      console.log("Frequency: " + term.frequency);
-      console.log("Created At: " + term.createdAt);
+      apiMessage("GET", "/search?q=" + q, "Term: " + term.term);
+      apiMessage("GET", "/search?q=" + q, "Frequency: " + term.frequency);
+      apiMessage("GET", "/search?q=" + q, "Created At: " + term.createdAt);
     })
 
     let sortOption = {};
@@ -305,7 +306,7 @@ videoRouter.get("/search", async (req, res) => {
     else if (sort === "views") sortOption = { views: -1 };
     else sortOption = { relevance: -1 }; // fallback (you can implement textScore if needed)
 
-    const videos = await Video.find(query).sort(sortOption);
+    const videos = await Video.find(query).sort(sortOption).populate("uploader", "_id username publicName verified");
 
     res.json(videos);
   } catch (err) {

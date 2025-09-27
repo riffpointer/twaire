@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, Grid, MenuItem, Paper, Tab, TextField, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Box, MenuItem, Paper, Tab, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
 import { getRelativeTime } from '../utils/DateUtils.js';
-import VideoCard from './VideoCard';
+import VideoGrid from './VideoGrid.jsx';
 
 function UserTabs({ user, videos }) {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -54,18 +53,7 @@ function UserTabs({ user, videos }) {
                 <MenuItem value="date">Upload date (Newest first)</MenuItem>
                 <MenuItem value="views">Most viewed</MenuItem>
               </TextField>
-              <Grid container spacing={2}>
-                {videos.map((video) => (
-                  <Grid key={video._id}>
-                    <Link
-                      to={`/watch/${video._id}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      <VideoCard video={video} />
-                    </Link>
-                  </Grid>
-                ))}
-              </Grid>
+              <VideoGrid videos={videos} />
             </>
           )}
         </TabPanel>

@@ -1,8 +1,8 @@
+import { Box, Container, MenuItem, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Box, MenuItem, TextField, Typography, Grid, Container, useTheme, useMediaQuery } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
-import VideoCard from "../components/VideoCard.jsx";
+import VideoGrid from "../components/VideoGrid.jsx";
 import ApiConfig from "../utils/ApiConfig.js";
 
 function useQuery() {
@@ -55,21 +55,26 @@ function Search() {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: displaySizeMd ? "start" : "center",
-          flexDirection: displaySizeMd ? "column" : "row",
-          mb: 3,
+          alignItems: "center",
+          flexDirection: {
+            xs: "column",
+            sm: "row",
+          },
+          mb: { xs: 4, sm: 2 }
         }}
       >
-        <Typography variant="h5" mb={displaySizeMd && 4}>
+        <Typography variant="h5" sx={{ mb: { xs: 2, sm: 0 }, textAlign: { xs: "center", sm: "left" }, width: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           Search Results for: <b>{searchTerm}</b>
         </Typography>
+
         <TextField
           select
           label="Sort by"
           value={sort}
           onChange={(e) => setSort(e.target.value)}
           variant="outlined"
-          sx={{ minWidth: 200 }}
+          sx={{ minWidth: { xs: "100%", sm: 200 }, mt: 2 }}
+          size="small"
         >
           <MenuItem value="relevance">Relevance</MenuItem>
           <MenuItem value="date">Upload date (Newest first)</MenuItem>
@@ -90,18 +95,7 @@ function Search() {
         </Typography>
       )}
 
-      <Grid container spacing={3} mt={1}>
-        {videos.map((video) => (
-          <Grid item xs={12} md={6} lg={3} key={video._id}>
-            <Link
-              to={`/watch/${video._id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <VideoCard video={video} />
-            </Link>
-          </Grid>
-        ))}
-      </Grid>
+      <VideoGrid videos={videos} />
     </Container>
   );
 }

@@ -6,7 +6,7 @@ import React from "react";
 import UserAvatar from "./UserAvatar.jsx";
 
 
-function VideoCard({ video }) {
+function VideoCard({ video, sx={} }) {
   const safeThumbnail = video.thumbnail
     ? `${ApiConfig.serverUrl}/data/thumbnails/${video.thumbnail}`
     : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(video.title)}`;
@@ -26,6 +26,7 @@ function VideoCard({ video }) {
         flexDirection: "column",
         width: "100%",
         minWidth: 200,
+        ...sx,
       }}
     >
       <CardActionArea
