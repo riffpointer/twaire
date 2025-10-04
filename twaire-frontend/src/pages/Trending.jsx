@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { ContentContainer } from "@/components/Containers.jsx";
+import Footer from "@/components/Footer.jsx";
+import Loading from "@/components/Loading.jsx";
+import VideoCard from "@/components/VideoCard.jsx";
+import WhatshotIcon from "@mui/icons-material/Whatshot";
+import { Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Footer from "../components/Footer.jsx";
-import Loading from "../components/Loading.jsx";
-import VideoCard from "../components/VideoCard.jsx";
-import ApiConfig from "../utils/ApiConfig.js";
-import React from "react";
+import ApiConfig from "../utils/Api.js";
+import { NoLinkStyling } from "@/styles/LinkStyles.jsx";
 
 function Trending() {
   const [videos, setVideos] = useState([]);
@@ -37,12 +40,16 @@ function Trending() {
   }, []);
 
   return (
-    <>
-      <div className="container mb-4">
-        <h2><i className="bi bi-fire"></i> Trending Videos</h2>
-        <p className="mb-1">Have a look at the latest trending videos!</p>
+    <ContentContainer>
+      <div>
+        <Typography variant="h3" sx={{ mb: 0.5 }}>
+          <WhatshotIcon sx={{ mb: 2, fontSize: 50 }} /> Trending Videos
+        </Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          These videos are going viral, take a look at them!
+        </Typography>
 
-        {loading && <Loading label="Loading videos" />}
+        <Loading show={loading} label="Loading videos" />
         {error && <p className="text-danger">Error: {error}</p>}
 
         {!loading && !error && videos.length === 0 && (
@@ -52,10 +59,7 @@ function Trending() {
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-0">
           {videos.map((video) => (
             <div key={video._id} className="col">
-              <Link
-                to={`/watch/${video._id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
+              <Link to={`/watch/${video._id}`} style={NoLinkStyling}>
                 <VideoCard video={video} />
               </Link>
             </div>
@@ -63,7 +67,7 @@ function Trending() {
         </div>
       </div>
       <Footer />
-    </>
+    </ContentContainer>
   );
 }
 

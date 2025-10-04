@@ -1,12 +1,20 @@
-import Footer from '../components/Footer.jsx';
-import Strings from '../utils/Strings.js';
-import VideoCard from '../components/VideoCard.jsx';
+import Footer from "@/components/Footer.jsx";
+import Strings from "../utils/Strings.js";
+import VideoCard from "@/components/VideoCard.jsx";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ApiConfig from "../utils/ApiConfig.js";
-import Loading from '../components/Loading.jsx';
-import { Box, Container, Divider, MenuItem, Skeleton, TextField, Typography } from '@mui/material';
-
+import ApiConfig from "../utils/Api.js";
+import Loading from "@/components/Loading.jsx";
+import {
+  Box,
+  Container,
+  Divider,
+  MenuItem,
+  Skeleton,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { ContentContainer } from "@/components/Containers.jsx";
 
 function Home() {
   const [videos, setVideos] = useState([]);
@@ -17,13 +25,14 @@ function Home() {
   useEffect(() => {
     document.title = "Home - Twaire";
     fetchVideos(sort);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort]);
 
   const fetchVideos = async (sortOption) => {
     try {
       setLoading(true);
-      const res = await fetch(`${ApiConfig.serverUrl}/api/videos?sort=${sortOption}`);
+      const res = await fetch(
+        `${ApiConfig.serverUrl}/api/videos?sort=${sortOption}`,
+      );
       if (!res.ok) throw new Error("Failed to fetch videos");
       const data = await res.json();
       setVideos(data);
@@ -38,7 +47,9 @@ function Home() {
     <>
       {/* Banner*/}
       <Box sx={{ width: "100%", mb: 4, mt: -4 }}>
-        {!bannerLoaded && <Skeleton variant="rectangular" width="100%" height={360} />}
+        {!bannerLoaded && (
+          <Skeleton variant="rectangular" width="100%" height={360} />
+        )}
         <img
           src={`${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`}
           alt="Banner"
@@ -47,12 +58,13 @@ function Home() {
         />
       </Box>
 
-      <Box sx={{px:{xs:2,md:6}}}>
-        <Typography variant="h2" sx={{mb: 1, fontWeight: 'bold'}}>
+      <ContentContainer>
+        <Typography variant="h2" sx={{ mb: 1, fontWeight: "bold" }}>
           Welcome to Twaire!
         </Typography>
         <Typography variant="subtitle1">
-          Twaire is an open platform where you can share your vlogs, videos and much more!
+          Twaire is an open platform where you can share your vlogs, videos and
+          much more!
         </Typography>
         <Divider sx={{ my: 2 }} />
 
@@ -66,7 +78,7 @@ function Home() {
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             variant="outlined"
-            sx={{ width: 'auto', minWidth: 120 }}
+            sx={{ width: "auto", minWidth: 120 }}
           >
             <MenuItem value="latest">Latest</MenuItem>
             <MenuItem value="trending">Trending</MenuItem>
@@ -93,7 +105,8 @@ function Home() {
             </div>
           )}
         </div>
-      </Box>
+      </ContentContainer>
+
       <Footer />
     </>
   );

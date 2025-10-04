@@ -10,10 +10,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Loading from "../components/Loading.jsx";
-import UserHeader from "../components/UserHeader.jsx";
-import UserTabs from "../components/UserTabs.jsx";
-import ApiConfig from "../utils/ApiConfig.js";
+import Loading from "@/components/Loading.jsx";
+import UserHeader from "@/components/UserHeader.jsx";
+import UserTabs from "@/components/UserTabs.jsx";
+import ApiConfig from "../utils/Api.js";
 
 function MyAccount() {
   const [user, setUser] = useState(null);
@@ -35,7 +35,7 @@ function MyAccount() {
         setUser(data);
 
         const vidRes = await fetch(
-          `${ApiConfig.serverUrl}/api/videos?uploader=${data._id}`
+          `${ApiConfig.serverUrl}/api/videos?uploader=${data._id}`,
         );
         if (vidRes.ok) {
           const vidData = await vidRes.json();
@@ -62,12 +62,6 @@ function MyAccount() {
     } catch (err) {
       console.error("Logout failed", err);
     }
-  };
-
-  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-
-  const handleTabChange = (event, newValue) => {
-    setSelectedTabIndex(newValue);
   };
 
   if (loading) return <Loading label="Loading your account..." />;

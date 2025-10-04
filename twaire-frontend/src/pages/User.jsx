@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { Container } from "@mui/material";
-import Loading from "../components/Loading.jsx";
-import SubscribeButton from "../components/SubscribeButton.jsx";
-import UserHeader from "../components/UserHeader.jsx";
-import UserTabs from "../components/UserTabs.jsx";
+import Loading from "@/components/Loading.jsx";
+import SubscribeButton from "@/components/SubscribeButton.jsx";
+import UserHeader from "@/components/UserHeader.jsx";
+import UserTabs from "@/components/UserTabs.jsx";
 import ApiConfig from "../utils/ApiConfig.js";
-import AppSnackbar from "../components/AppSnackbar.jsx";
+import AppSnackbar from "@/components/AppSnackbar.jsx";
 
 function User() {
   const { username } = useParams();
@@ -35,7 +35,9 @@ function User() {
   useEffect(() => {
     const fetchUserAndVideos = async () => {
       try {
-        const resUser = await fetch(`${ApiConfig.serverUrl}/api/users/${username}`);
+        const resUser = await fetch(
+          `${ApiConfig.serverUrl}/api/users/${username}`,
+        );
         if (!resUser.ok) {
           const errData = await resUser.json().catch(() => ({}));
           throw new Error(errData.error || "User not found");
@@ -43,7 +45,9 @@ function User() {
         const userData = await resUser.json();
         setUser(userData);
 
-        const resVideos = await fetch(`${ApiConfig.serverUrl}/api/videos?uploader=${userData._id}`);
+        const resVideos = await fetch(
+          `${ApiConfig.serverUrl}/api/videos?uploader=${userData._id}`,
+        );
         if (!resVideos.ok) {
           const errData = await resVideos.json().catch(() => ({}));
           throw new Error(errData.error || "Failed to fetch videos");
@@ -53,7 +57,7 @@ function User() {
 
         const subRes = await fetch(
           `${ApiConfig.serverUrl}/api/users/${userData._id}/isSubscribed`,
-          { credentials: "include" }
+          { credentials: "include" },
         );
         if (subRes.ok) {
           const subData = await subRes.json();
@@ -76,10 +80,13 @@ function User() {
     if (!user?._id) return;
     try {
       setSubLoading(true);
-      const res = await fetch(`${ApiConfig.serverUrl}/api/users/${user._id}/subscribe`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${ApiConfig.serverUrl}/api/users/${user._id}/subscribe`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to subscribe");
       setSubscribed(data.subscribed);

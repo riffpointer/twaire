@@ -19,11 +19,15 @@ const localIP = obtainLocalIPAddress();
 
 // You must have MongoDB installed: https://www.mongodb.com/try/download/community
 // Here we connect to a local MongoDB instance. I haven't tried out MongoDB Atlas yet.
-mongoose.connect(process.env.MONGO_SERVER || "mongodb://127.0.0.1:27017/twaire");
+mongoose.connect(
+  process.env.MONGO_SERVER || "mongodb://127.0.0.1:27017/twaire",
+);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
-db.once("open", () => console.log("Connected to MongoDB instance successfully"));
+db.once("open", () =>
+  console.log("Connected to MongoDB instance successfully"),
+);
 
 app.use(
   session({
@@ -36,9 +40,8 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
     },
-  })
+  }),
 );
-
 
 // app.use(
 //   cors({
@@ -61,9 +64,9 @@ app.use(
 // Uncomment this to allow any domain to access this server (not recommended)
 app.use(
   cors({
-    origin: true,       // allow all origins
-    credentials: true,  // allow cookies
-  })
+    origin: true, // allow all origins
+    credentials: true, // allow cookies
+  }),
 );
 
 app.use(express.json());

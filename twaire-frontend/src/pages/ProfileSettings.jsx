@@ -1,5 +1,5 @@
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import DeleteIcon from '@mui/icons-material/Delete';
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Alert,
   Avatar,
@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Loading from "../components/Loading.jsx";
+import Loading from "@/components/Loading.jsx";
 import ApiConfig from "../utils/ApiConfig.js";
 
 function ProfileSettings() {
@@ -32,10 +32,13 @@ function ProfileSettings() {
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [removeProfilePictureButtonDisabled, setRemoveProfileButtonDisabled] = useState(false);
+  const [removeProfilePictureButtonDisabled, setRemoveProfileButtonDisabled] =
+    useState(false);
   const [saveInProgress, setSaveInProgress] = useState(false);
 
-  const navigate = (location) => { window.location.href = location };
+  const navigate = (location) => {
+    window.location.href = location;
+  };
   const routerNavigate = useNavigate();
 
   useEffect(() => {
@@ -91,7 +94,7 @@ function ProfileSettings() {
       console.error("Account deletion failed", err);
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -126,10 +129,13 @@ function ProfileSettings() {
 
   const handleRemoveProfilePicture = async () => {
     try {
-      const res = await fetch(`${ApiConfig.serverUrl}/api/users/me/delete/profile_picture`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${ApiConfig.serverUrl}/api/users/me/delete/profile_picture`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
 
       if (res.ok) {
         setProfilePicture(null);
@@ -159,15 +165,31 @@ function ProfileSettings() {
             Profile Settings
           </Typography>
           <Alert severity="info" mb={2}>
-            You cannot change your username once you have created your account. To request a username change, please contact the Twaire team.
+            You cannot change your username once you have created your account.
+            To request a username change, please contact the Twaire team.
           </Alert>
           <Box
             component="form"
-            sx={{ display: "flex", flexDirection: { xs: 'column', md: 'row' }, width: "100%", mt: 3 }}
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              width: "100%",
+              mt: 3,
+            }}
             onSubmit={handleSubmit}
             noValidate
           >
-            <Box sx={{ mb: { xs: 3, md: 0 }, mr: { xs: 0, md: 4 }, display: 'flex', justifyContent: 'start', alignItems: "center", flexDirection: "column", gap: 2 }}>
+            <Box
+              sx={{
+                mb: { xs: 3, md: 0 },
+                mr: { xs: 0, md: 4 },
+                display: "flex",
+                justifyContent: "start",
+                alignItems: "center",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
               <Tooltip title="Change Profile Picture">
                 <IconButton
                   color="primary"
@@ -182,7 +204,10 @@ function ProfileSettings() {
                     onChange={handleFileChange}
                   />
                   <Avatar
-                    src={preview || `${ApiConfig.serverUrl}/api/helper/placeholder/100x100?text=${publicName.charAt(0)}`}
+                    src={
+                      preview ||
+                      `${ApiConfig.serverUrl}/api/helper/placeholder/100x100?text=${publicName.charAt(0)}`
+                    }
                     sx={{ width: 100, height: 100 }}
                   />
                   <Box
@@ -217,7 +242,7 @@ function ProfileSettings() {
                 onClick={handleRemoveProfilePicture}
               >
                 <DeleteIcon fontSize="small" /> Remove picture
-              </Button>            
+              </Button>
             </Box>
             <Box sx={{ flexGrow: 1 }}>
               <TextField
@@ -244,8 +269,16 @@ function ProfileSettings() {
               />
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Button type="submit" variant="contained" color="primary" disabled={saveInProgress}>
-                  {saveInProgress && <CircularProgress size={20} sx={{mr:1}} />}{" "}Save Changes
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={saveInProgress}
+                >
+                  {saveInProgress && (
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                  )}{" "}
+                  Save Changes
                 </Button>
                 <Button
                   variant="outlined"
@@ -271,7 +304,9 @@ function ProfileSettings() {
         <DialogTitle id="delete-dialog-title">Delete Account</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete your account? This action is irreversible and will delete all your data, including videos and comments.
+            Are you sure you want to delete your account? This action is
+            irreversible and will delete all your data, including videos and
+            comments.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -1,27 +1,20 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import {
-  Box,
-  Card,
-  Chip,
-  Container,
-  Divider,
-  Typography
-} from "@mui/material";
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import CommentSection from "../components/CommentSection.jsx";
-import Loading from "../components/Loading.jsx";
-import PublicVideosList from "../components/PublicVideosList.jsx";
-import VideoActionBar from "../components/VideoActionBar.jsx";
-import VideoPlayer from "../components/VideoPlayer.jsx";
-import ApiConfig from "../utils/ApiConfig.js";
+import { Box, Card, Chip, Container, Divider, Typography } from "@mui/material";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import CommentSection from "@/components/CommentSection.jsx";
+import Loading from "@/components/Loading.jsx";
+import PublicVideosList from "@/components/PublicVideosList.jsx";
+import VideoActionBar from "@/components/VideoActionBar.jsx";
+import VideoPlayer from "@/components/VideoPlayer.jsx";
+import ApiConfig from "../utils/Api.js";
 import { getRelativeTime } from "../utils/DateUtils.js";
-import PromptLoginDialog from "../components/PromptLoginDialog.jsx";
-import ChannelBar from "../components/ChannelBar.jsx";
+import PromptLoginDialog from "@/components/PromptLoginDialog.jsx";
+import ChannelBar from "@/components/ChannelBar.jsx";
 import React from "react";
 
 function Watch() {
@@ -39,9 +32,9 @@ function Watch() {
     setContextMenu(
       contextMenu === null
         ? {
-          mouseX: event.clientX + 2,
-          mouseY: event.clientY - 6,
-        }
+            mouseX: event.clientX + 2,
+            mouseY: event.clientY - 6,
+          }
         : null,
     );
   };
@@ -70,10 +63,13 @@ function Watch() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const videoDataRequest = await fetch(`${ApiConfig.serverUrl}/api/videos/${id}/view`, {
-          method: "POST",
-          credentials: "include",
-        });
+        const videoDataRequest = await fetch(
+          `${ApiConfig.serverUrl}/api/videos/${id}/view`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
 
         if (!videoDataRequest.ok) {
           const errorData = await videoDataRequest.json().catch(() => ({}));
@@ -88,7 +84,7 @@ function Watch() {
         if (data.uploaderId) {
           const subDataRequest = await fetch(
             `${ApiConfig.serverUrl}/api/users/${data.uploaderId}/isSubscribed`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           if (subDataRequest.ok) {
@@ -97,7 +93,7 @@ function Watch() {
           }
 
           const uploaderDataRequest = await fetch(
-            `${ApiConfig.serverUrl}/api/users/${data.uploader.username}`
+            `${ApiConfig.serverUrl}/api/users/${data.uploader.username}`,
           );
 
           if (uploaderDataRequest.ok) {
@@ -125,7 +121,7 @@ function Watch() {
         {
           method: "POST",
           credentials: "include",
-        }
+        },
       );
 
       if (res.status === 401) {
@@ -140,7 +136,7 @@ function Watch() {
 
       setSubscribed(data.subscribed);
       setUploaderSubs((prev) =>
-        data.subscribed ? prev + 1 : Math.max(prev - 1, 0)
+        data.subscribed ? prev + 1 : Math.max(prev - 1, 0),
       );
     } catch (err) {
       console.error(err);
@@ -162,7 +158,9 @@ function Watch() {
     );
 
   const uploadedAgo = getRelativeTime(video.uploadedAt);
-  const formattedUploadDate = video.uploadedAt ? new Date(video.uploadedAt).toLocaleDateString() : "";
+  const formattedUploadDate = video.uploadedAt
+    ? new Date(video.uploadedAt).toLocaleDateString()
+    : "";
   const isPaused = document.getElementById("main-video-player")?.paused;
 
   return (
@@ -174,7 +172,11 @@ function Watch() {
             <div className="card-body">
               {/* Video player */}
               <Box sx={{ mb: 2 }}>
-                <VideoPlayer onContextMenu={handleContextMenu} src={`${ApiConfig.serverUrl}/data/uploads/${video.filename}`} autoPlay={true} />
+                <VideoPlayer
+                  onContextMenu={handleContextMenu}
+                  src={`${ApiConfig.serverUrl}/data/uploads/${video.filename}`}
+                  autoPlay={true}
+                />
                 <Menu
                   open={contextMenu !== null}
                   onClose={handleClose}
@@ -187,26 +189,32 @@ function Watch() {
                   slotProps={{
                     paper: {
                       sx: {
-                        backgroundColor: '#2c2c2c',
-                        color: 'white',
-                        '& .MuiMenuItem-root': {
-                          '&:hover': {
-                            backgroundColor: '#444444',
+                        backgroundColor: "#2c2c2c",
+                        color: "white",
+                        "& .MuiMenuItem-root": {
+                          "&:hover": {
+                            backgroundColor: "#444444",
                           },
                         },
                       },
-                    }
+                    },
                   }}
                 >
                   <MenuItem onClick={handlePlayPause}>
                     <ListItemIcon>
-                      <i className={`bi ${isPaused ? 'bi-play-fill' : 'bi-pause-fill'}`} style={{ color: 'white' }}></i>
+                      <i
+                        className={`bi ${isPaused ? "bi-play-fill" : "bi-pause-fill"}`}
+                        style={{ color: "white" }}
+                      ></i>
                     </ListItemIcon>
-                    <ListItemText>{isPaused ? 'Play' : 'Pause'}</ListItemText>
+                    <ListItemText>{isPaused ? "Play" : "Pause"}</ListItemText>
                   </MenuItem>
                   <MenuItem onClick={handleRestart}>
                     <ListItemIcon>
-                      <i className="bi bi-arrow-repeat" style={{ color: 'white' }}></i>
+                      <i
+                        className="bi bi-arrow-repeat"
+                        style={{ color: "white" }}
+                      ></i>
                     </ListItemIcon>
                     <ListItemText>Restart</ListItemText>
                   </MenuItem>
@@ -223,17 +231,18 @@ function Watch() {
               )}
 
               {/* Title */}
-              <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{ fontWeight: "bold", mb: 1 }}
+              >
                 {video.title}
               </Typography>
 
               {/* Video statistics */}
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 1 }}
-              >
-                {video.views} views • Uploaded {uploadedAgo} ({formattedUploadDate})
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {video.views} views • Uploaded {uploadedAgo} (
+                {formattedUploadDate})
               </Typography>
 
               {/* Video action bar i.e like dislike share etc */}
@@ -270,10 +279,13 @@ function Watch() {
           </div>
         </div>
       </Container>
-      <PromptLoginDialog action="subscribe to this channel" open={promptLoginDialogShown} onClose={() => showPromptLogin(false)} />
+      <PromptLoginDialog
+        action="subscribe to this channel"
+        open={promptLoginDialogShown}
+        onClose={() => showPromptLogin(false)}
+      />
     </>
   );
 }
 
 export default Watch;
-

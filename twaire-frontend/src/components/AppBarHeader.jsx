@@ -1,46 +1,42 @@
-import LoginIcon from '@mui/icons-material/Login';
-import MenuIcon from '@mui/icons-material/Menu';
-import { Button, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import { useEffect, useState } from "react";
+import HomeIcon from "@mui/icons-material/Home";
+import InfoIcon from "@mui/icons-material/Info";
+import LoginIcon from "@mui/icons-material/Login";
+import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
+import WhatshotIcon from "@mui/icons-material/Whatshot";
+import { Button, InputAdornment, TextField } from "@mui/material";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import ApiConfig from '../utils/ApiConfig.js';
-import AppDrawer from './AppDrawer';
-import UserDropdown from './UserDropdown';
-import HomeIcon from '@mui/icons-material/Home';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import InfoIcon from '@mui/icons-material/Info';
-import SearchIcon from '@mui/icons-material/Search';
-import Loading from './Loading';
-import React from 'react';
+import ApiConfig, { fromServer } from "../utils/Api.js";
+import AppDrawer from "./AppDrawer";
+import Loading from "./Loading";
+import UserDropdown from "./UserDropdown";
 
 export default function AppBarHeader() {
-  const [auth, setAuth] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searchBarOpen, setSearchBarOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
-  const displaySizeMd = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
+        const res = await fetch(fromServer("/api/users/me"), {
           credentials: "include",
         });
         if (!res.ok) {
           setUser(null);
-          console.log("Unable to obtain logged in user information, response not ok");
+          console.log(
+            "Unable to obtain logged in user information, response not ok",
+          );
         } else {
           const data = await res.json();
           setUser(data);
@@ -67,21 +63,9 @@ export default function AppBarHeader() {
     setDrawerOpen(newOpen);
   };
 
-  const handleChange = (event) => {
-    setAuth(event.target.checked);
-  };
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleLogout = async () => {
     try {
-      await fetch(`${ApiConfig.serverUrl}/api/users/logout`, {
+      await fetch(fromServer("/api/users/logout"), {
         method: "POST",
         credentials: "include",
       });
@@ -100,19 +84,27 @@ export default function AppBarHeader() {
   };
 
   const navLinkPages = {
-    "Home": {
+    Home: {
       path: "/",
-      icon: <HomeIcon />
+      icon: <HomeIcon />,
     },
-    "Trending": {
+    Trending: {
       path: "/trending",
-      icon: <WhatshotIcon />
+      icon: <WhatshotIcon />,
     },
-    "About": {
+    About: {
       path: "/about",
-      icon: <InfoIcon />
+      icon: <InfoIcon />,
     },
   };
+
+  const searchFieldEndAdornment = (
+    <InputAdornment position="end">
+      <IconButton type="submit" edge="end" aria-label="search">
+        <SearchIcon />
+      </IconButton>
+    </InputAdornment>
+  );
 
   return (
     <Box mb={4}>
@@ -128,17 +120,34 @@ export default function AppBarHeader() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component={Link} color="textPrimary" to="/" sx={{ display: { xs: 'none', sm: 'block' }, textDecoration: "none", mr: 2, flexGrow: { xs: 1, md: 0 } }}>
+          <Typography
+            variant="h6"
+            component={Link}
+            color="textPrimary"
+            to="/"
+            sx={{
+              display: { xs: "none", sm: "block" },
+              textDecoration: "none",
+              mr: 2,
+              flexGrow: { xs: 1, md: 0 },
+            }}
+          >
             Twaire
           </Typography>
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: "start", flexGrow: 1 }}>
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              justifyContent: "start",
+              flexGrow: 1,
+            }}
+          >
             {Object.entries(navLinkPages).map(([label, navLink]) => (
               <Button
                 key={label}
                 onClick={() => {
                   navigate(navLink.path);
                 }}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: "white", display: "block" }}
               >
                 {label}
               </Button>
@@ -147,28 +156,21 @@ export default function AppBarHeader() {
           <Box
             component="form"
             onSubmit={handleSearch}
-            sx={{ marginRight: 2, width: "100%", maxWidth: {xs: "100%", sm: 300, md: 400}, flexGrow: { xs: 1, md: 0 }}}
+            sx={{
+              marginRight: 2,
+              width: "100%",
+              maxWidth: { xs: "100%", sm: 300, md: 400 },
+              flexGrow: { xs: 1, md: 0 },
+            }}
           >
             <TextField
               fullWidth
               variant="outlined"
               placeholder="Search videos..."
               value={searchTerm}
-              size='small'
+              size="small"
               onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      type="submit"
-                      edge="end"
-                      aria-label="search"
-                    >
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
+              InputProps={{ endAdornment: searchFieldEndAdornment }}
             />
           </Box>
           <Box>
@@ -187,13 +189,19 @@ export default function AppBarHeader() {
 
             {user ? (
               <UserDropdown user={user} handleLogout={handleLogout} />
-            ) : ((!user && loading) && 
-              <Loading />
+            ) : (
+              !user && loading && <Loading />
             )}
           </Box>
         </Toolbar>
       </AppBar>
-      <AppDrawer navLinkPages={navLinkPages} open={drawerOpen} toggleDrawer={toggleDrawer} />
+
+      {/* App drawer */}
+      <AppDrawer
+        navLinkPages={navLinkPages}
+        open={drawerOpen}
+        toggleDrawer={toggleDrawer}
+      />
     </Box>
   );
 }

@@ -10,5 +10,5 @@ const ApiConfig = (() => {
     serverUrl: `${protocol}//${hostname}${portPart}`,
   };
 })();
-
+export const fromServer = (url) => ApiConfig.serverUrl + url;
 export default ApiConfig;

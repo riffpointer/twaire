@@ -1,8 +1,16 @@
-import { Box, Container, MenuItem, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Box,
+  Container,
+  MenuItem,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import Loading from "../components/Loading.jsx";
-import VideoGrid from "../components/VideoGrid.jsx";
+import Loading from "@/components/Loading.jsx";
+import VideoGrid from "@/components/VideoGrid.jsx";
 import ApiConfig from "../utils/ApiConfig.js";
 
 function useQuery() {
@@ -18,7 +26,7 @@ function Search() {
   const [sort, setSort] = useState("relevance");
 
   const theme = useTheme();
-  const displaySizeMd = useMediaQuery(theme.breakpoints.down('md'));
+  const displaySizeMd = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     document.title = `${searchTerm} - Search - Twaire`;
@@ -29,8 +37,8 @@ function Search() {
 
         const res = await fetch(
           `${ApiConfig.serverUrl}/api/videos/search?q=${encodeURIComponent(
-            searchTerm
-          )}&sort=${sort}`
+            searchTerm,
+          )}&sort=${sort}`,
         );
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -60,10 +68,20 @@ function Search() {
             xs: "column",
             sm: "row",
           },
-          mb: { xs: 4, sm: 2 }
+          mb: { xs: 4, sm: 2 },
         }}
       >
-        <Typography variant="h5" sx={{ mb: { xs: 2, sm: 0 }, textAlign: { xs: "center", sm: "left" }, width: "100%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <Typography
+          variant="h5"
+          sx={{
+            mb: { xs: 2, sm: 0 },
+            textAlign: { xs: "center", sm: "left" },
+            width: "100%",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
           Search Results for: <b>{searchTerm}</b>
         </Typography>
 
