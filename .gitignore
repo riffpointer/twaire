@@ -31,3 +31,4 @@ dist-ssr
 /resources/sample_videos
 *.sublime-workspace
 todo.txt
+*.zip
