@@ -11,10 +11,11 @@ import Loading from "@/components/Loading.jsx";
 import PublicVideosList from "@/components/PublicVideosList.jsx";
 import VideoActionBar from "@/components/VideoActionBar.jsx";
 import VideoPlayer from "@/components/VideoPlayer.jsx";
-import ApiConfig from "../utils/Api.js";
+import ApiConfig from "../utils/ApiConfig.js";
 import { getRelativeTime } from "../utils/DateUtils.js";
 import PromptLoginDialog from "@/components/PromptLoginDialog.jsx";
 import ChannelBar from "@/components/ChannelBar.jsx";
+import AppSnackbar from "@/components/AppSnackbar.jsx";
 import React from "react";
 
 function Watch() {
@@ -26,6 +27,18 @@ function Watch() {
   const [uploaderSubs, setUploaderSubs] = useState(0);
   const [contextMenu, setContextMenu] = useState(null);
   const [promptLoginDialogShown, showPromptLogin] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("error");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const showSnackbar = (message, severity = "error") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = () => setSnackbarOpen(false);
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -109,10 +122,32 @@ function Watch() {
     };
 
     fetchVideo();
+    
+    // Fetch current user for self-subscribe check
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setCurrentUser(userData);
+        }
+      } catch (err) {
+        // Not logged in - ignore
+      }
+    };
+    fetchCurrentUser();
   }, [id]);
 
   const handleSubscribe = async () => {
     if (!video?.uploaderId) return;
+
+    // Check if user is trying to subscribe to themselves
+    if (currentUser && video.uploaderId === currentUser._id) {
+      showSnackbar("You may not subscribe to yourself", "warning");
+      return;
+    }
 
     try {
       setSubLoading(true);
@@ -140,7 +175,7 @@ function Watch() {
       );
     } catch (err) {
       console.error(err);
-      alert("Subscription action failed: " + err.message);
+      showSnackbar("Subscription action failed: " + err.message);
     } finally {
       setSubLoading(false);
     }
@@ -283,6 +318,12 @@ function Watch() {
         action="subscribe to this channel"
         open={promptLoginDialogShown}
         onClose={() => showPromptLogin(false)}
+      />
+      <AppSnackbar
+        open={snackbarOpen}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
       />
     </>
   );

@@ -24,7 +24,7 @@ function UserTabs({ user, videos }) {
   });
 
   return (
-    <Paper elevation={2} sx={{ p: 2, mt: 2, mb: 2 }}>
+    <Paper elevation={2} sx={{ p: 2, pt: 1, mt: 1, mb: 2 }}>
       <TabContext value={selectedTabIndex.toString()}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 0 }}>
           <TabList onChange={handleTabChange} aria-label="channel info tabs">

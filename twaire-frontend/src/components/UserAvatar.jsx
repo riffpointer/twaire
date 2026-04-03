@@ -1,5 +1,5 @@
 import { Avatar } from "@mui/material";
-import ApiConfig from "../utils/Api.js";
+import ApiConfig from "../utils/ApiConfig.js";
 
 function UserAvatar({ user, size = 38, sx = {}, ...props }) {
   return (

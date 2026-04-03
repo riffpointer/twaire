@@ -6,7 +6,7 @@ import WhatshotIcon from "@mui/icons-material/Whatshot";
 import { Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import ApiConfig from "../utils/Api.js";
+import ApiConfig from "../utils/ApiConfig.js";
 import { NoLinkStyling } from "@/styles/LinkStyles.jsx";
 
 function Trending() {
@@ -53,7 +53,7 @@ function Trending() {
         {error && <p className="text-danger">Error: {error}</p>}
 
         {!loading && !error && videos.length === 0 && (
-          <p className="text-muted">No trending videos found.</p>
+          <Typography color="text.secondary">No trending videos found.</Typography>
         )}
 
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-0">

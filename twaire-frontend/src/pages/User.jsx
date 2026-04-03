@@ -16,6 +16,7 @@ function User() {
   const [loading, setLoading] = useState(true);
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -38,22 +39,17 @@ function User() {
         const resUser = await fetch(
           `${ApiConfig.serverUrl}/api/users/${username}`,
         );
-        if (!resUser.ok) {
-          const errData = await resUser.json().catch(() => ({}));
-          throw new Error(errData.error || "User not found");
-        }
+        if (!resUser.ok) throw new Error("User not found");
         const userData = await resUser.json();
         setUser(userData);
 
         const resVideos = await fetch(
           `${ApiConfig.serverUrl}/api/videos?uploader=${userData._id}`,
         );
-        if (!resVideos.ok) {
-          const errData = await resVideos.json().catch(() => ({}));
-          throw new Error(errData.error || "Failed to fetch videos");
+        if (resVideos.ok) {
+          const vidData = await resVideos.json();
+          setVideos(vidData);
         }
-        const videosData = await resVideos.json();
-        setVideos(videosData);
 
         const subRes = await fetch(
           `${ApiConfig.serverUrl}/api/users/${userData._id}/isSubscribed`,
@@ -73,11 +69,32 @@ function User() {
       }
     };
 
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setCurrentUser(userData);
+        }
+      } catch (err) {
+        // Not logged in
+      }
+    };
+
     fetchUserAndVideos();
+    fetchCurrentUser();
   }, [username, subscribed]);
 
   const handleSubscribe = async () => {
     if (!user?._id) return;
+
+    if (currentUser && user._id === currentUser._id) {
+      showSnackbar("You may not subscribe to yourself", "warning");
+      return;
+    }
+
     try {
       setSubLoading(true);
       const res = await fetch(

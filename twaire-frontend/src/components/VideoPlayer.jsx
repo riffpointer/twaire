@@ -1,6 +1,7 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ReplayIcon from "@mui/icons-material/Replay";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Box, CircularProgress, Fade, IconButton, Slide, Slider, Typography } from "@mui/material";
@@ -9,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
 const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
   const videoRef = useRef(null);
   const [playing, setPlaying] = useState(autoPlay);
+  const [ended, setEnded] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [volume, setVolume] = useState(1);
   const [prevVolume, setPrevVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -18,6 +21,8 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
   const [muted, setMuted] = useState(false);
   const [buffering, setBuffering] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekTime, setSeekTime] = useState(0);
 
   let hideTimeout = useRef(null);
 
@@ -31,6 +36,72 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
       }
       setShowControls(false);
     }, 2500);
+  };
+
+  useEffect(() => {
+    resetHideTimeout();
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
+    const handleLoadedMetadata = () => setDuration(video.duration);
+    const handleWaiting = () => setBuffering(true);
+    const handlePlaying = () => {
+      setBuffering(false);
+      setPlaying(true);
+      setEnded(false);
+    };
+    const handleEnded = () => {
+      setPlaying(false);
+      setEnded(true);
+      setShowCenterIcon(true);
+    };
+    const handlePause = () => setPlaying(false);
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("waiting", handleWaiting);
+    video.addEventListener("playing", handlePlaying);
+    video.addEventListener("ended", handleEnded);
+    video.addEventListener("pause", handlePause);
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("waiting", handleWaiting);
+      video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("pause", handlePause);
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (ended) {
+      video.currentTime = 0;
+      video.play();
+      setEnded(false);
+      setPlaying(true);
+      setShowCenterIcon(true);
+      setTimeout(() => setShowCenterIcon(false), 800);
+      resetHideTimeout();
+      return;
+    }
+
+    if (video.paused) {
+      video.play();
+      setPlaying(true);
+    } else {
+      video.pause();
+      setPlaying(false);
+    }
+
+    setShowCenterIcon(true);
+    setTimeout(() => setShowCenterIcon(false), 800);
+
+    resetHideTimeout();
   };
 
   useEffect(() => {
@@ -57,24 +128,6 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
     };
   }, []);
 
-  const togglePlay = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (video.paused) {
-      video.play();
-      setPlaying(true);
-    } else {
-      video.pause();
-      setPlaying(false);
-    }
-
-    setShowCenterIcon(true);
-    setTimeout(() => setShowCenterIcon(false), 800);
-
-    resetHideTimeout();
-  };
-
   const handleVolumeChange = (e, value) => {
     const video = videoRef.current;
     if (!video) return;
@@ -87,12 +140,37 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
   };
 
   const handleProgressChange = (e, value) => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.currentTime = value;
+    if (!isSeeking) setIsSeeking(true);
+    setSeekTime(value);
     setCurrentTime(value);
     resetHideTimeout();
   };
+
+  const handleProgressChangeCommitted = (e, value) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = value;
+    setIsSeeking(false);
+    resetHideTimeout();
+  };
+
+  // Smooth time update during seeking
+  useEffect(() => {
+    if (!isSeeking) return;
+    let animationId;
+    const animate = () => {
+      const video = videoRef.current;
+      if (video) {
+        const diff = seekTime - video.currentTime;
+        if (Math.abs(diff) > 0.1) {
+          video.currentTime += diff * 0.15;
+          animationId = requestAnimationFrame(animate);
+        }
+      }
+    };
+    animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, [isSeeking, seekTime]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60).toString().padStart(2, "0");
@@ -134,6 +212,15 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
       {/* Video clickable area */}
       <Box
         onClick={togglePlay}
+        onKeyDown={(e) => {
+          if (e.key === " " || e.key === "k") {
+            e.preventDefault();
+            togglePlay();
+          }
+        }}
+        tabIndex={0}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         sx={{
           width: "100%",
           height: "100%",
@@ -141,6 +228,8 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
           top: 0,
           left: 0,
           zIndex: 1,
+          outline: focused ? "2px solid" : "none",
+          outlineColor: "primary.main",
         }}
       />
 
@@ -170,8 +259,8 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
         </Box>
       )}
 
-      {/* Center Play/Pause Icon */}
-      <Fade in={showCenterIcon}>
+      {/* Center Play/Pause/Replay Icon */}
+      <Fade in={showCenterIcon || ended}>
         <Box
           sx={{
             position: "absolute",
@@ -188,7 +277,9 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             zIndex: 2,
           }}
         >
-          {playing ? (
+          {ended ? (
+            <ReplayIcon sx={{ color: "white", fontSize: 60 }} />
+          ) : playing ? (
             <PauseIcon sx={{ color: "white", fontSize: 60 }} />
           ) : (
             <PlayArrowIcon sx={{ color: "white", fontSize: 60 }} />
@@ -218,13 +309,14 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             {playing ? <PauseIcon /> : <PlayArrowIcon />}
           </IconButton>
           <Typography sx={{ color: "white", ml: 1, minWidth: 50 }}>
-            {formatTime(currentTime)}
+            {formatTime(isSeeking ? seekTime : currentTime)}
           </Typography>
           <Slider
             min={0}
             max={duration || 0}
-            value={currentTime}
+            value={isSeeking ? seekTime : currentTime}
             onChange={handleProgressChange}
+            onChangeCommitted={handleProgressChangeCommitted}
             sx={{ mx: 1, flex: 1 }}
             size="small"
           />

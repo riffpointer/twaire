@@ -3,7 +3,7 @@ import Strings from "../utils/Strings.js";
 import VideoCard from "@/components/VideoCard.jsx";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ApiConfig from "../utils/Api.js";
+import ApiConfig from "../utils/ApiConfig.js";
 import Loading from "@/components/Loading.jsx";
 import {
   Box,

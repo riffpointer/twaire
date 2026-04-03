@@ -22,8 +22,9 @@ To run a local instance of Twaire, you must have the following installed on your
 
 - [Node.js](https://nodejs.org/) (v16 or higher recommended)
 - [Git](https://git-scm.com/)
-- [MongoDB Server](https://www.mongodb.com/try/download/community)
+- [MongoDB Server](https://www.mongodb.com/try/download/community) (Make sure `mongod` is in your path after installing it)
 - [pnpm](https://pnpm.io) can be installed with `npm install -g pnpm`
+- [nodemon]() can be installed with `pnpm install -g nodemon`
 
 ### Running
 Twaire has two components: 

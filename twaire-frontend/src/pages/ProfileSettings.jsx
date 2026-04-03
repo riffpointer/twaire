@@ -1,10 +1,18 @@
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import DeleteIcon from "@mui/icons-material/Delete";
+import PersonIcon from "@mui/icons-material/Person";
+import EmailIcon from "@mui/icons-material/Email";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
 import {
   Alert,
   Avatar,
   Box,
   Button,
+  Card,
+  CardContent,
+  Chip,
   CircularProgress,
   Container,
   Dialog,
@@ -12,7 +20,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Divider,
   IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   Paper,
   TextField,
   Tooltip,

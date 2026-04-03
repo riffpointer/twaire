@@ -12,7 +12,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import ApiConfig, { fromServer } from "../utils/Api.js";
+import ApiConfig, { fromServer } from "../utils/ApiConfig.js";
 import AppDrawer from "./AppDrawer";
 import Loading from "./Loading";
 import UserDropdown from "./UserDropdown";
@@ -178,9 +178,10 @@ export default function AppBarHeader() {
               <Button
                 component={NavLink}
                 to="/login"
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 size="small"
+                sx={{ height: 40 }}
                 startIcon={<LoginIcon />}
               >
                 Login

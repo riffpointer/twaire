@@ -1,5 +1,8 @@
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import UploadIcon from "@mui/icons-material/Upload";
+import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
+import PeopleIcon from "@mui/icons-material/People";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {
   Alert,
   Box,
@@ -14,12 +17,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   FormHelperText,
-  List,
-  ListItemButton,
-  ListItemText,
+  Grid,
   TextField,
   Typography,
   useMediaQuery,
@@ -28,7 +28,7 @@ import {
 import { grey } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiConfig from "../utils/Api.js";
+import ApiConfig from "../utils/ApiConfig.js";
 import Loading from "@/components/Loading.jsx";
 import { getRelativeTime } from "../utils/DateUtils.js";
 
@@ -48,7 +48,6 @@ function Dashboard() {
   const [videos, setVideos] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [statUserCreationDate, setStatUserCreationDate] = useState(null);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -72,17 +71,6 @@ function Dashboard() {
         );
         const videosData = await videosRes.json();
         setVideos(videosData);
-        setStatUserCreationDate(
-          new Date(data.createdAt).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            timeZoneName: "short",
-          }),
-        );
       } catch (err) {
         console.error(err);
         navigate("/login");
@@ -215,101 +203,149 @@ function Dashboard() {
   };
 
   return (
-    <Container
-      maxWidth="xl"
-      sx={{
-        display: "flex",
-        flexDirection: displaySizeMd ? "column" : "row",
-        gap: 4,
-        height: displaySizeMd ? "100%" : "80vh",
-      }}
-    >
-      {/* Left Panel */}
-      <Card
-        sx={{
-          width: 300,
-          display: "flex",
-          flexDirection: "column",
-          height: displaySizeMd ? "20em" : "100%",
-          minWidth: displaySizeMd ? "100%" : "18em",
-        }}
-      >
-        <Box p={2} pb={0}>
-          <Typography variant="h6">Your Videos</Typography>
-        </Box>
-        <List sx={{ flexGrow: 1, overflowY: "auto", height: "100%" }}>
-          {videos.map((v) => (
-            <ListItemButton
-              key={v._id}
-              onClick={() => navigate(`/watch/${v._id}`)}
-            >
-              <ListItemText
-                primary={v.title}
-                secondary={
-                  v.uploadedAt
-                    ? "Uploaded at " +
-                      new Date(v.uploadedAt).toLocaleDateString()
-                    : ""
-                }
-              />
-            </ListItemButton>
-          ))}
-          {videos.length === 0 && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              p={2}
-              width="100%"
-              textAlign="center"
-            >
-              No videos uploaded yet.
-            </Typography>
-          )}
-        </List>
-      </Card>
+    <Container maxWidth="xl" sx={{ mb: 4 }}>
+      {/* Header */}
+      <Box mb={3}>
+        <Typography variant="h5" fontWeight={700} gutterBottom>
+          Dashboard
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Manage your videos, track performance, and upload new content.
+        </Typography>
+      </Box>
 
-      {/* Right Panel */}
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant={displaySizeMd ? "h3" : "h2"} gutterBottom>
-          Welcome to your dashboard!
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Have an overview of how your videos are performing, update or delete
-          your previous uploads, or upload a new video, all in one place!
-        </Typography>
-        <Divider />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setOpenDialog(true)}
-          sx={{ mb: 2, mt: 2, width: displaySizeMd ? "100%" : "auto" }}
-        >
-          <UploadIcon sx={{ mr: 1 }} />
-          Upload a video
-        </Button>
-        <Divider />
-        <Card>
-          <CardContent>
-            <Typography variant="h5" gutterBottom>
-              Channel Statistics
-            </Typography>
-            <ul style={{ marginBottom: 0 }}>
-              <li>
-                You've uploaded <b>{videos.length}</b> videos so far!
-              </li>
-              <li>
-                Your account was created on{" "}
-                <b>{user ? statUserCreationDate : "..."}</b>, that was{" "}
-                <b>{user ? getRelativeTime(user.createdAt) : "..."}</b>!
-              </li>
-              <li>
-                You've got <b>{user ? user.subscribers : "..."}</b> subscriber
-                {user && user.subscribers != 1 && "s"}{" "}
-                {user && (user.subscribers == 0 ? " :(" : ":D")}
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <Grid container spacing={2} mb={3}>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Card variant="outlined">
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ color: "primary.main" }}>
+                <VideoLibraryIcon />
+              </Box>
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  {videos.length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Videos uploaded
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Card variant="outlined">
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ color: "primary.main" }}>
+                <PeopleIcon />
+              </Box>
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  {user ? user.subscribers ?? 0 : "..."}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Subscribers
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Card variant="outlined">
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ color: "primary.main" }}>
+                <CalendarTodayIcon />
+              </Box>
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  {user ? getRelativeTime(user.createdAt) : "..."}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Account age
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Content */}
+      <Grid container spacing={3}>
+        {/* Video list - left side */}
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                Your Videos
+              </Typography>
+              {videos.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" fontStyle="italic" py={1}>
+                  No videos uploaded yet.
+                </Typography>
+              ) : (
+                <Grid container spacing={2}>
+                  {videos.map((v) => (
+                    <Grid key={v._id} size={{ xs: 12, sm: 6 }}>
+                      <Box
+                        onClick={() => navigate(`/watch/${v._id}`)}
+                        sx={{
+                          cursor: "pointer",
+                          borderRadius: 1,
+                          overflow: "hidden",
+                          border: 1,
+                          borderColor: "divider",
+                          "&:hover": { opacity: 0.9 },
+                        }}
+                      >
+                        <Box sx={{ position: "relative", pt: "56.25%" }}>
+                          <img
+                            src={v.thumbnail ? `${ApiConfig.serverUrl}/${v.thumbnail}` : `${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`}
+                            alt={v.title}
+                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </Box>
+                        <Box sx={{ p: 1.5 }}>
+                          <Typography variant="body2" fontWeight={500} noWrap>
+                            {v.title}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {v.uploadedAt ? getRelativeTime(v.uploadedAt) : "Just now"}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Upload action - right side */}
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+              <Box sx={{ mb: 2 }}>
+                <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary" }} />
+              </Box>
+              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                Upload a new video
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={3}>
+                Share your content with the world
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setOpenDialog(true)}
+                startIcon={<UploadIcon />}
+              >
+                Upload
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
         <Dialog
           open={openDialog}
@@ -481,7 +517,6 @@ function Dashboard() {
             </Button>
           </DialogActions>
         </Dialog>
-      </Box>
     </Container>
   );
 }

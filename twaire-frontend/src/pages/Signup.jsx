@@ -128,7 +128,9 @@ function Signup() {
             control={<Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} />}
             label="I have read and agreed to the terms and conditions."
           />
-          {errors.agree && <Typography color="error" variant="caption">{errors.agree}</Typography>}
+          <Box sx={{ mt: -1, mb: 1 }}>
+            {errors.agree && <Typography color="error" variant="caption">{errors.agree}</Typography>}
+          </Box>
 
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button type="submit" variant="contained" disableElevation>
