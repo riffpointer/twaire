@@ -14,9 +14,9 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import Check from "@mui/icons-material/Check";
+import BookmarkOutlined from "@mui/icons-material/BookmarkOutlined";
 import Close from "@mui/icons-material/Close";
 import ContentCopy from "@mui/icons-material/ContentCopy";
-import PlaylistAdd from "@mui/icons-material/PlaylistAdd";
 import Share from "@mui/icons-material/Share";
 import ThumbDown from "@mui/icons-material/ThumbDown";
 import ThumbDownOutlined from "@mui/icons-material/ThumbDownOutlined";
@@ -28,8 +28,10 @@ import Reddit from "@mui/icons-material/Reddit";
 import Twitter from "@mui/icons-material/Twitter";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import { Divider } from "@mui/material";
+import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import SaveToPlaylistDialog from "./SaveToPlaylistDialog.jsx";
 
-function VideoActionBar({ videoId }) {
+function VideoActionBar({ videoId, onOpenBookmarks }) {
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -38,6 +40,8 @@ function VideoActionBar({ videoId }) {
   const [openShare, setOpenShare] = useState(false);
   const [copyButtonText, setCopyButtonText] = useState("Copy");
   const [promptLoginDialogShown, showPromptLogin] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     if (!videoId) return;
@@ -64,6 +68,16 @@ function VideoActionBar({ videoId }) {
     };
     fetchReactions();
   }, [videoId]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, { credentials: "include" });
+        if (res.ok) setCurrentUser(await res.json());
+      } catch { /* not logged in */ }
+    };
+    fetchCurrentUser();
+  }, []);
 
   const handleReaction = async (type) => {
     if (!videoId) return;
@@ -153,8 +167,18 @@ function VideoActionBar({ videoId }) {
 
         <Button
           variant="outlined"
-          startIcon={<PlaylistAdd />}
-          title="Save the video to a playlist"
+          startIcon={<BookmarkOutlined />}
+          onClick={onOpenBookmarks}
+          title="Open your private bookmarks"
+        >
+          Bookmarks
+        </Button>
+
+        <Button
+          variant="outlined"
+          startIcon={<PlaylistAddIcon />}
+          onClick={() => setSaveDialogOpen(true)}
+          title="Save to playlist"
         >
           Save
         </Button>
@@ -263,6 +287,12 @@ function VideoActionBar({ videoId }) {
           </Stack>
         </DialogContent>
       </Dialog>
+      <SaveToPlaylistDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        videoId={videoId}
+        currentUser={currentUser}
+      />
       <PromptLoginDialog
         action="like this video"
         open={promptLoginDialogShown}

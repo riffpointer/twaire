@@ -1,24 +1,58 @@
 import express from "express";
 import mongoose from "mongoose";
-import { Video, User, Comment, Autocomplete } from "../models/models.js";
+import { Video, User, Comment, Autocomplete, Bookmark, ChannelView } from "../models/models.js";
 import { videoUpload } from "../providers/storage.js";
 import isAuthenticated from "../middleware/auth.js";
 import { apiError, apiMessage } from "../utils/logging.js";
+import { DEFAULT_VIDEO_CATEGORY, isVideoCategory, sanitizeVideoCategory } from "../utils/videoCategories.js";
 
 const videoRouter = express.Router();
 
-const updateAutocomplete = async (terms) => {
+const sanitizeAutocompleteToken = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+const extractAutocompleteTerms = (...values) => {
+  const terms = new Set();
+  for (const value of values.flat()) {
+    String(value || "")
+      .split(/[^a-zA-Z0-9]+/)
+      .map(sanitizeAutocompleteToken)
+      .filter((token) => token.length > 1)
+      .forEach((token) => terms.add(token));
+  }
+  return Array.from(terms);
+};
+
+const normalizeBookmarkTimestamp = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return Math.round(parsed * 1000) / 1000;
+};
+
+const updateAutocomplete = async (terms, incrementBy = 1) => {
   try {
-    for (const term of terms) {
-      if (term && term.length > 2) { // Only process terms with more than 2 characters
-        await Autocomplete.findOneAndUpdate(
-          { term: term.toLowerCase() },
-          { createdAt: Date.now() },
-          { $inc: { frequency: 1 } },
-          { upsert: true }
-        );
-      }
-    }
+    const uniqueTerms = Array.from(
+      new Set((terms || []).map(sanitizeAutocompleteToken).filter((term) => term.length > 1)),
+    );
+
+    if (uniqueTerms.length === 0) return;
+
+    const now = new Date();
+    await Autocomplete.bulkWrite(
+      uniqueTerms.map((term) => ({
+        updateOne: {
+          filter: { term },
+          update: {
+            $setOnInsert: { term },
+            $set: { createdAt: now },
+            $inc: { frequency: incrementBy },
+          },
+          upsert: true,
+        },
+      })),
+    );
   } catch (error) {
     console.error("Error updating autocomplete terms:", error);
   }
@@ -99,6 +133,9 @@ videoRouter.get('/:id/reactions', async (req, res) => {
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ error: 'Video not found' });
 
+    video.likes = Array.isArray(video.likes) ? video.likes : [];
+    video.dislikes = Array.isArray(video.dislikes) ? video.dislikes : [];
+
     let liked = false;
     let disliked = false;
     const userId = req.session?.userId?.toString();
@@ -119,6 +156,135 @@ videoRouter.get('/:id/reactions', async (req, res) => {
   }
 });
 
+// GET API: Get private bookmarks for the current user on a video
+videoRouter.get("/:id/bookmarks", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    const videoExists = await Video.exists({ _id: req.params.id });
+    if (!videoExists) return res.status(404).json({ error: "Video not found" });
+
+    const bookmarks = await Bookmark.find({
+      user: userId,
+      video: req.params.id,
+    }).sort({ timestampSeconds: 1, createdAt: 1 });
+
+    res.json(bookmarks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST API: Save or update a private bookmark for a video timestamp
+videoRouter.post("/:id/bookmarks", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    const videoExists = await Video.exists({ _id: req.params.id });
+    if (!videoExists) return res.status(404).json({ error: "Video not found" });
+
+    const timestampSeconds = normalizeBookmarkTimestamp(req.body?.timestampSeconds);
+    const note = String(req.body?.note || "").trim();
+
+    if (timestampSeconds === null) {
+      return res.status(400).json({ error: "A valid timestamp is required" });
+    }
+
+    if (!note) {
+      return res.status(400).json({ error: "A note is required" });
+    }
+
+    const bookmark = await Bookmark.findOneAndUpdate(
+      {
+        user: userId,
+        video: req.params.id,
+        timestampSeconds,
+      },
+      {
+        $set: {
+          user: userId,
+          video: req.params.id,
+          timestampSeconds,
+          note,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      },
+    );
+
+    res.json(bookmark);
+  } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({ error: "That bookmark already exists" });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE API: Remove a private bookmark
+videoRouter.delete("/:id/bookmarks/:bookmarkId", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.bookmarkId)) {
+      return res.status(400).json({ error: "Invalid bookmark id" });
+    }
+
+    const bookmark = await Bookmark.findOneAndDelete({
+      _id: req.params.bookmarkId,
+      user: userId,
+      video: req.params.id,
+    });
+
+    if (!bookmark) {
+      return res.status(404).json({ error: "Bookmark not found" });
+    }
+
+    res.json({ message: "Bookmark deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Get videos uploaded by channels the current user is subscribed to
+videoRouter.get("/subscriptions/feed", isAuthenticated, async (req, res) => {
+  try {
+    const currentUserId = req.session.userId?.toString();
+    if (!currentUserId) return res.status(401).json({ error: "Not authenticated" });
+
+    const sort = req.query.sort || "recent";
+    const currentUser = await User.findById(currentUserId).select("subscriptions");
+    if (!currentUser) return res.status(404).json({ error: "User not found" });
+
+    const subscribedUserIds = Array.isArray(currentUser.subscriptions)
+      ? currentUser.subscriptions
+      : [];
+
+    if (subscribedUserIds.length === 0) {
+      return res.json([]);
+    }
+
+    let sortOption = { uploadedAt: -1 };
+    if (sort === "trending" || sort === "views") sortOption = { views: -1 };
+
+    const videos = await Video.find({ uploader: { $in: subscribedUserIds }, visibility: 0 })
+      .sort(sortOption)
+      .populate("uploader", "_id username publicName verified subscribers profilePicture");
+
+    res.json(videos);
+  } catch (err) {
+    console.error("Subscriptions feed error:", err);
+    res.status(500).json({ error: "Server error while retrieving subscriptions feed" });
+  }
+});
+
 // API: Get all videos with optional sorting and filtering
 videoRouter.get("/", async (req, res) => {
   try {
@@ -127,7 +293,7 @@ videoRouter.get("/", async (req, res) => {
     let sortOption = { uploadedAt: -1 };
     if (sort === "trending") sortOption = { views: -1 };
 
-    const query = {};
+    const query = { visibility: 0 };
     if (tag) query.tags = tag;
 
     // Only add uploader filter if valid ObjectId
@@ -148,17 +314,35 @@ videoRouter.get("/", async (req, res) => {
 // API: Increment view and get video details
 videoRouter.post("/:id/view", async (req, res) => {
   try {
-    const video = await Video.findByIdAndUpdate(
+    const viewerId = req.session?.userId?.toString() || null;
+    const video = await Video.findById(req.params.id).populate("uploader", "_id username publicName verified subscribers profilePicture");
+
+    if (!video) return res.status(404).json({ error: "Video not found" });
+    const isOwner = viewerId && video.uploader?._id?.toString() === viewerId;
+    if (video.visibility === 2 && !isOwner) {
+      return res.status(404).json({ error: "Video not found" });
+    }
+
+    const updatedVideo = await Video.findByIdAndUpdate(
       req.params.id,
       { $inc: { views: 1 } },
       { new: true }
     ).populate("uploader", "_id username publicName verified subscribers profilePicture");
 
-    if (!video) return res.status(404).json({ error: "Video not found" });
-
     // Add uploaderId to response for frontend
-    const videoData = video.toObject();
-    videoData.uploaderId = video.uploader?._id;
+    const videoData = updatedVideo.toObject();
+    videoData.uploaderId = updatedVideo.uploader?._id;
+
+    if (updatedVideo.uploader?._id) {
+      ChannelView.create({
+        uploader: updatedVideo.uploader._id,
+        video: updatedVideo._id,
+        viewer: viewerId,
+        viewedAt: new Date(),
+      }).catch((err) => {
+        console.error("Failed to record channel view:", err);
+      });
+    }
 
     res.json(videoData);
   } catch (err) {
@@ -217,7 +401,7 @@ videoRouter.post(
       const userId = req.session.userId;
       if (!userId) return res.status(401).json({ error: "Not logged in" });
 
-      const { title, description, tags } = req.body;
+      const { title, description, tags, category } = req.body;
       if (!req.files || !req.files.video)
         return res.status(400).json({ error: "No video file provided" });
 
@@ -243,21 +427,19 @@ videoRouter.post(
       const video = new Video({
         title,
         description,
+        category: sanitizeVideoCategory(category),
         filename: videoFile.filename,
         thumbnail: thumbnailFile?.filename || "",
         views: 0,
         tags: sanitizedTags,
         uploader: user,
+        visibility: [0, 1, 2].includes(Number(req.body.visibility)) ? Number(req.body.visibility) : 0,
       });
 
       await video.save();
-      
-      const autocompleteTerms = new Set();
-      video.title.split(/\s+/).forEach(t => autocompleteTerms.add(t.toLowerCase()));
-      video.description.split(/\s+/).forEach(t => autocompleteTerms.add(t.toLowerCase()));
-      video.tags.forEach(t => autocompleteTerms.add(t.toLowerCase()));
-      
-      await updateAutocomplete(Array.from(autocompleteTerms));
+
+      const autocompleteTerms = extractAutocompleteTerms(video.title, video.description, video.tags);
+      await updateAutocomplete(autocompleteTerms);
 
       // Respond with uploaderId explicitly
       res.json({
@@ -274,17 +456,19 @@ videoRouter.post(
 // GET API: Query videos by title, description, or tags with sorting
 videoRouter.get("/search", async (req, res) => {
   try {
-    const { q, sort } = req.query;
+    const { sort } = req.query;
+    const q = String(req.query.q || "").trim();
     if (!q) return res.status(400).json({ error: "Missing search query" });
 
-    await updateAutocomplete([q]);
+    await updateAutocomplete(extractAutocompleteTerms(q));
 
     let query = {
       $or: [
         { title: { $regex: q, $options: "i" } },
         { description: { $regex: q, $options: "i" } },
         { tags: { $regex: q, $options: "i" } }
-      ]
+      ],
+      visibility: 0,
     };
 
     // TODO: Put under a debug flag
@@ -306,7 +490,19 @@ videoRouter.get("/search", async (req, res) => {
     else if (sort === "views") sortOption = { views: -1 };
     else sortOption = { relevance: -1 }; // fallback (you can implement textScore if needed)
 
-    const videos = await Video.find(query).sort(sortOption).populate("uploader", "_id username publicName verified");
+    const videos = await Video.find(query)
+      .sort(sortOption)
+      .populate("uploader", "_id username publicName verified profilePicture");
+
+    // Seed from most popular matching content so autocomplete leans toward high-interest terms.
+    const popularResults = [...videos]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 10);
+    const popularTerms = extractAutocompleteTerms(
+      popularResults.map((video) => video.title),
+      popularResults.map((video) => video.tags || []),
+    );
+    await updateAutocomplete(popularTerms, 2);
 
     res.json(videos);
   } catch (err) {
@@ -318,9 +514,9 @@ videoRouter.get("/search", async (req, res) => {
 // GET API: Return search autocomplete information
 videoRouter.get("/search/autocomplete", async (req, res) => {
   try {
-    const { q } = req.query;
+    const q = sanitizeAutocompleteToken(req.query.q);
 
-    if (!q || q.trim() === "") {
+    if (!q) {
       return res.json([]);
     }
 
@@ -331,18 +527,59 @@ videoRouter.get("/search/autocomplete", async (req, res) => {
     .limit(10); 
 
     // TODO: Only return terms if the frequency is greater than a popularity threshold e.g 5000
-    res.json(terms.map(t => t.term));
+    res.json(terms.map((t) => sanitizeAutocompleteToken(t.term)).filter(Boolean));
 
   } catch (err) {
     res.status(500).json({error: "Error while retrieving autocomplete info: " + err.message})
   }
 });
 
+// GET API: Return all videos for a specific category
+videoRouter.get("/category/:category", async (req, res) => {
+  try {
+    const category = req.params.category?.trim().toLowerCase();
+    const sort = req.query.sort || "recent";
+
+    if (!isVideoCategory(category)) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    const query =
+      category === DEFAULT_VIDEO_CATEGORY
+        ? {
+            $or: [
+              { category },
+              { category: { $exists: false } },
+              { category: null },
+            ],
+          }
+        : { category };
+
+    let sortOption = { uploadedAt: -1 };
+    if (sort === "trending") sortOption = { views: -1 };
+    else if (sort === "views") sortOption = { views: -1 };
+
+    const videos = await Video.find({ ...query, visibility: 0 })
+      .sort(sortOption)
+      .populate("uploader", "_id username publicName verified profilePicture");
+
+    res.json(videos);
+  } catch (err) {
+    console.error("Category lookup error:", err);
+    res.status(500).json({ error: "Server error while retrieving category videos: " + err.message });
+  }
+});
+
 // GET API: Return details of a single video by ID
 videoRouter.get("/:id", async (req, res) => {
   try {
-    const video = await Video.findById(req.params.id).populate("uploader", "_id username publicName verified");
+    const currentUserId = req.session?.userId?.toString();
+    const video = await Video.findById(req.params.id).populate("uploader", "_id username publicName verified profilePicture");
     if (!video) return res.status(404).json({ error: "Video not found" });
+    const isOwner = currentUserId && video.uploader?._id?.toString() === currentUserId;
+    if (video.visibility === 2 && !isOwner) {
+      return res.status(404).json({ error: "Video not found" });
+    }
 
     const videoData = video.toObject();
     videoData.uploaderId = video.uploader?._id;

@@ -1,11 +1,73 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { User, Video, Comment, Reply } from "../models/models.js";
+import crypto from "crypto";
+import { User, Video, Comment, Reply, Bookmark, ChannelView, Playlist } from "../models/models.js";
 import isAuthenticated from "../middleware/auth.js";
-import { userUpload } from "../providers/storage.js";
+import { profileUpload } from "../providers/storage.js";
 import { apiMessage, apiError } from "../utils/logging.js";
 
 const userRouter = express.Router();
+const MAX_ACCOUNT_SWITCH_TOKENS = 10;
+
+function hashSwitchToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function buildUserPayload(user) {
+  return {
+    _id: user._id,
+    username: user.username,
+    publicName: user.publicName || user.username,
+    verified: user.verified,
+    subscribers: user.subscribers.length,
+    accountViews: user.accountViews,
+    profilePicture: user.profilePicture,
+    banner: user.banner,
+    bio: user.bio,
+    links: Array.isArray(user.links) ? user.links : [],
+    createdAt: user.createdAt,
+  };
+}
+
+function parseProfileLinks(rawLinks) {
+  if (!rawLinks) return [];
+
+  let parsedLinks = [];
+  try {
+    parsedLinks = JSON.parse(rawLinks);
+  } catch {
+    throw new Error("Invalid links format");
+  }
+
+  if (!Array.isArray(parsedLinks)) {
+    throw new Error("Invalid links format");
+  }
+
+  return parsedLinks
+    .map((entry) => ({
+      title: String(entry?.title || "").trim(),
+      url: String(entry?.url || "").trim(),
+    }))
+    .filter((entry) => entry.title && entry.url)
+    .slice(0, 12);
+}
+
+async function issueAccountSwitchToken(user) {
+  const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashSwitchToken(token);
+
+  user.accountSwitchTokens = [
+    ...(user.accountSwitchTokens || []),
+    {
+      tokenHash,
+      createdAt: new Date(),
+      lastUsedAt: new Date(),
+    },
+  ].slice(-MAX_ACCOUNT_SWITCH_TOKENS);
+
+  await user.save();
+  return token;
+}
 
 userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -29,15 +91,13 @@ userRouter.post("/login", async (req, res) => {
 
     req.session.userId = user._id;
     req.session.username = user.username;
+    const switchToken = await issueAccountSwitchToken(user);
 
     apiMessage("POST", "/login", `User ${user.username} logged in`);
     res.json({
       message: "Login successful",
-      user: {
-        username: user.username,
-        publicName: user.publicName || user.username,
-        profilePicture: user.profilePicture,
-      },
+      user: buildUserPayload(user),
+      switchToken,
     });
   } catch (err) {
     apiError("POST", "/login", "Login failed:", err);
@@ -75,6 +135,16 @@ userRouter.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
+
+    const watchLater = new Playlist({
+      name: "Watch Later",
+      owner: newUser._id,
+      visibility: 2,
+      isDefault: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+    await watchLater.save();
     apiMessage("POST", "/signup", `New user created: ${username}`);
     res.json({ message: "Signup successful", userId: newUser._id });
   } catch (err) {
@@ -83,7 +153,22 @@ userRouter.post("/signup", async (req, res) => {
   }
 });
 
-userRouter.post("/logout", (req, res) => {
+userRouter.post("/logout", async (req, res) => {
+  try {
+    if (req.session?.userId && req.body?.switchToken) {
+      const user = await User.findById(req.session.userId);
+      if (user) {
+        const tokenHash = hashSwitchToken(req.body.switchToken);
+        user.accountSwitchTokens = (user.accountSwitchTokens || []).filter(
+          (tokenEntry) => tokenEntry.tokenHash !== tokenHash,
+        );
+        await user.save();
+      }
+    }
+  } catch (err) {
+    apiError("POST", "/logout", "Failed to revoke account switch token:", err);
+  }
+
   req.session.destroy(err => {
     if (err) {
       apiError("POST", "/logout", "Failed to logout:", err);
@@ -103,20 +188,246 @@ userRouter.get("/me", isAuthenticated, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json({
-      _id: user._id,
-      username: user.username,
-      publicName: user.publicName || user.username,
-      verified: user.verified,
-      subscribers: user.subscribers.length,
-      accountViews: user.accountViews,
-      profilePicture: user.profilePicture,
-      bio: user.bio,
-      createdAt: user.createdAt,
-    });
+    res.json(buildUserPayload(user));
   } catch (err) {
     apiError("GET", "/me", "Failed to fetch user:", err);
     res.status(500).json({ error: "Server error fetching user profile" });
+  }
+});
+
+userRouter.get("/me/bookmarks", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const bookmarks = await Bookmark.find({ user: userId })
+      .populate("video", "_id title")
+      .sort({ updatedAt: -1, timestampSeconds: 1 });
+
+    const groupsMap = new Map();
+
+    for (const bookmark of bookmarks) {
+      if (!bookmark.video?._id) continue;
+      const videoId = bookmark.video._id.toString();
+      if (!groupsMap.has(videoId)) {
+        groupsMap.set(videoId, {
+          video: {
+            _id: bookmark.video._id,
+            title: bookmark.video.title,
+          },
+          latestBookmarkAt: bookmark.updatedAt || bookmark.createdAt,
+          bookmarks: [],
+        });
+      }
+
+      const group = groupsMap.get(videoId);
+      group.bookmarks.push({
+        _id: bookmark._id,
+        timestampSeconds: bookmark.timestampSeconds,
+        note: bookmark.note,
+        createdAt: bookmark.createdAt,
+        updatedAt: bookmark.updatedAt,
+      });
+
+      if ((bookmark.updatedAt || bookmark.createdAt) > group.latestBookmarkAt) {
+        group.latestBookmarkAt = bookmark.updatedAt || bookmark.createdAt;
+      }
+    }
+
+    const groupedBookmarks = Array.from(groupsMap.values())
+      .map((group) => ({
+        ...group,
+        bookmarks: group.bookmarks.sort((left, right) => left.timestampSeconds - right.timestampSeconds),
+      }))
+      .sort((left, right) => new Date(right.latestBookmarkAt) - new Date(left.latestBookmarkAt));
+
+    res.json(groupedBookmarks);
+  } catch (err) {
+    apiError("GET", "/me/bookmarks", "Failed to fetch bookmarks:", err);
+    res.status(500).json({ error: "Server error while retrieving bookmarks" });
+  }
+});
+
+userRouter.get("/me/analytics/views", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const requestedDays = Number.parseInt(req.query.days, 10);
+    const days = Number.isFinite(requestedDays) && requestedDays > 0
+      ? Math.min(requestedDays, 365)
+      : 30;
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const start = new Date(end);
+    start.setDate(start.getDate() - (days - 1));
+    start.setHours(0, 0, 0, 0);
+
+    const series = Array.from({ length: days }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      return {
+        date: date.toISOString().slice(0, 10),
+        views: 0,
+      };
+    });
+
+    const pipeline = [
+      {
+        $match: {
+          uploader: new mongoose.Types.ObjectId(userId),
+          viewedAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$viewedAt",
+              timezone: "UTC",
+            },
+          },
+          views: { $sum: 1 },
+        },
+      },
+    ];
+
+    const dailyViews = await ChannelView.aggregate(pipeline);
+    const bucketMap = new Map(series.map((entry) => [entry.date, entry]));
+    for (const entry of dailyViews) {
+      const bucket = bucketMap.get(entry._id);
+      if (bucket) bucket.views = entry.views;
+    }
+
+    const totalViews = series.reduce((sum, entry) => sum + entry.views, 0);
+    const averageViews = Math.round(totalViews / series.length);
+
+    res.json({
+      days,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      totalViews,
+      averageViews,
+      series,
+    });
+  } catch (err) {
+    apiError("GET", "/me/analytics/views", "Failed to fetch video analytics:", err);
+    res.status(500).json({ error: "Server error while retrieving video analytics" });
+  }
+});
+
+userRouter.get("/check-username", async (req, res) => {
+  try {
+    const username = String(req.query.username || "").trim();
+
+    if (!username) {
+      return res.status(400).json({ error: "Username is required" });
+    }
+
+    if (!/^[A-Za-z0-9_]+$/.test(username)) {
+      return res.status(400).json({ error: "Invalid username format", available: false });
+    }
+
+    const existingUser = await User.findOne({ username }).select("_id");
+    res.json({ available: !existingUser });
+  } catch (err) {
+    apiError("GET", "/check-username", "Failed to check username:", err);
+    res.status(500).json({ error: "Server error while checking username" });
+  }
+});
+
+userRouter.get("/:id/subscriptions", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate("subscriptions", "username publicName verified profilePicture subscribers")
+      .select("subscriptions");
+
+    if (!user) {
+      apiError("GET", `/${req.params.id}/subscriptions`, "User not found");
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const subscriptions = (user.subscriptions || []).map((subscriptionUser) => ({
+      _id: subscriptionUser._id,
+      username: subscriptionUser.username,
+      publicName: subscriptionUser.publicName || subscriptionUser.username,
+      verified: subscriptionUser.verified,
+      profilePicture: subscriptionUser.profilePicture,
+      subscribers: Array.isArray(subscriptionUser.subscribers)
+        ? subscriptionUser.subscribers.length
+        : 0,
+    }));
+
+    apiMessage("GET", `/${req.params.id}/subscriptions`, `Fetched subscriptions for user ${req.params.id}`);
+    res.json(subscriptions);
+  } catch (err) {
+    apiError("GET", `/${req.params.id}/subscriptions`, "Failed to fetch subscriptions:", err);
+    res.status(500).json({ error: "Server error while retrieving subscriptions" });
+  }
+});
+
+userRouter.post("/me/account-switch-token", isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      apiError("POST", "/me/account-switch-token", "User not found");
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const switchToken = await issueAccountSwitchToken(user);
+    res.json({
+      user: buildUserPayload(user),
+      switchToken,
+    });
+  } catch (err) {
+    apiError("POST", "/me/account-switch-token", "Failed to create account switch token:", err);
+    res.status(500).json({ error: "Failed to create account switch token" });
+  }
+});
+
+userRouter.post("/switch-account", async (req, res) => {
+  const { userId, switchToken } = req.body || {};
+
+  if (!userId || !switchToken) {
+    return res.status(400).json({ error: "userId and switchToken are required" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const tokenHash = hashSwitchToken(switchToken);
+    const matchingToken = (user.accountSwitchTokens || []).find(
+      (tokenEntry) => tokenEntry.tokenHash === tokenHash,
+    );
+
+    if (!matchingToken) {
+      return res.status(401).json({ error: "Saved login has expired. Please log in again." });
+    }
+
+    matchingToken.lastUsedAt = new Date();
+    await user.save();
+
+    req.session.userId = user._id;
+    req.session.username = user.username;
+
+    apiMessage("POST", "/switch-account", `Switched session to user ${user.username}`);
+    res.json({
+      message: "Switched account successfully",
+      user: buildUserPayload(user),
+    });
+  } catch (err) {
+    apiError("POST", "/switch-account", "Failed to switch account:", err);
+    res.status(500).json({ error: "Server error while switching account" });
   }
 });
 
@@ -139,9 +450,31 @@ userRouter.delete("/me/delete/profile_picture", isAuthenticated, async (req, res
   }
 });
 
-userRouter.put("/profile", isAuthenticated, userUpload.single("profilePicture"), async (req, res) => {
+userRouter.delete("/me/delete/banner", isAuthenticated, async (req, res) => {
   try {
-    const { publicName, bio } = req.body;
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      apiError("DELETE", "/me/delete/banner", "User not found");
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.banner = null;
+    await user.save();
+
+    apiMessage("DELETE", "/me/delete/banner", "Banner removed");
+    res.json({ message: "Banner removed successfully" });
+  } catch (err) {
+    apiError("DELETE", "/me/delete/banner", "Failed to remove banner:", err);
+    res.status(500).json({ error: "Server error while removing banner" });
+  }
+});
+
+userRouter.put("/profile", isAuthenticated, profileUpload.fields([
+  { name: "profilePicture", maxCount: 1 },
+  { name: "banner", maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { publicName, bio, links } = req.body;
     const user = await User.findById(req.session.userId);
     if (!user) {
       apiError("PUT", "/profile", "User not found");
@@ -150,7 +483,18 @@ userRouter.put("/profile", isAuthenticated, userUpload.single("profilePicture"),
 
     user.publicName = publicName || user.publicName;
     user.bio = bio || user.bio;
-    if (req.file) user.profilePicture = req.file.path;
+    if (links !== undefined) {
+      user.links = parseProfileLinks(links);
+    }
+    
+    if (req.files) {
+      if (req.files.profilePicture) {
+        user.profilePicture = req.files.profilePicture[0].path;
+      }
+      if (req.files.banner) {
+        user.banner = req.files.banner[0].path;
+      }
+    }
 
     await user.save();
     apiMessage("PUT", "/profile", `Updated profile for user ${user.username}`);
@@ -160,18 +504,36 @@ userRouter.put("/profile", isAuthenticated, userUpload.single("profilePicture"),
         username: user.username,
         publicName: user.publicName,
         profilePicture: user.profilePicture,
+        banner: user.banner,
         bio: user.bio,
+        links: Array.isArray(user.links) ? user.links : [],
       },
     });
   } catch (err) {
     apiError("PUT", "/profile", "Profile update failed:", err);
+    if (err.message === "Invalid links format") {
+      return res.status(400).json({ error: "Invalid links format" });
+    }
     res.status(500).json({ error: "Server error during profile update" });
   }
 });
 
 userRouter.get("/:id/videos", async (req, res) => {
   try {
-    const videos = await Video.find({ uploader: req.params.id }).sort({ uploadedAt: -1 });
+    const currentUserId = req.session?.userId?.toString();
+    const requestedVisibility = String(req.query.visibility || "").trim();
+    const visibilityMap = { public: 0, unlisted: 1, private: 2 };
+    const visibility = requestedVisibility in visibilityMap ? visibilityMap[requestedVisibility] : null;
+    const isOwner = currentUserId && currentUserId === req.params.id;
+
+    const query = { uploader: req.params.id };
+    if (visibility !== null) {
+      query.visibility = visibility;
+    } else if (!isOwner) {
+      query.visibility = 0;
+    }
+
+    const videos = await Video.find(query).sort({ uploadedAt: -1 });
     apiMessage("GET", `/${req.params.id}/videos`, `Fetched videos for user ${req.params.id}`);
     res.json(videos);
   } catch (err) {
@@ -198,7 +560,9 @@ userRouter.get("/:username", async (req, res) => {
       subscribers: user.subscribers.length,
       accountViews: user.accountViews,
       profilePicture: user.profilePicture,
+      banner: user.banner,
       bio: user.bio,
+      links: Array.isArray(user.links) ? user.links : [],
       createdAt: user.createdAt,
     });
   } catch (err) {
@@ -299,6 +663,7 @@ userRouter.delete("/me", isAuthenticated, async (req, res) => {
     await Video.deleteMany({ uploader: userId });
     await Comment.deleteMany({ author: userId });
     await Reply.deleteMany({ author: userId });
+    await Bookmark.deleteMany({ user: userId });
     await User.updateMany({ subscribers: userId }, { $pull: { subscribers: userId } });
     await User.updateMany({ subscriptions: userId }, { $pull: { subscriptions: userId } });
     await User.findByIdAndDelete(userId);

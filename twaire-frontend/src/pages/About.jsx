@@ -1,19 +1,3 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Link as MuiLink,
-  Skeleton,
-  Typography,
-} from "@mui/material";
-import { ContentContainer } from "@/components/Containers.jsx";
-import { useEffect, useState } from "react";
-import Footer from "@/components/Footer.jsx";
-import ApiConfig from "../utils/ApiConfig.js";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -23,55 +7,98 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import WebIcon from "@mui/icons-material/Web";
 import DnsIcon from "@mui/icons-material/Dns";
 import StorageIcon from "@mui/icons-material/Storage";
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  Link as MuiLink,
+  Paper,
+  Skeleton,
+  Typography,
+} from "@mui/material";
+import { ContentContainer } from "@/components/Containers.jsx";
+import { useEffect, useState } from "react";
+import Footer from "@/components/Footer.jsx";
+import ApiConfig from "../utils/ApiConfig.js";
+
+function SectionHeader({ title, description }) {
+  return (
+    <Box sx={{ mb: 2.5 }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 0.5 }}>
+        {title}
+      </Typography>
+      {description && (
+        <Typography variant="body2" color="text.secondary">
+          {description}
+        </Typography>
+      )}
+    </Box>
+  );
+}
 
 function FeatureCards() {
   const features = [
     {
       title: "Upload videos",
-      desc: "Upload your own videos with custom thumbnails",
-      icon: <CloudUploadIcon fontSize="large" />,
+      desc: "Upload your own videos with custom thumbnails.",
+      icon: <CloudUploadIcon fontSize="small" />,
     },
     {
-      title: "Responsive Player",
-      desc: "Watch videos in a responsive video player",
-      icon: <PlayCircleIcon fontSize="large" />,
+      title: "Responsive player",
+      desc: "Watch videos with a clean, responsive playback experience.",
+      icon: <PlayCircleIcon fontSize="small" />,
     },
     {
-      title: "View Tracking",
-      desc: "Automatic view tracking for all videos",
-      icon: <BarChartIcon fontSize="large" />,
+      title: "View tracking",
+      desc: "Automatic view counting and performance visibility.",
+      icon: <BarChartIcon fontSize="small" />,
     },
     {
-      title: "Sorting Options",
-      desc: "Browse by trending or latest uploads",
-      icon: <SortIcon fontSize="large" />,
+      title: "Sorting options",
+      desc: "Browse uploads by trending or recent activity.",
+      icon: <SortIcon fontSize="small" />,
     },
     {
       title: "Reactions",
-      desc: "Like and dislike videos to share your opinion",
-      icon: <ThumbUpIcon fontSize="large" />,
+      desc: "Like and dislike videos to express feedback.",
+      icon: <ThumbUpIcon fontSize="small" />,
     },
     {
       title: "Comments",
-      desc: "Post comments and join the discussion",
-      icon: <CommentIcon fontSize="large" />,
+      desc: "Join discussions with threaded replies and interactions.",
+      icon: <CommentIcon fontSize="small" />,
     },
   ];
 
   return (
     <Grid container spacing={2}>
-      {features.map((f, idx) => (
-        <Grid key={idx} size={{ xs: 12, sm: 6, md: 4 }}>
-          <Card variant="outlined" sx={{ height: "100%" }}>
-            <CardContent>
-              <Box color="primary.main" mb={1}>
-                {f.icon}
+      {features.map((feature) => (
+        <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card elevation={2} sx={{ height: "100%", borderRadius: 2 }}>
+            <CardContent sx={{ p: 2.25 }}>
+              <Box
+                sx={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: "action.hover",
+                  color: "primary.main",
+                  mb: 1.5,
+                }}
+              >
+                {feature.icon}
               </Box>
-              <Typography variant="subtitle1" fontWeight={600}>
-                {f.title}
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.25 }}>
+                {feature.title}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {f.desc}
+                {feature.desc}
               </Typography>
             </CardContent>
           </Card>
@@ -116,15 +143,28 @@ function TechStack() {
     <Grid container spacing={2}>
       {stacks.map((stack) => (
         <Grid key={stack.label} size={{ xs: 12, md: 4 }}>
-          <Card variant="outlined" sx={{ height: "100%" }}>
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1, color: "text.secondary" }}>
-                {stack.icon}
-                <Typography variant="subtitle2" fontWeight={700}>
+          <Card elevation={2} sx={{ height: "100%", borderRadius: 2 }}>
+            <CardContent sx={{ p: 2.25 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.25 }}>
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "action.hover",
+                    color: "primary.main",
+                  }}
+                >
+                  {stack.icon}
+                </Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   {stack.label}
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
                 {stack.items.map((item) => (
                   <Chip
                     key={item.name}
@@ -134,8 +174,8 @@ function TechStack() {
                     target="_blank"
                     rel="noopener noreferrer"
                     clickable
-                    variant="outlined"
                     size="small"
+                    sx={{ borderRadius: 1 }}
                   />
                 ))}
               </Box>
@@ -157,67 +197,54 @@ function About() {
   return (
     <>
       <Box sx={{ width: "100%", mb: 4, mt: -4 }}>
-        {!bannerLoaded && (
-          <Skeleton variant="rectangular" width="100%" height={360} />
-        )}
+        {!bannerLoaded && <Skeleton variant="rectangular" width="100%" height={320} />}
         <img
           src={`${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`}
-          alt="Banner"
+          alt="Twaire banner"
           style={{ width: "100%", display: bannerLoaded ? "block" : "none" }}
           onLoad={() => setBannerLoaded(true)}
         />
       </Box>
 
       <ContentContainer>
-        <Box mb={5}>
-          <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-            About
+        <Paper elevation={3} sx={{ p: { xs: 2.25, md: 3 }, borderRadius: 2.5, mb: 3 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
+            About Twaire
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
-            Twaire is an open-source video sharing platform built with React,
-            Node.js, Express, and MongoDB. It's a lightweight alternative to
-            YouTube where users can upload, watch, and explore videos.
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 760 }}>
+            Twaire is a lightweight, open-source video sharing platform built with React, Node.js, Express, and
+            MongoDB. Upload videos, discover content, and engage with comments in a straightforward, fast interface.
           </Typography>
-        </Box>
+        </Paper>
 
-        <Box mb={5}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Features
-          </Typography>
+        <Paper elevation={1} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 2, mb: 3 }}>
+          <SectionHeader
+            title="Features"
+            description="The core capabilities currently available in Twaire."
+          />
           <FeatureCards />
-        </Box>
+        </Paper>
 
-        <Box mb={5}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Tech Stack
-          </Typography>
+        <Paper elevation={1} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 2, mb: 3 }}>
+          <SectionHeader
+            title="Tech Stack"
+            description="Main frontend, backend, and data technologies used in production."
+          />
           <TechStack />
-        </Box>
+        </Paper>
 
-        <Divider sx={{ my: 4 }} />
-
-        <Box mb={5}>
-          <Typography variant="h6" fontWeight={600} mb={1}>
-            Author
-          </Typography>
-          <Card variant="outlined">
+        <Paper elevation={1} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 2, mb: 3 }}>
+          <SectionHeader title="Author" />
+          <Card elevation={0} sx={{ borderRadius: 2, bgcolor: "action.hover" }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Avatar
-                src="https://placehold.co/128"
-                sx={{ width: 48, height: 48 }}
-              />
+              <Avatar src="https://placehold.co/128" sx={{ width: 50, height: 50 }} />
               <Box>
-                <Typography variant="subtitle1" fontWeight={600}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   theonlyasdk
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Twaire is primarily developed and maintained by{" "}
-                  <MuiLink
-                    href="https://github.com/theonlyasdk"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
-                  >
+                  <MuiLink href="https://github.com/theonlyasdk" target="_blank" rel="noopener noreferrer" underline="hover">
                     theonlyasdk
                   </MuiLink>
                   .
@@ -225,39 +252,25 @@ function About() {
               </Box>
             </CardContent>
           </Card>
-        </Box>
+        </Paper>
 
-        <Box mb={5}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            License
+        <Paper elevation={1} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 2, mb: 5 }}>
+          <SectionHeader title="License" />
+          <Divider sx={{ mb: 1.75 }} />
+          <Typography variant="body2" color="text.secondary">
+            <strong>Twaire</strong> is open source software licensed under the{" "}
+            <MuiLink href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" underline="hover">
+              MIT License
+            </MuiLink>
+            . The source code is available on{" "}
+            <MuiLink href="https://github.com/theonlyasdk/twaire" target="_blank" rel="noopener noreferrer" underline="hover">
+              GitHub
+            </MuiLink>
+            .
           </Typography>
-          <Card variant="outlined">
-            <CardContent sx={{ display: "flex", alignItems: "center" }}>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Twaire</strong> is open source software licensed under the{" "}
-                <MuiLink
-                  href="https://opensource.org/licenses/MIT"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="hover"
-                >
-                  MIT License
-                </MuiLink>
-                . You can find the source code on{" "}
-                <MuiLink
-                  href="https://github.com/theonlyasdk/twaire"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="hover"
-                >
-                  GitHub
-                </MuiLink>
-                .
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+        </Paper>
       </ContentContainer>
+
       <Footer />
     </>
   );

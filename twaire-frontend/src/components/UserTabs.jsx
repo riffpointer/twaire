@@ -1,15 +1,329 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, MenuItem, Paper, Tab, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditIcon from '@mui/icons-material/Edit';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import ForumIcon from '@mui/icons-material/Forum';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import LanguageIcon from '@mui/icons-material/Language';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import LinkIcon from '@mui/icons-material/Link';
+import LockIcon from '@mui/icons-material/Lock';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PublicIcon from '@mui/icons-material/Public';
+import RedditIcon from '@mui/icons-material/Reddit';
+import ShareIcon from '@mui/icons-material/Share';
+import SmartDisplayIcon from '@mui/icons-material/SmartDisplay';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import XIcon from '@mui/icons-material/X';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  InputLabel,
+  FormControl,
+  Menu,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Tab,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import { getRelativeTime } from '../utils/DateUtils.js';
+import { detectLinkPlatform, ensureAbsoluteUrl } from '../utils/ProfileLinks.js';
+import ApiConfig from '../utils/ApiConfig.js';
+import UserAvatar from './UserAvatar.jsx';
+import VerifiedUserBadge from './VerifiedUserBadge.jsx';
 import VideoGrid from './VideoGrid.jsx';
 
-function UserTabs({ user, videos }) {
+function formatBookmarkTime(seconds) {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const wholeSeconds = Math.floor(safeSeconds);
+  const hours = Math.floor(wholeSeconds / 3600);
+  const minutes = Math.floor((wholeSeconds % 3600) / 60);
+  const secs = wholeSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
+
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function BookmarkVideoThumbnail({ video }) {
+  const [loaded, setLoaded] = useState(false);
+  const imageRef = useRef(null);
+
+  const safeThumbnail = video?.thumbnail
+    ? `${ApiConfig.serverUrl}/data/thumbnails/${video.thumbnail}`
+    : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(video?.title || "Untitled video")}`;
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [safeThumbnail]);
+
+  useEffect(() => {
+    if (imageRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, [safeThumbnail]);
+
+  return (
+    <Box sx={{ position: "relative", width: 120, minWidth: 120, aspectRatio: "16 / 9", borderRadius: 1, overflow: "hidden", bgcolor: "action.hover" }}>
+      {!loaded && <Skeleton variant="rectangular" sx={{ position: "absolute", inset: 0 }} />}
+      <Box
+        component="img"
+        ref={imageRef}
+        src={safeThumbnail}
+        alt={video?.title || "Video thumbnail"}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        sx={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 180ms ease-out",
+        }}
+      />
+    </Box>
+  );
+}
+
+const VISIBILITY_OPTIONS = [
+  { value: 0, label: "Public", icon: <PublicIcon fontSize="small" /> },
+  { value: 1, label: "Unlisted", icon: <LinkIcon fontSize="small" /> },
+  { value: 2, label: "Private", icon: <LockIcon fontSize="small" /> },
+];
+
+function PlaylistCard({ pl, onDeleted }) {
+  const navigate = useNavigate();
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editName, setEditName] = useState(pl.name);
+  const [editVisibility, setEditVisibility] = useState(pl.visibility);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [playlist, setPlaylist] = useState(pl);
+
+  const firstVid = playlist.videos?.length > 0 ? playlist.videos[0] : null;
+  const thumbUrl = firstVid?.thumbnail
+    ? `${ApiConfig.serverUrl}/data/thumbnails/${firstVid.thumbnail}`
+    : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(playlist.name)}`;
+  const visLabel = VISIBILITY_OPTIONS.find((o) => o.value === playlist.visibility)?.label ?? "Public";
+  const isPrivate = playlist.visibility === 2;
+  const shareUrl = `${window.location.origin}/playlist/${playlist._id}`;
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/playlists/${playlist._id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName.trim(), visibility: editVisibility }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setPlaylist((prev) => ({ ...prev, name: updated.name, visibility: updated.visibility }));
+        setEditOpen(false);
+      }
+    } catch { /* silent */ } finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`${ApiConfig.serverUrl}/api/playlists/${playlist._id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setDeleteOpen(false);
+        onDeleted?.(playlist._id);
+      }
+    } catch { /* silent */ } finally { setDeleting(false); }
+  };
+
+  const handleShare = () => {
+    navigator.clipboard?.writeText(shareUrl);
+    setMenuAnchor(null);
+  };
+
+  return (
+    <>
+      <Card
+        variant="outlined"
+        sx={{ position: "relative", cursor: "pointer", "&:hover": { boxShadow: 3 }, transition: "box-shadow 0.2s" }}
+        onClick={() => navigate(`/playlist/${playlist._id}`)}
+      >
+        {/* Thumbnail */}
+        <Box sx={{ position: "relative", width: "100%", aspectRatio: "16 / 9", bgcolor: "action.hover" }}>
+          <Box component="img" src={thumbUrl} alt={playlist.name} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <Box sx={{ position: "absolute", bottom: 8, right: 8, px: 1, py: 0.25, bgcolor: "rgba(0,0,0,0.8)", color: "#fff", borderRadius: 1, fontSize: "0.75rem", fontWeight: "bold" }}>
+            {playlist.videos?.length || 0} video{playlist.videos?.length === 1 ? "" : "s"}
+          </Box>
+        </Box>
+
+        {/* Info */}
+        <Box sx={{ p: 1.5, width: "100%", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="subtitle1" fontWeight={600} noWrap>{playlist.name}</Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.25 }}>
+              {VISIBILITY_OPTIONS.find((o) => o.value === playlist.visibility)?.icon}
+              <Typography variant="caption" color="text.secondary">{visLabel}</Typography>
+              {playlist.isDefault && <Chip label="Default" size="small" variant="outlined" sx={{ height: 20, fontSize: "0.65rem", ml: 0.5 }} />}
+            </Box>
+          </Box>
+
+          {/* 3-dot menu button */}
+          <IconButton
+            size="small"
+            sx={{ mt: -0.25, flexShrink: 0 }}
+            onClick={(e) => { e.stopPropagation(); setMenuAnchor(e.currentTarget); }}
+            aria-label="Playlist options"
+          >
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Card>
+
+      {/* 3-dot menu */}
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Tooltip
+          title={isPrivate ? "Make playlist public or unlisted to get a shareable link" : ""}
+          placement="left"
+        >
+          <span>
+            <MenuItem
+              onClick={handleShare}
+              disabled={isPrivate}
+              sx={isPrivate ? { opacity: 0.45, cursor: "default" } : {}}
+            >
+              <ShareIcon fontSize="small" sx={{ mr: 1.5 }} />
+              Copy shareable link
+            </MenuItem>
+          </span>
+        </Tooltip>
+        <MenuItem onClick={() => { setEditName(playlist.name); setEditVisibility(playlist.visibility); setEditOpen(true); setMenuAnchor(null); }}>
+          <EditIcon fontSize="small" sx={{ mr: 1.5 }} />
+          Edit playlist
+        </MenuItem>
+        {!playlist.isDefault && (
+          <MenuItem onClick={() => { setDeleteOpen(true); setMenuAnchor(null); }} sx={{ color: "error.main" }}>
+            <DeleteOutlineIcon fontSize="small" sx={{ mr: 1.5 }} />
+            Delete playlist
+          </MenuItem>
+        )}
+      </Menu>
+
+      {/* Edit dialog */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="xs" onClick={(e) => e.stopPropagation()}>
+        <DialogTitle>Edit playlist</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "12px !important" }}>
+          <TextField
+            autoFocus
+            size="small"
+            label="Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            disabled={playlist.isDefault}
+            fullWidth
+          />
+          <FormControl size="small" fullWidth>
+            <InputLabel id="edit-playlist-vis-label">Visibility</InputLabel>
+            <Select
+              labelId="edit-playlist-vis-label"
+              label="Visibility"
+              value={editVisibility}
+              onChange={(e) => setEditVisibility(e.target.value)}
+              renderValue={(v) => {
+                const opt = VISIBILITY_OPTIONS.find((o) => o.value === v);
+                return <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>{opt?.icon}{opt?.label}</Box>;
+              }}
+            >
+              {VISIBILITY_OPTIONS.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>{opt.icon}{opt.label}</Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSave} disabled={!editName.trim() || saving} startIcon={saving ? <CircularProgress size={14} /> : null}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete confirm dialog */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} fullWidth maxWidth="xs" onClick={(e) => e.stopPropagation()}>
+        <DialogTitle>Delete "{playlist.name}"?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>This will permanently delete the playlist. Videos won't be affected.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting} startIcon={deleting ? <CircularProgress size={14} /> : null}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+
+function UserTabs({ user, videos, subscriptions = [], playlists = [], showBookmarksTab = false, bookmarkedVideos = [], videoVisibility, onVideoVisibilityChange }) {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [sort, setSort] = useState("relevance");
+  const [subscriptionsSort, setSubscriptionsSort] = useState("recent");
+  const [subscriptionsView, setSubscriptionsView] = useState("grid");
 
   const handleTabChange = (event, newValue) => {
     setSelectedTabIndex(newValue);
+  };
+
+  const getLinkIcon = (url) => {
+    const platform = detectLinkPlatform(url);
+    if (platform === "youtube") return <SmartDisplayIcon fontSize="small" />;
+    if (platform === "github") return <GitHubIcon fontSize="small" />;
+    if (platform === "x") return <XIcon fontSize="small" />;
+    if (platform === "instagram") return <InstagramIcon fontSize="small" />;
+    if (platform === "linkedin") return <LinkedInIcon fontSize="small" />;
+    if (platform === "facebook") return <FacebookIcon fontSize="small" />;
+    if (platform === "reddit") return <RedditIcon fontSize="small" />;
+    if (platform === "discord" || platform === "twitch") return <ForumIcon fontSize="small" />;
+    return <LanguageIcon fontSize="small" />;
   };
 
   const userCreationDate = new Date(user.createdAt);
@@ -23,37 +337,72 @@ function UserTabs({ user, videos }) {
     timeZoneName: 'short'
   });
 
+  const sortedSubscriptions = [...subscriptions].sort((left, right) => {
+    if (subscriptionsSort === "subscribers") {
+      return (right.subscribers || 0) - (left.subscribers || 0);
+    }
+
+    return 0;
+  });
+
   return (
     <Paper elevation={2} sx={{ p: 2, pt: 1, mt: 1, mb: 2 }}>
       <TabContext value={selectedTabIndex.toString()}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 0 }}>
-          <TabList onChange={handleTabChange} aria-label="channel info tabs">
+          <TabList onChange={handleTabChange} aria-label="channel info tabs" variant="scrollable" scrollButtons="auto">
             <Tab label="Videos" value="0" />
+            <Tab label="Playlists" value="4" />
+            <Tab label="Subscriptions" value="2" />
+            {showBookmarksTab && <Tab label="Bookmarks" value="3" />}
             <Tab label="About" value="1" />
           </TabList>
         </Box>
 
         <TabPanel value="0" sx={{ p: 0, m: 0, mt: 2 }}>
-          {videos.length === 0 ? (
+          {(videos.length === 0 && !videoVisibility) ? (
             <Typography variant="body2" color="text.secondary" fontStyle="italic">
               This user has not uploaded any videos yet.
             </Typography>
           ) : (
             <>
-              <TextField
-                select
-                size="small"
-                label="Sort by..."
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                variant="outlined"
-                sx={{ width: "auto", minWidth: 160, mb: 2, mt: 1 }}
-              >
-                <MenuItem value="relevance">Relevance</MenuItem>
-                <MenuItem value="date">Upload date (Newest first)</MenuItem>
-                <MenuItem value="views">Most viewed</MenuItem>
-              </TextField>
-              <VideoGrid videos={videos} />
+              <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap", mt: 1, mb: 2 }}>
+                <TextField
+                  select
+                  size="small"
+                  label="Sort by..."
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value)}
+                  variant="outlined"
+                  sx={{ width: "auto", minWidth: 160 }}
+                >
+                  <MenuItem value="relevance">Relevance</MenuItem>
+                  <MenuItem value="date">Upload date (Newest first)</MenuItem>
+                  <MenuItem value="views">Most viewed</MenuItem>
+                </TextField>
+                {onVideoVisibilityChange && (
+                  <TextField
+                    select
+                    size="small"
+                    label="Visibility"
+                    value={videoVisibility ?? "all"}
+                    onChange={(e) => onVideoVisibilityChange(e.target.value)}
+                    variant="outlined"
+                    sx={{ width: "auto", minWidth: 150 }}
+                  >
+                    <MenuItem value="all">All videos</MenuItem>
+                    <MenuItem value="public">Public</MenuItem>
+                    <MenuItem value="unlisted">Unlisted</MenuItem>
+                    <MenuItem value="private">Private</MenuItem>
+                  </TextField>
+                )}
+              </Box>
+              {videos.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                  No videos match this filter.
+                </Typography>
+              ) : (
+                <VideoGrid videos={videos} />
+              )}
             </>
           )}
         </TabPanel>
@@ -71,13 +420,29 @@ function UserTabs({ user, videos }) {
           </Box>
           <Box mb={2}>
             <Typography variant="h6">More links</Typography>
-            <Typography component="div" variant="body2">
-              {user.moreLinks || (
-                <Box component="i" sx={{ color: 'text.secondary' }}>
-                  No links.
-                </Box>
-              )}
-            </Typography>
+            {Array.isArray(user.links) && user.links.length > 0 ? (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                {user.links.map((link, index) => (
+                  <Button
+                    key={`channel-link-${index}`}
+                    variant="outlined"
+                    size="small"
+                    component="a"
+                    href={ensureAbsoluteUrl(link.url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startIcon={getLinkIcon(link.url)}
+                    sx={{ borderRadius: 999, textTransform: "none" }}
+                  >
+                    {link.title}
+                  </Button>
+                ))}
+              </Box>
+            ) : (
+              <Box component="i" sx={{ color: 'text.secondary' }}>
+                No links.
+              </Box>
+            )}
           </Box>
           <Box>
             <small>
@@ -87,6 +452,248 @@ function UserTabs({ user, videos }) {
             </small>
           </Box>
         </TabPanel>
+
+        <TabPanel value="4" sx={{ p: 0, m: 0, mt: 2 }}>
+          {playlists.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" fontStyle="italic">
+              This user has no playlists.
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  md: "repeat(3, minmax(0, 1fr))",
+                  lg: "repeat(4, minmax(0, 1fr))"
+                },
+              }}
+            >
+              {[...playlists].sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0)).map((pl) => (
+                <PlaylistCard
+                  key={pl._id}
+                  pl={pl}
+                  onDeleted={(deletedId) => {
+                    // bubble up not needed — handled with local state below
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+        </TabPanel>
+
+        <TabPanel value="2" sx={{ p: 0, m: 0, mt: 2 }}>
+          {subscriptions.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" fontStyle="italic">
+              This user has not subscribed to any channels yet.
+            </Typography>
+          ) : (
+            <>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Sort by:
+                </Typography>
+                <Tooltip title="Newest subscriptions first">
+                  <Button
+                    size="small"
+                    variant={subscriptionsSort === "recent" ? "contained" : "outlined"}
+                    onClick={() => setSubscriptionsSort("recent")}
+                    sx={{ borderRadius: 999 }}
+                  >
+                    Subscription time
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Channels with the most subscribers first">
+                  <Button
+                    size="small"
+                    variant={subscriptionsSort === "subscribers" ? "contained" : "outlined"}
+                    onClick={() => setSubscriptionsSort("subscribers")}
+                    sx={{ borderRadius: 999 }}
+                  >
+                    Subscribers
+                  </Button>
+                </Tooltip>
+                <Box sx={{ ml: { xs: 0, sm: "auto" }, display: "flex", gap: 1 }}>
+                  <Tooltip title="Show channels in a grid">
+                    <Button
+                      size="small"
+                      startIcon={<ViewModuleIcon fontSize="small" />}
+                      variant={subscriptionsView === "grid" ? "contained" : "outlined"}
+                      onClick={() => setSubscriptionsView("grid")}
+                      sx={{ borderRadius: 999 }}
+                    >
+                      Grid
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Show channels in a list">
+                    <Button
+                      size="small"
+                      startIcon={<ViewListIcon fontSize="small" />}
+                      variant={subscriptionsView === "list" ? "contained" : "outlined"}
+                      onClick={() => setSubscriptionsView("list")}
+                      sx={{ borderRadius: 999 }}
+                    >
+                      List
+                    </Button>
+                  </Tooltip>
+                </Box>
+              </Box>
+              {subscriptionsView === "grid" ? (
+                <Box
+                  sx={{
+                    display: "grid",
+                    gap: 2,
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(2, minmax(0, 1fr))",
+                      md: "repeat(3, minmax(0, 1fr))",
+                    },
+                    justifyItems: "start",
+                  }}
+                >
+                  {sortedSubscriptions.map((subscription) => (
+                    <Box key={subscription._id} sx={{ width: "100%", maxWidth: 320 }}>
+                      <Card variant="outlined" sx={{ width: "100%" }}>
+                        <CardActionArea
+                          component={Link}
+                          to={`/user/${subscription.username}`}
+                          sx={{
+                            p: 2,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            textAlign: "left",
+                            gap: 1.5,
+                          }}
+                        >
+                          <UserAvatar user={subscription} size={52} />
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography
+                              variant="subtitle1"
+                              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                            >
+                              <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {subscription.publicName}
+                              </Box>
+                              <VerifiedUserBadge user={subscription} />
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              @{subscription.username}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {subscription.subscribers || 0} subscriber{subscription.subscribers === 1 ? "" : "s"}
+                            </Typography>
+                          </Box>
+                        </CardActionArea>
+                      </Card>
+                    </Box>
+                  ))}
+                </Box>
+              ) : (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  {sortedSubscriptions.map((subscription) => (
+                    <Card key={subscription._id} variant="outlined">
+                      <CardActionArea
+                        component={Link}
+                        to={`/user/${subscription.username}`}
+                        sx={{
+                          px: 2,
+                          py: 1.5,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 2,
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
+                          <UserAvatar user={subscription} size={52} />
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                              variant="subtitle1"
+                              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                            >
+                              <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {subscription.publicName}
+                              </Box>
+                              <VerifiedUserBadge user={subscription} />
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              @{subscription.username}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+                          {subscription.subscribers || 0} subscriber{subscription.subscribers === 1 ? "" : "s"}
+                        </Typography>
+                      </CardActionArea>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </>
+          )}
+        </TabPanel>
+
+        {showBookmarksTab && (
+          <TabPanel value="3" sx={{ p: 0, m: 0, mt: 2 }}>
+            {bookmarkedVideos.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                No bookmarks saved yet.
+              </Typography>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {bookmarkedVideos.map((group) => (
+                  <Accordion key={group.video?._id} disableGutters>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls={`bookmarks-panel-${group.video?._id}`}
+                      id={`bookmarks-header-${group.video?._id}`}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, width: "100%" }}>
+                        <BookmarkVideoThumbnail video={group.video} />
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                          >
+                            {group.video?.title || "Untitled video"}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {group.bookmarks?.length || 0} bookmark{(group.bookmarks?.length || 0) === 1 ? "" : "s"}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                        {(group.bookmarks || []).map((bookmark) => (
+                          <Card key={bookmark._id} variant="outlined" sx={{ p: 1.25 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                              <Chip label={formatBookmarkTime(bookmark.timestampSeconds)} size="small" color="primary" variant="outlined" />
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {bookmark.note}
+                              </Typography>
+                              <Button
+                                size="small"
+                                component={Link}
+                                to={`/watch/${group.video?._id}?t=${Math.floor(Number(bookmark.timestampSeconds) || 0)}`}
+                                sx={{ ml: "auto" }}
+                              >
+                                Open
+                              </Button>
+                            </Box>
+                          </Card>
+                        ))}
+                      </Box>
+                    </AccordionDetails>
+                  </Accordion>
+                ))}
+              </Box>
+            )}
+          </TabPanel>
+        )}
       </TabContext>
     </Paper>
   );

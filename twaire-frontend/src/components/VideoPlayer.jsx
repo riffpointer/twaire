@@ -1,18 +1,39 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FastForwardIcon from "@mui/icons-material/FastForward";
+import FastRewindIcon from "@mui/icons-material/FastRewind";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import { Box, CircularProgress, Fade, IconButton, Slide, Slider, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Fade, IconButton, Menu, MenuItem, Slide, Slider, Snackbar, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
+const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const UP_NEXT_SECONDS = 5;
+const AUTOPLAY_NEXT_VIDEO_STORAGE_KEY = "video-autoplay-next-video";
+
+const VideoPlayer = ({
+  src,
+  autoPlay = false,
+  videoElementId = "main-video-player",
+  startAtSeconds = null,
+  onNextVideo,
+  hasNextVideo = false,
+  nextVideoTitle = "",
+  ...props
+}) => {
   const videoRef = useRef(null);
+  const initialSeekAppliedRef = useRef(false);
   const [playing, setPlaying] = useState(autoPlay);
   const [ended, setEnded] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem("video-volume");
+    return saved !== null ? parseFloat(saved) : 1;
+  });
   const [prevVolume, setPrevVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -23,6 +44,65 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
   const [fullscreen, setFullscreen] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekTime, setSeekTime] = useState(0);
+  const [skipDirection, setSkipDirection] = useState(null);
+  const [playbackRate, setPlaybackRate] = useState(() => {
+    const saved = localStorage.getItem("video-playback-rate");
+    const parsed = saved !== null ? Number.parseFloat(saved) : 1;
+    return PLAYBACK_RATES.includes(parsed) ? parsed : 1;
+  });
+  const [upNextVisible, setUpNextVisible] = useState(false);
+  const [upNextRemaining, setUpNextRemaining] = useState(UP_NEXT_SECONDS);
+  const [upNextCancelled, setUpNextCancelled] = useState(false);
+  const [showAutoplayNextPrompt, setShowAutoplayNextPrompt] = useState(false);
+  const [autoplayNextVideo, setAutoplayNextVideo] = useState(() => {
+    const saved = localStorage.getItem(AUTOPLAY_NEXT_VIDEO_STORAGE_KEY);
+    if (saved === null) return true;
+    return saved !== "false";
+  });
+  const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState(null);
+  const ignoreNextClickRef = useRef(false);
+  const hasAutoNavigatedRef = useRef(false);
+  const onNextVideoRef = useRef(onNextVideo);
+  const hasNextVideoRef = useRef(hasNextVideo);
+  const upNextCancelledRef = useRef(upNextCancelled);
+  const autoplayNextVideoRef = useRef(autoplayNextVideo);
+  const speedMenuOpen = Boolean(speedMenuAnchorEl);
+
+  useEffect(() => {
+    onNextVideoRef.current = onNextVideo;
+  }, [onNextVideo]);
+
+  useEffect(() => {
+    hasNextVideoRef.current = hasNextVideo;
+  }, [hasNextVideo]);
+
+  useEffect(() => {
+    upNextCancelledRef.current = upNextCancelled;
+  }, [upNextCancelled]);
+
+  useEffect(() => {
+    autoplayNextVideoRef.current = autoplayNextVideo;
+    localStorage.setItem(AUTOPLAY_NEXT_VIDEO_STORAGE_KEY, autoplayNextVideo ? "true" : "false");
+  }, [autoplayNextVideo]);
+
+  const triggerNextVideo = () => {
+    if (hasAutoNavigatedRef.current) return;
+    if (!hasNextVideoRef.current) return;
+    if (upNextCancelledRef.current) return;
+    if (!autoplayNextVideoRef.current) return;
+    if (typeof onNextVideoRef.current !== "function") return;
+
+    hasAutoNavigatedRef.current = true;
+    onNextVideoRef.current();
+  };
+
+  useEffect(() => {
+    localStorage.setItem("video-volume", volume.toString());
+  }, [volume]);
+
+  useEffect(() => {
+    localStorage.setItem("video-playback-rate", playbackRate.toString());
+  }, [playbackRate]);
 
   let hideTimeout = useRef(null);
 
@@ -52,6 +132,10 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
       setEnded(false);
     };
     const handleEnded = () => {
+      if (!upNextCancelledRef.current && hasNextVideoRef.current && typeof onNextVideoRef.current === "function") {
+        triggerNextVideo();
+        return;
+      }
       setPlaying(false);
       setEnded(true);
       setShowCenterIcon(true);
@@ -73,6 +157,102 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
       video.removeEventListener("pause", handlePause);
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
     };
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.volume = volume;
+      video.muted = muted;
+      video.playbackRate = playbackRate;
+    }
+  }, [volume, muted, playbackRate]);
+
+  useEffect(() => {
+    initialSeekAppliedRef.current = false;
+  }, [src, startAtSeconds]);
+
+  useEffect(() => {
+    hasAutoNavigatedRef.current = false;
+    setUpNextVisible(false);
+    setUpNextRemaining(UP_NEXT_SECONDS);
+    setUpNextCancelled(false);
+    setShowAutoplayNextPrompt(false);
+  }, [src, startAtSeconds]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!Number.isFinite(startAtSeconds) || startAtSeconds < 0 || initialSeekAppliedRef.current) return;
+
+    const applyStartTime = () => {
+      if (initialSeekAppliedRef.current) return;
+      const safeDuration = Number.isFinite(video.duration) ? video.duration : null;
+      const target = safeDuration ? Math.min(startAtSeconds, Math.max(safeDuration - 0.1, 0)) : startAtSeconds;
+      video.currentTime = Math.max(target, 0);
+      setCurrentTime(video.currentTime);
+      initialSeekAppliedRef.current = true;
+    };
+
+    if (video.readyState >= 1) {
+      applyStartTime();
+      return;
+    }
+
+    video.addEventListener("loadedmetadata", applyStartTime, { once: true });
+    return () => video.removeEventListener("loadedmetadata", applyStartTime);
+  }, [startAtSeconds, src]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const videoContainer = videoRef.current?.parentElement;
+      setFullscreen(Boolean(videoContainer && document.fullscreenElement === videoContainer));
+      resetHideTimeout();
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      if (hasAutoNavigatedRef.current) return;
+      if (!autoplayNextVideoRef.current) {
+        setUpNextVisible(false);
+        return;
+      }
+      if (upNextCancelledRef.current || !hasNextVideoRef.current || typeof onNextVideoRef.current !== "function") {
+        setUpNextVisible(false);
+        return;
+      }
+
+      const safeDuration = Number.isFinite(video.duration) ? video.duration : 0;
+      if (!safeDuration) {
+        setUpNextVisible(false);
+        return;
+      }
+
+      const remaining = Math.max(0, safeDuration - (video.currentTime || 0));
+      if (remaining <= 0) {
+        if (!video.paused) {
+          triggerNextVideo();
+        }
+        return;
+      }
+
+      if (remaining <= UP_NEXT_SECONDS) {
+        setUpNextRemaining(remaining);
+        setUpNextVisible(true);
+      } else {
+        setUpNextVisible(false);
+        setUpNextRemaining(UP_NEXT_SECONDS);
+      }
+    }, 100);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   const togglePlay = () => {
@@ -178,12 +358,46 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
     return `${minutes}:${seconds}`;
   };
 
+  const flashSkipDirection = (direction) => {
+    setSkipDirection(direction);
+    setShowCenterIcon(true);
+    window.clearTimeout(hideTimeout.current);
+    window.setTimeout(() => {
+      setSkipDirection(null);
+      setShowCenterIcon(false);
+      resetHideTimeout();
+    }, 650);
+  };
+
+  const skipBy = (seconds, direction) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const nextTime = Math.min(Math.max(video.currentTime + seconds, 0), video.duration || video.currentTime + seconds);
+    video.currentTime = nextTime;
+    setCurrentTime(nextTime);
+    if (isSeeking) {
+      setIsSeeking(false);
+      setSeekTime(nextTime);
+    }
+    if (video.ended && nextTime < (video.duration || nextTime)) {
+      setEnded(false);
+    }
+    flashSkipDirection(direction);
+  };
+
   const handleFullscreen = () => {
     const videoContainer = videoRef.current?.parentElement; // outer Box
     if (!videoContainer) return;
 
+    if (document.fullscreenElement === videoContainer) {
+      document.exitFullscreen().catch((err) => {
+        console.log("Unable to exit fullscreen: " + err);
+      });
+      return;
+    }
+
     if (!document.fullscreenElement) {
-      setFullscreen(true);
       videoContainer.requestFullscreen().catch((err) => {
         setFullscreen(false);
         console.log("Unable to go fullscreen: " + err);
@@ -192,6 +406,41 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
       document.exitFullscreen();
       setFullscreen(false);
     }
+  };
+
+  const handlePlaybackRateChange = (rate) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.playbackRate = rate;
+    setPlaybackRate(rate);
+    setSpeedMenuAnchorEl(null);
+    resetHideTimeout();
+  };
+
+  const handleWheelVolume = (event) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    event.preventDefault();
+
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const step = event.shiftKey ? 0.2 : 0.05;
+    const nextVolume = Math.max(0, Math.min(1, volume + direction * step));
+
+    video.volume = nextVolume;
+    video.muted = nextVolume === 0;
+    setMuted(video.muted);
+    setVolume(nextVolume);
+    if (nextVolume > 0) {
+      setPrevVolume(nextVolume);
+    }
+    resetHideTimeout();
+  };
+
+  const handleCancelUpNext = () => {
+    setUpNextCancelled(true);
+    setUpNextVisible(false);
+    setShowAutoplayNextPrompt(true);
   };
 
   return (
@@ -207,15 +456,47 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
         ...props.sx, // merge custom sx if passed
       }}
       onMouseMove={resetHideTimeout}
+      onWheel={handleWheelVolume}
     >
 
       {/* Video clickable area */}
       <Box
-        onClick={togglePlay}
+        onClick={(e) => {
+          if (ignoreNextClickRef.current) {
+            ignoreNextClickRef.current = false;
+            return;
+          }
+          togglePlay();
+        }}
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleFullscreen();
+        }}
+        onPointerUp={(e) => {
+          if (e.pointerType !== "touch") return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const xRatio = (e.clientX - rect.left) / rect.width;
+          const isLeftSide = xRatio <= 0.35;
+          const isRightSide = xRatio >= 0.65;
+
+          if (!isLeftSide && !isRightSide) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+          ignoreNextClickRef.current = true;
+          skipBy(isLeftSide ? -5 : 5, isLeftSide ? "back" : "forward");
+        }}
         onKeyDown={(e) => {
           if (e.key === " " || e.key === "k") {
             e.preventDefault();
             togglePlay();
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            skipBy(-5, "back");
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            skipBy(5, "forward");
           }
         }}
         tabIndex={0}
@@ -234,6 +515,7 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
       />
 
       <video
+        id={videoElementId}
         ref={videoRef}
         src={src}
         style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 0 }}
@@ -255,7 +537,7 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             pointerEvents: "none",
           }}
         >
-          <CircularProgress color="inherit" />
+          <CircularProgress color="inherit" size={36} thickness={5} sx={{ filter: "drop-shadow(0px 0px 3px #000000A0)" }} />
         </Box>
       )}
 
@@ -279,6 +561,10 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
         >
           {ended ? (
             <ReplayIcon sx={{ color: "white", fontSize: 60 }} />
+          ) : skipDirection === "back" ? (
+            <FastRewindIcon sx={{ color: "white", fontSize: 60 }} />
+          ) : skipDirection === "forward" ? (
+            <FastForwardIcon sx={{ color: "white", fontSize: 60 }} />
           ) : playing ? (
             <PauseIcon sx={{ color: "white", fontSize: 60 }} />
           ) : (
@@ -286,6 +572,110 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
           )}
         </Box>
       </Fade>
+
+      <Fade in={upNextVisible && !ended}>
+        <Box
+          sx={{
+            position: "absolute",
+            right: 16,
+            bottom: 78,
+            zIndex: 5,
+            bgcolor: "rgba(0,0,0,0.76)",
+            color: "white",
+            borderRadius: 2,
+            px: 1.75,
+            py: 1.4,
+            display: "flex",
+            alignItems: "center",
+            gap: 1.25,
+            border: "1px solid rgba(255,255,255,0.22)",
+          }}
+        >
+          <Box sx={{ position: "relative", width: 48, height: 48 }}>
+            <CircularProgress
+              variant="determinate"
+              value={100}
+              size={48}
+              thickness={5}
+              sx={{ color: "rgba(255,255,255,0.22)", position: "absolute", inset: 0 }}
+            />
+            <CircularProgress
+              variant="determinate"
+              value={Math.max(0, Math.min(100, (upNextRemaining / UP_NEXT_SECONDS) * 100))}
+              size={48}
+              thickness={5}
+              sx={{ color: "white", position: "absolute", inset: 0 }}
+            />
+            <Typography
+              variant="caption"
+              sx={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+              }}
+            >
+              {Math.ceil(upNextRemaining)}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.1 }}>
+              Up Next
+            </Typography>
+            {nextVideoTitle ? (
+              <Typography variant="caption" sx={{ opacity: 0.85, display: "block", mb: 0.5 }}>
+                {nextVideoTitle}
+              </Typography>
+            ) : null}
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleCancelUpNext}
+              sx={{
+                color: "white",
+                borderColor: "rgba(255,255,255,0.7)",
+                minWidth: 0,
+                px: 1,
+                py: 0.25,
+                "&:hover": {
+                  borderColor: "white",
+                  bgcolor: "rgba(255,255,255,0.08)",
+                },
+              }}
+          >
+            Cancel
+          </Button>
+          </Box>
+        </Box>
+      </Fade>
+
+      <Snackbar
+        open={showAutoplayNextPrompt}
+        autoHideDuration={6000}
+        onClose={() => setShowAutoplayNextPrompt(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        message="Autoplay next video is on. Disable it?"
+        action={
+          <Button
+            color="inherit"
+            size="small"
+            onClick={() => {
+              setAutoplayNextVideo(false);
+              setShowAutoplayNextPrompt(false);
+            }}
+          >
+            Disable
+          </Button>
+        }
+        ContentProps={{
+          sx: {
+            bgcolor: "rgba(20,20,20,0.96)",
+            color: "white",
+          },
+        }}
+      />
 
       {/* Bottom Controls */}
       <Slide in={showControls} direction="up">
@@ -307,6 +697,15 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
         >
           <IconButton onClick={togglePlay} sx={{ color: "white" }} title={playing ? "Pause" : "Play"}>
             {playing ? <PauseIcon /> : <PlayArrowIcon />}
+          </IconButton>
+          <IconButton
+            onClick={onNextVideo}
+            sx={{ color: "white" }}
+            title="Next video"
+            aria-label="Next video"
+            disabled={!hasNextVideo || typeof onNextVideo !== "function"}
+          >
+            <SkipNextIcon />
           </IconButton>
           <Typography sx={{ color: "white", ml: 1, minWidth: 50 }}>
             {formatTime(isSeeking ? seekTime : currentTime)}
@@ -345,6 +744,31 @@ const VideoPlayer = ({ src, autoPlay = false, ...props }) => {
             sx={{ width: 100, mr: 1 }}
             size="small"
           />
+
+          <IconButton
+            onClick={(e) => setSpeedMenuAnchorEl(e.currentTarget)}
+            sx={{ color: "white", ml: 0.5 }}
+            title={`Playback speed (${playbackRate}x)`}
+          >
+            <SlowMotionVideoIcon />
+          </IconButton>
+          <Menu
+            anchorEl={speedMenuAnchorEl}
+            open={speedMenuOpen}
+            onClose={() => setSpeedMenuAnchorEl(null)}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            {PLAYBACK_RATES.map((rate) => (
+              <MenuItem
+                key={rate}
+                selected={rate === playbackRate}
+                onClick={() => handlePlaybackRateChange(rate)}
+              >
+                {rate}x
+              </MenuItem>
+            ))}
+          </Menu>
 
           {/* Full Screen button */}
           <IconButton onClick={handleFullscreen} sx={{ color: "white" }} title="Fullscreen">

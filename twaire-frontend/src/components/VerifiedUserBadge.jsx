@@ -1,15 +1,17 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Tooltip from '@mui/material/Tooltip';
 
 function VerifiedUserBadge({ user, verticalAlign = "text-center", sx={} }) {
   return (
     <>
       {user.verified && (
-        <CheckCircleIcon
-          fontSize="inherit"
-          color="primary"
-          sx={{ ml: 0.5, verticalAlign: verticalAlign, height: "100%", ...sx }}
-          title="Verified user"
-        />
+        <Tooltip title="Verified user" arrow>
+          <CheckCircleIcon
+            fontSize="inherit"
+            color="primary"
+            sx={{ ml: 0.5, verticalAlign: verticalAlign, height: "100%", ...sx }}
+          />
+        </Tooltip>
       )}
     </>
   );

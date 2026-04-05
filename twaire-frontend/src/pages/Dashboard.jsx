@@ -1,8 +1,9 @@
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import UploadIcon from "@mui/icons-material/Upload";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import PeopleIcon from "@mui/icons-material/People";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import GridViewIcon from "@mui/icons-material/GridView";
+import ViewListIcon from "@mui/icons-material/ViewList";
 import {
   Alert,
   Box,
@@ -20,6 +21,11 @@ import {
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
   TextField,
   Typography,
   useMediaQuery,
@@ -31,10 +37,16 @@ import { useNavigate } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
 import Loading from "@/components/Loading.jsx";
 import { getRelativeTime } from "../utils/DateUtils.js";
+import {
+  DEFAULT_VIDEO_CATEGORY,
+  VIDEO_CATEGORY_OPTIONS,
+} from "../utils/VideoCategories.js";
 
 function Dashboard() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(DEFAULT_VIDEO_CATEGORY);
+  const [visibility, setVisibility] = useState("public");
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [editingTag, setEditingTag] = useState({ index: null, text: "" });
@@ -46,8 +58,12 @@ function Dashboard() {
   const [disabled, setDisabled] = useState(false);
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [channelViewsAnalytics, setChannelViewsAnalytics] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [viewMode, setViewMode] = useState("grid");
+  const [thumbnailLoadedMap, setThumbnailLoadedMap] = useState({});
+  const [fabCollapsed, setFabCollapsed] = useState(false);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -71,6 +87,17 @@ function Dashboard() {
         );
         const videosData = await videosRes.json();
         setVideos(videosData);
+
+        const analyticsRes = await fetch(
+          `${ApiConfig.serverUrl}/api/users/me/analytics/views?days=30`,
+          {
+            credentials: "include",
+          },
+        );
+        if (analyticsRes.ok) {
+          const analyticsData = await analyticsRes.json();
+          setChannelViewsAnalytics(analyticsData);
+        }
       } catch (err) {
         console.error(err);
         navigate("/login");
@@ -88,6 +115,16 @@ function Dashboard() {
     const timer = setTimeout(() => setRedirectCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [redirectCountdown, alert, navigate]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setFabCollapsed(window.scrollY > 40);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -142,6 +179,8 @@ function Dashboard() {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
+    formData.append("category", category);
+    formData.append("visibility", visibility === "public" ? "0" : visibility === "unlisted" ? "1" : "2");
     formData.append("video", file);
     if (thumbnail) formData.append("thumbnail", thumbnail);
     if (tags.length > 0) formData.append("tags", tags.join(","));
@@ -167,6 +206,8 @@ function Dashboard() {
       setDisabled(true);
       setTitle("");
       setDescription("");
+      setCategory(DEFAULT_VIDEO_CATEGORY);
+      setVisibility("public");
       setTags([]);
       setFile(null);
       setThumbnail(null);
@@ -202,6 +243,15 @@ function Dashboard() {
       });
   };
 
+  const markThumbnailLoaded = (videoId) => {
+    setThumbnailLoadedMap((prev) => (prev[videoId] ? prev : { ...prev, [videoId]: true }));
+  };
+
+  const channelViewsSeries = channelViewsAnalytics?.series || [];
+  const maxChannelViews = channelViewsSeries.reduce((max, bucket) => Math.max(max, bucket.views || 0), 0);
+  const totalChannelViews = channelViewsAnalytics?.totalViews ?? 0;
+  const averageChannelViews = channelViewsAnalytics?.averageViews ?? 0;
+
   return (
     <Container maxWidth="xl" sx={{ mb: 4 }}>
       {/* Header */}
@@ -217,16 +267,31 @@ function Dashboard() {
       {/* Stats */}
       <Grid container spacing={2} mb={3}>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Card variant="outlined">
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ color: "primary.main" }}>
+          <Card
+            elevation={2}
+            sx={{
+              borderRadius: 1,
+            }}
+          >
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: 2.5 }}>
+              <Box
+                sx={{
+                  color: "primary.main",
+                  bgcolor: "transparent",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1,
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
                 <VideoLibraryIcon />
               </Box>
               <Box>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
                   {videos.length}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Videos uploaded
                 </Typography>
               </Box>
@@ -234,16 +299,31 @@ function Dashboard() {
           </Card>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Card variant="outlined">
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ color: "primary.main" }}>
+          <Card
+            elevation={2}
+            sx={{
+              borderRadius: 1,
+            }}
+          >
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: 2.5 }}>
+              <Box
+                sx={{
+                  color: "primary.main",
+                  bgcolor: "transparent",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1,
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
                 <PeopleIcon />
               </Box>
               <Box>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
                   {user ? user.subscribers ?? 0 : "..."}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Subscribers
                 </Typography>
               </Box>
@@ -251,16 +331,31 @@ function Dashboard() {
           </Card>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Card variant="outlined">
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ color: "primary.main" }}>
+          <Card
+            elevation={2}
+            sx={{
+              borderRadius: 1,
+            }}
+          >
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: 2.5 }}>
+              <Box
+                sx={{
+                  color: "primary.main",
+                  bgcolor: "transparent",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1,
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
                 <CalendarTodayIcon />
               </Box>
               <Box>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
                   {user ? getRelativeTime(user.createdAt) : "..."}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Account age
                 </Typography>
               </Box>
@@ -271,81 +366,289 @@ function Dashboard() {
 
       {/* Content */}
       <Grid container spacing={3}>
-        {/* Video list - left side */}
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Your Videos
-              </Typography>
-              {videos.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" fontStyle="italic" py={1}>
-                  No videos uploaded yet.
+        <Grid size={{ xs: 12 }}>
+          <Card elevation={2} sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5, gap: 2 }}>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Channel views
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Daily channel views for the last 30 days.
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: "right" }}>
+                  <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
+                    {totalChannelViews.toLocaleString()}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Total views
+                  </Typography>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(30, minmax(0, 1fr))",
+                  alignItems: "end",
+                  gap: 0.75,
+                  minHeight: 180,
+                  mt: 2,
+                }}
+              >
+                {channelViewsSeries.map((bucket) => {
+                  const barHeight = maxChannelViews ? Math.max((bucket.views / maxChannelViews) * 100, bucket.views > 0 ? 10 : 3) : 3;
+                  return (
+                    <Box key={bucket.date} sx={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          minHeight: 160,
+                          display: "flex",
+                          alignItems: "end",
+                        }}
+                      >
+                        <Box
+                          title={`${bucket.date}: ${bucket.views.toLocaleString()} views`}
+                          sx={{
+                            width: "100%",
+                            height: `${barHeight}%`,
+                            minHeight: bucket.views > 0 ? 8 : 3,
+                            borderRadius: 0.75,
+                            bgcolor: "primary.main",
+                            opacity: 0.82,
+                            transition: "transform 160ms ease, opacity 160ms ease",
+                            "&:hover": {
+                              opacity: 1,
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                        />
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: 0.5, fontSize: "0.65rem", lineHeight: 1, whiteSpace: "nowrap" }}
+                      >
+                        {new Intl.DateTimeFormat("en", { day: "numeric" }).format(new Date(bucket.date))}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1.5, gap: 2, flexWrap: "wrap" }}>
+                <Typography variant="caption" color="text.secondary">
+                  Average per day: {averageChannelViews.toLocaleString()}
                 </Typography>
-              ) : (
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Video list */}
+        <Grid size={{ xs: 12 }}>
+          <Card elevation={2} sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography variant="subtitle1" fontWeight={600}>
+                  Your Videos
+                </Typography>
+                <IconButton
+                  onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                  size="small"
+                  title={viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
+                  sx={{ borderRadius: 1 }}
+                >
+                  {viewMode === "grid" ? <ViewListIcon /> : <GridViewIcon />}
+                </IconButton>
+              </Box>
+              {videos.length === 0 ? (
+                <Box
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                    No videos uploaded yet.
+                  </Typography>
+                </Box>
+              ) : viewMode === "grid" ? (
                 <Grid container spacing={2}>
                   {videos.map((v) => (
                     <Grid key={v._id} size={{ xs: 12, sm: 6 }}>
-                      <Box
+                      <ButtonBase
                         onClick={() => navigate(`/watch/${v._id}`)}
                         sx={{
                           cursor: "pointer",
                           borderRadius: 1,
                           overflow: "hidden",
-                          border: 1,
-                          borderColor: "divider",
-                          "&:hover": { opacity: 0.9 },
+                          display: "block",
+                          textAlign: "left",
+                          width: "100%",
+                          bgcolor: "background.paper",
+                          boxShadow: (theme) => theme.shadows[1],
+                          transition: "box-shadow 0.18s ease",
+                          "&:hover": {
+                            boxShadow: (theme) => theme.shadows[3],
+                          },
                         }}
                       >
-                        <Box sx={{ position: "relative", pt: "56.25%" }}>
+                        <Box sx={{ position: "relative", aspectRatio: "16 / 9", bgcolor: "grey.200" }}>
+                          {!thumbnailLoadedMap[v._id] && (
+                            <Skeleton
+                              variant="rectangular"
+                              sx={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                              }}
+                            />
+                          )}
                           <img
-                            src={v.thumbnail ? `${ApiConfig.serverUrl}/${v.thumbnail}` : `${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`}
+                            src={v.thumbnail ? `${ApiConfig.serverUrl}/data/thumbnails/${v.thumbnail}` : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(v.title)}`}
                             alt={v.title}
-                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                            loading="lazy"
+                            onLoad={() => markThumbnailLoaded(v._id)}
+                            onError={() => markThumbnailLoaded(v._id)}
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              opacity: thumbnailLoadedMap[v._id] ? 1 : 0,
+                              transition: "opacity 180ms ease-out",
+                            }}
                           />
                         </Box>
-                        <Box sx={{ p: 1.5 }}>
+                        <Box sx={{ p: 1.75 }}>
                           <Typography variant="body2" fontWeight={500} noWrap>
                             {v.title}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {v.uploadedAt ? getRelativeTime(v.uploadedAt) : "Just now"}
+                            {v.views || 0} views &bull; {v.likes?.length || 0} likes &bull; {v.uploadedAt ? getRelativeTime(v.uploadedAt) : "Just now"}
                           </Typography>
                         </Box>
-                      </Box>
+                      </ButtonBase>
                     </Grid>
                   ))}
                 </Grid>
+              ) : (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  {videos.map((v) => (
+                    <ButtonBase
+                      key={v._id}
+                      onClick={() => navigate(`/watch/${v._id}`)}
+                      sx={{
+                        cursor: "pointer",
+                        display: "flex",
+                        gap: 2,
+                        borderRadius: 1,
+                        overflow: "hidden",
+                        height: 100,
+                        width: "100%",
+                        textAlign: "left",
+                        bgcolor: "background.paper",
+                        boxShadow: (theme) => theme.shadows[1],
+                        transition: "box-shadow 0.18s ease",
+                        "&:hover": {
+                          boxShadow: (theme) => theme.shadows[3],
+                        },
+                      }}
+                    >
+                      <Box sx={{ width: 160, height: 90, flexShrink: 0, bgcolor: "grey.200", position: "relative" }}>
+                        {!thumbnailLoadedMap[v._id] && (
+                          <Skeleton
+                            variant="rectangular"
+                            sx={{
+                              position: "absolute",
+                              inset: 0,
+                            }}
+                          />
+                        )}
+                        <img
+                          src={v.thumbnail ? `${ApiConfig.serverUrl}/data/thumbnails/${v.thumbnail}` : `${ApiConfig.serverUrl}/api/helper/placeholder/320x180?text=${encodeURIComponent(v.title)}`}
+                          alt={v.title}
+                          loading="lazy"
+                          onLoad={() => markThumbnailLoaded(v._id)}
+                          onError={() => markThumbnailLoaded(v._id)}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            opacity: thumbnailLoadedMap[v._id] ? 1 : 0,
+                            transition: "opacity 180ms ease-out",
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={500} noWrap>
+                          {v.title}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {v.views || 0} views &bull; {v.likes?.length || 0} likes
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {v.uploadedAt ? getRelativeTime(v.uploadedAt) : "Just now"}
+                        </Typography>
+                      </Box>
+                    </ButtonBase>
+                  ))}
+                </Box>
               )}
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Upload action - right side */}
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-            <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-              <Box sx={{ mb: 2 }}>
-                <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary" }} />
-              </Box>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Upload a new video
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
-                Share your content with the world
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setOpenDialog(true)}
-                startIcon={<UploadIcon />}
-              >
-                Upload
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
+
+      <Box
+        sx={{
+          position: "fixed",
+          right: { xs: 16, sm: 24 },
+          bottom: { xs: 16, sm: 24 },
+          zIndex: 1300,
+        }}
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenDialog(true)}
+          startIcon={<CloudUploadIcon />}
+          sx={{
+            borderRadius: 999,
+            minHeight: 56,
+            px: fabCollapsed ? 1.5 : 2.25,
+            minWidth: fabCollapsed ? 56 : 132,
+            width: "auto",
+            boxShadow: (theme) => theme.shadows[6],
+            transition: "all 220ms ease",
+            overflow: "hidden",
+            "& .MuiButton-startIcon": {
+              marginRight: fabCollapsed ? 0 : 1,
+              marginLeft: 0,
+            },
+          }}
+          >
+          <Box
+            component="span"
+            sx={{
+              maxWidth: fabCollapsed ? 0 : 120,
+              opacity: fabCollapsed ? 0 : 1,
+              transition: "all 220ms ease",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Upload
+          </Box>
+        </Button>
+      </Box>
 
         <Dialog
           open={openDialog}
@@ -356,7 +659,7 @@ function Dashboard() {
           keepMounted
           scroll="paper"
         >
-          <DialogTitle>Upload Video</DialogTitle>
+          <DialogTitle sx={{ pb: 1 }}>Upload Video</DialogTitle>
           <DialogContent dividers={true}>
             {alert && (
               <Alert
@@ -389,6 +692,44 @@ function Dashboard() {
               onChange={(e) => setDescription(e.target.value)}
               disabled={disabled}
             />
+
+            <FormControl fullWidth margin="normal" disabled={disabled}>
+              <InputLabel id="video-category-label">Category</InputLabel>
+              <Select
+                labelId="video-category-label"
+                id="video-category"
+                value={category}
+                label="Category"
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {VIDEO_CATEGORY_OPTIONS.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>
+                Choose the category that best matches your video.
+              </FormHelperText>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal" disabled={disabled}>
+              <InputLabel id="video-visibility-label">Visibility</InputLabel>
+              <Select
+                labelId="video-visibility-label"
+                id="video-visibility"
+                value={visibility}
+                label="Visibility"
+                onChange={(e) => setVisibility(e.target.value)}
+              >
+                <MenuItem value="public">Public</MenuItem>
+                <MenuItem value="unlisted">Unlisted</MenuItem>
+                <MenuItem value="private">Private</MenuItem>
+              </Select>
+              <FormHelperText>
+                Public videos appear everywhere. Unlisted videos are accessible by link. Private videos are only visible to you.
+              </FormHelperText>
+            </FormControl>
 
             <TextField
               label="Tags"

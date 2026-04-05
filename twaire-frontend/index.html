@@ -24,22 +24,38 @@
       justify-content: center;
     }
 
-    #root,
-    html,
-    body {
-      background: #111;
-    }
-
     @media (prefers-color-scheme: dark) {
+      #root,
+      html,
+      body {
+        background: #111;
+      }
       ._loading-wrapper {
         background: #111;
         color: #fff;
+      }
+      ._loading-svg {
+        --uib-color: #fff;
+      }
+    }
+
+    @media (prefers-color-scheme: light) {
+      #root,
+      html,
+      body {
+        background: #fff;
+      }
+      ._loading-wrapper {
+        background: #fff;
+        color: #000;
+      }
+      ._loading-svg {
+        --uib-color: #000;
       }
     }
 
     ._loading-svg {
       --uib-size: 55px;
-      --uib-color: #fff;
       --uib-speed: 1.3s;
       --uib-bg-opacity: .1;
       height: calc(var(--uib-size) * (2.1 / 5));

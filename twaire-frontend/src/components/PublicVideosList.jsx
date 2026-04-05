@@ -1,9 +1,36 @@
-import { MenuItem, TextField, Box, Typography, CircularProgress } from "@mui/material";
+import { MenuItem, TextField, Box, Typography, Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
 import VideoCard from "./VideoCard.jsx";
-import Loading from "./Loading.jsx";
+
+function PublicVideosListSkeleton({ count = 5 }) {
+  return (
+    <Box display="flex" flexDirection="column" gap={2}>
+      {[...Array(count)].map((_, index) => (
+        <Box
+          key={index}
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            bgcolor: "background.paper",
+            boxShadow: 1,
+          }}
+        >
+          <Skeleton variant="rectangular" sx={{ width: "100%", pt: "56.25%" }} />
+          <Box sx={{ p: 1.5, pt: 1 }}>
+            <Skeleton variant="text" width="88%" height={30} />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
+              <Skeleton variant="circular" width={24} height={24} />
+              <Skeleton variant="text" width="42%" height={20} />
+              <Skeleton variant="text" width="22%" height={20} />
+            </Box>
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+}
 
 function PublicVideosList({ defaultSort = "trending", limit }) {
   const [videos, setVideos] = useState([]);
@@ -50,7 +77,7 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
       </Box>
 
       {loading ? (
-        <Loading label="Loading videos..." />
+        <PublicVideosListSkeleton count={limit ?? 5} />
       ) : videos.length === 0 ? (
         <Typography>No videos available.</Typography>
       ) : (

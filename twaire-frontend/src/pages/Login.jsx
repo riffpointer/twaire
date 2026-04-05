@@ -1,15 +1,15 @@
-import { Alert, Box, Button, Container, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Container, Stack, TextField, Typography } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
+import { saveAccount } from "../utils/accountSwitcher.js";
 import Strings from "../utils/Strings.js";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [alert, setAlert] = useState(null);
-  const navigate = useNavigate();
   const redirectTimeout = 0;
 
   useEffect(() => {
@@ -40,6 +40,14 @@ function Login() {
       }
 
       // Successful login
+      saveAccount({
+        userId: data.user._id,
+        username: data.user.username,
+        publicName: data.user.publicName,
+        profilePicture: data.user.profilePicture,
+        verified: data.user.verified,
+        switchToken: data.switchToken,
+      });
       setAlert({ type: "success", message: "Login successful! Redirecting..." });
 
       // Redirect after short delay
@@ -54,63 +62,67 @@ function Login() {
   return (
     <>
       <Container maxWidth="sm">
-        <Typography variant="h4" gutterBottom>
-          Login to Twaire
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          {Strings.branding.description} To upload videos and share your opinions and reactions, please login.
-        </Typography>
+        <Card elevation={4} sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
+            <Typography variant="h4" gutterBottom>
+              Login to Twaire
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              {Strings.branding.description} To upload videos and share your opinions and reactions, please login.
+            </Typography>
 
-        {alert && (
-          <Alert
-            severity={alert.type === "danger" ? "error" : alert.type}
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => setAlert(null)}
+            {alert && (
+              <Alert
+                severity={alert.type === "danger" ? "error" : alert.type}
+                action={
+                  <IconButton
+                    aria-label="close"
+                    color="inherit"
+                    size="small"
+                    onClick={() => setAlert(null)}
+                  >
+                    <i className="bi bi-close"></i>
+                  </IconButton>
+                }
+                sx={{ mt: 2 }}
               >
-                <i className="bi bi-close"></i>
-              </IconButton>
-            }
-            sx={{ mt: 2 }}
-          >
-            {alert.message}
-          </Alert>
-        )}
+                {alert.message}
+              </Alert>
+            )}
 
-        <Box component="form" onSubmit={handleLogin} noValidate>
-          <TextField
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
+            <Box component="form" onSubmit={handleLogin} noValidate>
+              <TextField
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                fullWidth
+                margin="normal"
+                required
+              />
 
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
+              <TextField
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                fullWidth
+                margin="normal"
+                required
+              />
 
-          <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-            <Button type="submit" variant="contained" disableElevation>
-              Login
-            </Button>
+              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                <Button type="submit" variant="contained" disableElevation>
+                  Login
+                </Button>
 
-            <Button component={Link} to="/signup" variant="text" disableElevation>
-              Don't have an account? Sign up
-            </Button>
-          </Stack>
-        </Box>
+                <Button component={Link} to="/signup" variant="text" disableElevation>
+                  Don't have an account? Sign up
+                </Button>
+              </Stack>
+            </Box>
+          </CardContent>
+        </Card>
       </Container>
     </>
   );

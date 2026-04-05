@@ -17,7 +17,40 @@ const userStorage = multer.diskStorage({
   },
 });
 
+// multer setup for banner uploads
+const bannerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "data/banners";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+// Combined middleware for profile picture and banner
 const userUpload = multer({ storage: userStorage });
+const bannerUpload = multer({ storage: bannerStorage });
+const profileUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      let dir;
+      if (file.fieldname === "profilePicture") {
+        dir = "data/profile_pictures";
+      } else if (file.fieldname === "banner") {
+        dir = "data/banners";
+      } else {
+        dir = "data/uploads";
+      }
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+  }),
+});
 
 // multer setup for file uploads
 const videoStorage = multer.diskStorage({
@@ -35,4 +68,4 @@ const videoStorage = multer.diskStorage({
 
 const videoUpload = multer({ storage: videoStorage });
 
-export { userUpload, videoUpload };
+export { userUpload, videoUpload, bannerUpload, profileUpload };

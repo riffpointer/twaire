@@ -8,6 +8,7 @@ import commentsRouter from "./routes/commentsRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import videoRouter from "./routes/videoRoutes.js";
 import helperRouter from "./routes/helperRoutes.js";
+import playlistRouter from "./routes/playlistRoutes.js";
 import { obtainLocalIPAddress } from "./utils/net.js";
 
 const PORT = process.env.SERVER_PORT || 5000;
@@ -73,11 +74,13 @@ app.use(express.json());
 app.use("/res", express.static("../resources"));
 app.use("/data/uploads", express.static("data/uploads"));
 app.use("/data/thumbnails", express.static("data/thumbnails"));
+app.use("/data/banners", express.static("data/banners"));
 app.use("/data/profile_pictures", express.static("data/profile_pictures"));
 app.use("/api/users", userRouter);
 app.use("/api/videos", videoRouter);
 app.use("/api/comments", commentsRouter);
 app.use("/api/helper", helperRouter);
+app.use("/api/playlists", playlistRouter);
 
 /* If you want to port forward your server, run the server on 0.0.0.0 (set EXPOSE_NETWORK=true) */
 app.listen(PORT, EXPOSE_NETWORK ? "0.0.0.0" : "127.0.0.1", () => {

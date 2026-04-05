@@ -1,18 +1,21 @@
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import DeleteIcon from "@mui/icons-material/Delete";
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
+import AddLinkIcon from "@mui/icons-material/AddLink";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import ForumIcon from "@mui/icons-material/Forum";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import ImageIcon from "@mui/icons-material/Image";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import LanguageIcon from "@mui/icons-material/Language";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import RedditIcon from "@mui/icons-material/Reddit";
+import SmartDisplayIcon from "@mui/icons-material/SmartDisplay";
+import XIcon from "@mui/icons-material/X";
 import {
   Alert,
   Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
-  Chip,
   CircularProgress,
   Container,
   Dialog,
@@ -21,38 +24,84 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Paper,
+  Skeleton,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Loading from "@/components/Loading.jsx";
 import ApiConfig from "../utils/ApiConfig.js";
+import {
+  detectLinkPlatform,
+  ensureAbsoluteUrl,
+  isValidLinkUrl,
+} from "../utils/ProfileLinks.js";
 
 function ProfileSettings() {
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [publicName, setPublicName] = useState("");
   const [publicNameError, setPublicNameError] = useState("");
   const [bio, setBio] = useState("");
+  const [links, setLinks] = useState([{ title: "", url: "" }]);
+  const [linksError, setLinksError] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [banner, setBanner] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [removeProfilePictureButtonDisabled, setRemoveProfileButtonDisabled] =
     useState(false);
+  const [removeBannerButtonDisabled, setRemoveBannerButtonDisabled] =
+    useState(true);
+  const [bannerRemoved, setBannerRemoved] = useState(false);
   const [saveInProgress, setSaveInProgress] = useState(false);
+  const bannerInputRef = useRef(null);
 
   const navigate = (location) => {
     window.location.href = location;
   };
   const routerNavigate = useNavigate();
+
+  const getLinkIcon = (url) => {
+    const platform = detectLinkPlatform(url);
+    if (platform === "youtube") return <SmartDisplayIcon fontSize="small" />;
+    if (platform === "github") return <GitHubIcon fontSize="small" />;
+    if (platform === "x") return <XIcon fontSize="small" />;
+    if (platform === "instagram") return <InstagramIcon fontSize="small" />;
+    if (platform === "linkedin") return <LinkedInIcon fontSize="small" />;
+    if (platform === "facebook") return <FacebookIcon fontSize="small" />;
+    if (platform === "reddit") return <RedditIcon fontSize="small" />;
+    if (platform === "discord" || platform === "twitch") return <ForumIcon fontSize="small" />;
+    return <LanguageIcon fontSize="small" />;
+  };
+
+  const handleLinkChange = (index, field, value) => {
+    setLinks((prev) =>
+      prev.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [field]: value } : entry,
+      ),
+    );
+    setLinksError("");
+  };
+
+  const handleAddLink = () => {
+    setLinks((prev) => [...prev, { title: "", url: "" }]);
+  };
+
+  const maxLinks = 10;
+  const remainingLinkSlots = Math.max(maxLinks - links.length, 0);
+
+  const handleRemoveLink = (index) => {
+    setLinks((prev) => {
+      const next = prev.filter((_, entryIndex) => entryIndex !== index);
+      return next.length > 0 ? next : [{ title: "", url: "" }];
+    });
+    setLinksError("");
+  };
 
   useEffect(() => {
     document.title = "Profile Settings - Twaire";
@@ -64,12 +113,21 @@ function ProfileSettings() {
         });
         if (!res.ok) throw new Error("Not authenticated");
         const data = await res.json();
-        setUser(data);
         setPublicName(data.publicName || data.username);
         setBio(data.bio || "");
+        setLinks(
+          Array.isArray(data.links) && data.links.length > 0
+            ? data.links
+            : [{ title: "", url: "" }],
+        );
         setRemoveProfileButtonDisabled(data.profilePicture == null);
+        setRemoveBannerButtonDisabled(data.banner == null);
+        setBannerRemoved(false);
         if (data.profilePicture) {
           setPreview(`${ApiConfig.serverUrl}/${data.profilePicture}`);
+        }
+        if (data.banner) {
+          setBannerPreview(`${ApiConfig.serverUrl}/${data.banner}`);
         }
       } catch (err) {
         console.error(err);
@@ -87,6 +145,16 @@ function ProfileSettings() {
     if (file) {
       setProfilePicture(file);
       setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleBannerChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBanner(file);
+      setBannerPreview(URL.createObjectURL(file));
+      setRemoveBannerButtonDisabled(false);
+      setBannerRemoved(false);
     }
   };
 
@@ -112,17 +180,47 @@ function ProfileSettings() {
     e.preventDefault();
 
     setSaveInProgress(true);
+    setLinksError("");
 
     if (!publicName.trim()) {
       setPublicNameError("Public name cannot be empty.");
+      setSaveInProgress(false);
       return;
+    }
+
+    const normalizedLinks = [];
+    for (const entry of links) {
+      const title = String(entry.title || "").trim();
+      const url = String(entry.url || "").trim();
+      if (!title && !url) continue;
+
+      if (!title || !url) {
+        setLinksError("Each link needs both a title and a URL.");
+        setSaveInProgress(false);
+        return;
+      }
+
+      if (!isValidLinkUrl(url)) {
+        setLinksError("One or more links are invalid. Use a valid URL, for example https://example.com.");
+        setSaveInProgress(false);
+        return;
+      }
+
+      normalizedLinks.push({
+        title,
+        url: ensureAbsoluteUrl(url),
+      });
     }
 
     const formData = new FormData();
     formData.append("publicName", publicName);
     formData.append("bio", bio);
+    formData.append("links", JSON.stringify(normalizedLinks));
     if (profilePicture) {
       formData.append("profilePicture", profilePicture);
+    }
+    if (banner) {
+      formData.append("banner", banner);
     }
 
     try {
@@ -137,6 +235,8 @@ function ProfileSettings() {
       }
     } catch (error) {
       console.error("Failed to update profile", error);
+    } finally {
+      setSaveInProgress(false);
     }
   };
 
@@ -160,13 +260,83 @@ function ProfileSettings() {
     }
   };
 
+  const handleRemoveBanner = async () => {
+    try {
+      const res = await fetch(
+        `${ApiConfig.serverUrl}/api/users/me/delete/banner`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
+
+      if (res.ok) {
+        setBanner(null);
+        setBannerPreview(null);
+        setRemoveBannerButtonDisabled(true);
+        setBannerRemoved(true);
+        if (bannerInputRef.current) {
+          bannerInputRef.current.value = "";
+        }
+      }
+    } catch (err) {
+      console.error("Failed to remove banner", err);
+    }
+  };
+
   if (loading) {
     return (
-      <>
-        <Container maxWidth="md" sx={{ mt: 4 }}>
-          <Loading label="Loading profile settings..." />
-        </Container>
-      </>
+      <Container maxWidth="lg" sx={{ mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <Skeleton variant="text" width="28%" height={40} sx={{ mb: 2 }} />
+          <Skeleton
+            variant="rounded"
+            height={60}
+            sx={{ borderRadius: 1, mb: 3 }}
+          />
+          <Skeleton variant="text" width={180} height={30} sx={{ mb: 2 }} />
+          <Skeleton
+            variant="rounded"
+            height={150}
+            sx={{ borderRadius: 1, mb: 2 }}
+          />
+          <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+            <Skeleton
+              variant="rounded"
+              width={150}
+              height={36}
+              sx={{ borderRadius: 1 }}
+            />
+            <Skeleton
+              variant="rounded"
+              width={110}
+              height={36}
+              sx={{ borderRadius: 1 }}
+            />
+          </Box>
+          <Skeleton
+            variant="rectangular"
+            height={1}
+            sx={{ transform: "none", mb: 3 }}
+          />
+
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, width: "100%" }}>
+            <Box sx={{ mb: { xs: 3, md: 0 }, mr: { xs: 0, md: 4 }, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+              <Skeleton variant="circular" width={100} height={100} />
+              <Skeleton variant="rounded" width={140} height={36} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rounded" width={150} height={32} sx={{ borderRadius: 1 }} />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant="rounded" height={56} sx={{ borderRadius: 1, mb: 3 }} />
+              <Skeleton variant="rounded" height={120} sx={{ borderRadius: 1, mb: 3 }} />
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Skeleton variant="rounded" width={150} height={40} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rounded" width={120} height={40} sx={{ borderRadius: 1 }} />
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
+      </Container>
     );
   }
 
@@ -185,13 +355,95 @@ function ProfileSettings() {
             component="form"
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", md: "row" },
+              flexDirection: "column",
               width: "100%",
               mt: 3,
             }}
             onSubmit={handleSubmit}
             noValidate
           >
+            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+              Channel Banner
+            </Typography>
+            <Box
+              sx={{
+                position: "relative",
+                width: "100%",
+                height: 150,
+                bgcolor: "grey.200",
+                backgroundImage: bannerPreview
+                  ? "none"
+                  : "repeating-linear-gradient(-45deg, rgba(255,255,255,0.18) 0 14px, rgba(0,0,0,0.04) 14px 28px)",
+                borderRadius: 1,
+                overflow: "hidden",
+                mb: 2,
+              }}
+            >
+              {bannerPreview && (
+                <img
+                  src={bannerPreview}
+                  alt="Banner preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              )}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 2,
+                  bgcolor: "rgba(0,0,0,0.3)",
+                  opacity: 0,
+                  transition: "opacity 0.2s",
+                  "&:hover": { opacity: 1 },
+                }}
+              >
+                <Button
+                  component="label"
+                  variant="contained"
+                  startIcon={<ImageIcon />}
+                  sx={{ color: "white", bgcolor: "rgba(0,0,0,0.5)" }}
+                >
+                  Upload Banner
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    ref={bannerInputRef}
+                    onChange={handleBannerChange}
+                  />
+                </Button>
+                <Button
+                  variant="contained"
+                  color={bannerRemoved ? "success" : "error"}
+                  startIcon={<DeleteIcon />}
+                  onClick={handleRemoveBanner}
+                  disabled={removeBannerButtonDisabled}
+                  sx={{ color: "white" }}
+                >
+                  {bannerRemoved ? "Removed" : "Remove"}
+                </Button>
+              </Box>
+            </Box>
+
+            <Divider sx={{ mb: 3 }} />
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                width: "100%",
+              }}
+            >
             <Box
               sx={{
                 mb: { xs: 3, md: 0 },
@@ -280,6 +532,86 @@ function ProfileSettings() {
                 sx={{ mb: 3 }}
                 disabled={saveInProgress}
               />
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Links
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Add social and website links that appear on your channel profile.
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  {links.map((entry, index) => (
+                    <Box
+                      key={`profile-link-${index}`}
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1.4fr auto" },
+                        gap: 1,
+                        alignItems: "center",
+                      }}
+                    >
+                      <TextField
+                        size="small"
+                        label="Title"
+                        value={entry.title}
+                        onChange={(event) => handleLinkChange(index, "title", event.target.value)}
+                        disabled={saveInProgress}
+                      />
+                      <TextField
+                        size="small"
+                        label="URL"
+                        placeholder="https://example.com"
+                        value={entry.url}
+                        onChange={(event) => handleLinkChange(index, "url", event.target.value)}
+                        disabled={saveInProgress}
+                        InputProps={{
+                          startAdornment: (
+                            <Box sx={{ display: "inline-flex", mr: 1, color: "text.secondary" }}>
+                              {getLinkIcon(entry.url)}
+                            </Box>
+                          ),
+                        }}
+                      />
+                      <Tooltip title="Remove this link" arrow>
+                        <Button
+                          color="error"
+                          variant="outlined"
+                          onClick={() => handleRemoveLink(index)}
+                          disabled={saveInProgress}
+                          sx={{
+                            justifySelf: { xs: "flex-start", sm: "center" },
+                            minWidth: 0,
+                            px: 1.2,
+                            height: 40,
+                            minHeight: 40,
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </Button>
+                      </Tooltip>
+                    </Box>
+                  ))}
+                </Box>
+                {linksError && (
+                  <Alert severity="error" sx={{ mt: 1.5 }}>
+                    {linksError}
+                  </Alert>
+                )}
+                <Tooltip title={`${remainingLinkSlots}/${maxLinks} slots remaining`} arrow>
+                  <Box component="span" sx={{ display: "inline-flex", mt: 1.5 }}>
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AddLinkIcon />}
+                      onClick={handleAddLink}
+                      disabled={saveInProgress || links.length >= maxLinks}
+                    >
+                      Add Link
+                    </Button>
+                  </Box>
+                </Tooltip>
+              </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Button
@@ -304,6 +636,7 @@ function ProfileSettings() {
                   Delete Account
                 </Button>
               </Box>
+            </Box>
             </Box>
           </Box>
         </Paper>
