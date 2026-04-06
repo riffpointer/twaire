@@ -709,6 +709,7 @@ function Comment({
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {getRelativeTime(comment.createdAt)}
+          {comment.isEdited && ' (edited)'}
         </Typography>
         {isPinned && (
           <Box
@@ -890,6 +891,7 @@ function Comment({
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {getRelativeTime(reply.createdAt)}
+                            {reply.isEdited && ' (edited)'}
                           </Typography>
                         </Box>
                         {currentUser && !reply._pending && (

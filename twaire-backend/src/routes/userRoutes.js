@@ -24,6 +24,7 @@ function buildUserPayload(user) {
     profilePicture: user.profilePicture,
     banner: user.banner,
     bio: user.bio,
+    trailerVideo: user.trailerVideo,
     links: Array.isArray(user.links) ? user.links : [],
     createdAt: user.createdAt,
   };
@@ -486,7 +487,10 @@ userRouter.put("/profile", isAuthenticated, profileUpload.fields([
     if (links !== undefined) {
       user.links = parseProfileLinks(links);
     }
-    
+    if (req.body.trailerVideo !== undefined) {
+      user.trailerVideo = req.body.trailerVideo || null;
+    }
+
     if (req.files) {
       if (req.files.profilePicture) {
         user.profilePicture = req.files.profilePicture[0].path;
@@ -506,6 +510,7 @@ userRouter.put("/profile", isAuthenticated, profileUpload.fields([
         profilePicture: user.profilePicture,
         banner: user.banner,
         bio: user.bio,
+        trailerVideo: user.trailerVideo,
         links: Array.isArray(user.links) ? user.links : [],
       },
     });
@@ -545,7 +550,7 @@ userRouter.get("/:id/videos", async (req, res) => {
 userRouter.get("/:username", async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).populate("trailerVideo");
     if (!user) {
       apiError("GET", `/${username}`, "User not found");
       return res.status(404).json({ error: "User not found" });
@@ -562,6 +567,7 @@ userRouter.get("/:username", async (req, res) => {
       profilePicture: user.profilePicture,
       banner: user.banner,
       bio: user.bio,
+      trailerVideo: user.trailerVideo,
       links: Array.isArray(user.links) ? user.links : [],
       createdAt: user.createdAt,
     });

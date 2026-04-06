@@ -12,6 +12,7 @@ const videoSchema = new mongoose.Schema({
   filename: { type: String, required: true },
   thumbnail: { type: String, default: null },
   views: { type: Number, default: 0 },
+  duration: { type: Number, default: null }, // duration in seconds
   
   /* These store references to the reaction owners */
   likes: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [] },

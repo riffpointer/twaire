@@ -204,6 +204,9 @@ function MyAccount() {
           bookmarkedVideos={bookmarkedVideos}
           videoVisibility={videoVisibility}
           onVideoVisibilityChange={setVideoVisibility}
+          currentUser={user}
+          onPlaylistCreated={(newPl) => setPlaylists((prev) => [newPl, ...prev])}
+          onPlaylistDeleted={(id) => setPlaylists((prev) => prev.filter((p) => p._id !== id))}
         />
       </Container>
 

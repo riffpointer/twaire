@@ -230,7 +230,7 @@ function User() {
         </UserHeader>
       )}
 
-      <UserTabs user={user} videos={videos} subscriptions={subscriptions} playlists={playlists} />
+      <UserTabs user={user} videos={videos} subscriptions={subscriptions} playlists={playlists} currentUser={currentUser} subscribed={subscribed} />
 
       <AppSnackbar
         open={snackbarOpen}

@@ -18,7 +18,7 @@ function PublicVideosListSkeleton({ count = 5 }) {
           }}
         >
           <Skeleton variant="rectangular" sx={{ width: "100%", pt: "56.25%" }} />
-          <Box sx={{ p: 1.5, pt: 1 }}>
+          <Box sx={{ p: 1.5, pt: 1, pb: 1.5 }}>
             <Skeleton variant="text" width="88%" height={30} />
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
               <Skeleton variant="circular" width={24} height={24} />

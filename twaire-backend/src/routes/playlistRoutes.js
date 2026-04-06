@@ -1,5 +1,8 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
 import { User, Playlist } from "../models/models.js";
+import { playlistThumbnailUpload } from "../providers/storage.js";
 import isAuthenticated from "../middleware/auth.js";
 import { apiMessage, apiError } from "../utils/logging.js";
 
@@ -46,11 +49,12 @@ playlistRouter.get("/user/:username", async (req, res) => {
 // Create new playlist
 playlistRouter.post("/", isAuthenticated, async (req, res) => {
   try {
-    const { name, visibility } = req.body;
+    const { name, visibility, description } = req.body;
     if (!name) return res.status(400).json({ error: "Name is required" });
 
     const newPlaylist = new Playlist({
       name,
+      description: description || "",
       owner: req.session.userId,
       visibility: visibility || 0,
       createdAt: Date.now(),
@@ -61,6 +65,53 @@ playlistRouter.post("/", isAuthenticated, async (req, res) => {
     res.json(newPlaylist);
   } catch (err) {
     apiError("POST", "/", "Failed to create playlist:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Upload/update playlist thumbnail
+playlistRouter.post("/:id/thumbnail", isAuthenticated, playlistThumbnailUpload.single("thumbnail"), async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) return res.status(404).json({ error: "Playlist not found" });
+    if (playlist.owner.toString() !== req.session.userId.toString()) return res.status(403).json({ error: "Forbidden" });
+    if (!req.file) return res.status(400).json({ error: "No thumbnail file provided" });
+
+    // Remove old thumbnail file if present
+    if (playlist.thumbnail) {
+      const oldPath = path.join("data/playlist_thumbnails", playlist.thumbnail);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+
+    playlist.thumbnail = req.file.filename;
+    playlist.updatedAt = Date.now();
+    await playlist.save();
+
+    res.json({ thumbnail: playlist.thumbnail });
+  } catch (err) {
+    apiError("POST", `/${req.params.id}/thumbnail`, "Failed to upload thumbnail:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Remove playlist thumbnail
+playlistRouter.delete("/:id/thumbnail", isAuthenticated, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) return res.status(404).json({ error: "Playlist not found" });
+    if (playlist.owner.toString() !== req.session.userId.toString()) return res.status(403).json({ error: "Forbidden" });
+
+    if (playlist.thumbnail) {
+      const oldPath = path.join("data/playlist_thumbnails", playlist.thumbnail);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      playlist.thumbnail = "";
+      playlist.updatedAt = Date.now();
+      await playlist.save();
+    }
+
+    res.json({ message: "Thumbnail removed" });
+  } catch (err) {
+    apiError("DELETE", `/${req.params.id}/thumbnail`, "Failed to remove thumbnail:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -102,6 +153,31 @@ playlistRouter.delete("/:id/videos/:videoId", isAuthenticated, async (req, res) 
   }
 });
 
+// Reorder videos in playlist
+playlistRouter.patch("/:id/reorder", isAuthenticated, async (req, res) => {
+  try {
+    const { videoIds } = req.body;
+    if (!Array.isArray(videoIds)) return res.status(400).json({ error: "videoIds must be an array" });
+
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) return res.status(404).json({ error: "Playlist not found" });
+    if (playlist.owner.toString() !== req.session.userId.toString()) return res.status(403).json({ error: "Forbidden" });
+
+    // Only keep IDs that actually exist in the playlist (prevent injection)
+    const existing = new Set(playlist.videos.map((v) => v.toString()));
+    const filtered = videoIds.filter((v) => existing.has(v.toString()));
+
+    playlist.videos = filtered;
+    playlist.updatedAt = Date.now();
+    await playlist.save();
+
+    res.json({ message: "Reordered" });
+  } catch (err) {
+    apiError("PATCH", `/${req.params.id}/reorder`, "Failed to reorder playlist:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Delete playlist
 playlistRouter.delete("/:id", isAuthenticated, async (req, res) => {
   try {
@@ -109,6 +185,12 @@ playlistRouter.delete("/:id", isAuthenticated, async (req, res) => {
     if (!playlist) return res.status(404).json({ error: "Playlist not found" });
     if (playlist.owner.toString() !== req.session.userId.toString()) return res.status(403).json({ error: "Forbidden" });
     if (playlist.isDefault) return res.status(400).json({ error: "Cannot delete default playlist" });
+
+    // Clean up thumbnail file
+    if (playlist.thumbnail) {
+      const thumbPath = path.join("data/playlist_thumbnails", playlist.thumbnail);
+      if (fs.existsSync(thumbPath)) fs.unlinkSync(thumbPath);
+    }
 
     await Playlist.findByIdAndDelete(req.params.id);
     res.json({ message: "Deleted" });
@@ -118,10 +200,10 @@ playlistRouter.delete("/:id", isAuthenticated, async (req, res) => {
   }
 });
 
-// Update playlist
+// Update playlist (name, visibility, description)
 playlistRouter.put("/:id", isAuthenticated, async (req, res) => {
   try {
-    const { name, visibility } = req.body;
+    const { name, visibility, description } = req.body;
     const playlist = await Playlist.findById(req.params.id);
     if (!playlist) return res.status(404).json({ error: "Playlist not found" });
     if (playlist.owner.toString() !== req.session.userId.toString()) return res.status(403).json({ error: "Forbidden" });
@@ -129,6 +211,7 @@ playlistRouter.put("/:id", isAuthenticated, async (req, res) => {
 
     if (name && !playlist.isDefault) playlist.name = name;
     if (visibility !== undefined) playlist.visibility = visibility;
+    if (description !== undefined) playlist.description = description;
     playlist.updatedAt = Date.now();
 
     await playlist.save();
@@ -143,7 +226,7 @@ playlistRouter.put("/:id", isAuthenticated, async (req, res) => {
 playlistRouter.get("/:id", async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id)
-      .populate("videos", "_id title thumbnail uploader views uploadedAt")
+      .populate("videos", "_id title thumbnail uploader views uploadedAt duration")
       .populate("owner", "username publicName profilePicture verified");
 
     if (!playlist) return res.status(404).json({ error: "Playlist not found" });

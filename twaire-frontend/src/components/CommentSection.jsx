@@ -118,6 +118,51 @@ function CommentSection({ videoId, videoUploaderId, pinnedCommentId: initialPinn
     fetchCurrentUser();
   }, []);
 
+  useEffect(() => {
+    if (!currentUser || !comments || comments.length === 0) return;
+
+    let changed = false;
+    const initialLiked = new Set(likedComments);
+    const initialDisliked = new Set(dislikedComments);
+
+    comments.forEach((comment) => {
+      if (Array.isArray(comment.likes) && comment.likes.includes(currentUser._id)) {
+        if (!initialLiked.has(comment._id)) {
+          initialLiked.add(comment._id);
+          changed = true;
+        }
+      }
+      if (Array.isArray(comment.dislikes) && comment.dislikes.includes(currentUser._id)) {
+        if (!initialDisliked.has(comment._id)) {
+          initialDisliked.add(comment._id);
+          changed = true;
+        }
+      }
+
+      if (Array.isArray(comment.replies)) {
+        comment.replies.forEach((reply) => {
+          if (Array.isArray(reply.likes) && reply.likes.includes(currentUser._id)) {
+            if (!initialLiked.has(reply._id)) {
+              initialLiked.add(reply._id);
+              changed = true;
+            }
+          }
+          if (Array.isArray(reply.dislikes) && reply.dislikes.includes(currentUser._id)) {
+            if (!initialDisliked.has(reply._id)) {
+              initialDisliked.add(reply._id);
+              changed = true;
+            }
+          }
+        });
+      }
+    });
+
+    if (changed) {
+      setLikedComments(initialLiked);
+      setDislikedComments(initialDisliked);
+    }
+  }, [comments, currentUser]);
+
   const handlePost = useCallback(async (e) => {
     e.preventDefault();
     const currentText = textRef.current;

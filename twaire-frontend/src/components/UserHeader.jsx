@@ -141,7 +141,7 @@ function UserHeader({ user, children }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                flexDirection: { xs: "column", sm: "row" },
+                flexDirection: "row",
               }}
             >
               <UserAvatar
@@ -152,6 +152,8 @@ function UserHeader({ user, children }) {
                   border: "4px solid",
                   borderColor: "rgba(24,24,24,0.92)",
                   boxShadow: "0 10px 24px rgba(0,0,0,0.28)",
+                  width: { xs: 80, sm: 112 },
+                  height: { xs: 80, sm: 112 },
                 }}
               />
               <Box sx={{ color: "common.white", minWidth: 0, flex: 1 }}>

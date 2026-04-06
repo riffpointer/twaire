@@ -8,7 +8,7 @@ import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import { Box, Button, CircularProgress, Fade, IconButton, Menu, MenuItem, Slide, Slider, Snackbar, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Fade, IconButton, Menu, MenuItem, Slide, Slider, Snackbar, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
@@ -54,12 +54,15 @@ const VideoPlayer = ({
   const [upNextRemaining, setUpNextRemaining] = useState(UP_NEXT_SECONDS);
   const [upNextCancelled, setUpNextCancelled] = useState(false);
   const [showAutoplayNextPrompt, setShowAutoplayNextPrompt] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [volumePopupOpen, setVolumePopupOpen] = useState(false);
   const [autoplayNextVideo, setAutoplayNextVideo] = useState(() => {
     const saved = localStorage.getItem(AUTOPLAY_NEXT_VIDEO_STORAGE_KEY);
     if (saved === null) return true;
     return saved !== "false";
   });
   const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState(null);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const ignoreNextClickRef = useRef(false);
   const hasAutoNavigatedRef = useRef(false);
   const onNextVideoRef = useRef(onNextVideo);
@@ -178,6 +181,7 @@ const VideoPlayer = ({
     setUpNextRemaining(UP_NEXT_SECONDS);
     setUpNextCancelled(false);
     setShowAutoplayNextPrompt(false);
+    setLoadError("");
   }, [src, startAtSeconds]);
 
   useEffect(() => {
@@ -292,18 +296,33 @@ const VideoPlayer = ({
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
     const handleLoadedMetadata = () => setDuration(video.duration);
     const handleWaiting = () => setBuffering(true);
-    const handlePlaying = () => setBuffering(false);
+    const handlePlaying = () => {
+      setBuffering(false);
+      setLoadError("");
+    };
+    const handleError = () => {
+      const messageByCode = {
+        1: "The video loading was aborted.",
+        2: "The video could not be loaded.",
+        3: "The video format is not supported or the file is invalid.",
+        4: "The video source is unavailable or invalid.",
+      };
+      setBuffering(false);
+      setLoadError(messageByCode[video.error?.code] || "The video could not be loaded.");
+    };
 
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
 
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
+    video.addEventListener("error", handleError);
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("error", handleError);
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
     };
   }, []);
@@ -443,6 +462,31 @@ const VideoPlayer = ({
     setShowAutoplayNextPrompt(true);
   };
 
+  const handleFullscreenRef = useRef(handleFullscreen);
+  handleFullscreenRef.current = handleFullscreen;
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      const isInputActive = document.activeElement && (
+        document.activeElement.tagName === "INPUT" || 
+        document.activeElement.tagName === "TEXTAREA" || 
+        document.activeElement.isContentEditable
+      );
+      if (isInputActive) return;
+
+      if (e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        handleFullscreenRef.current();
+      } else if (e.key === "?") {
+        e.preventDefault();
+        setShowShortcutsDialog(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
+
   return (
     <Box
       {...props} // <-- forward all props to the container
@@ -450,7 +494,9 @@ const VideoPlayer = ({
         width: "100%",
         position: "relative",
         bgcolor: "black",
-        height: { xs: 300, md: 500 },
+        aspectRatio: "16 / 9",
+        height: "auto",
+        minHeight: { xs: 240, md: 360 },
         overflow: "hidden",
         borderRadius: 2,
         ...props.sx, // merge custom sx if passed
@@ -525,6 +571,31 @@ const VideoPlayer = ({
         }}
         autoPlay={autoPlay}
       />
+
+      {loadError && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 6,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 2,
+            textAlign: "center",
+            bgcolor: "rgba(0, 0, 0, 0.82)",
+          }}
+        >
+          <Box sx={{ maxWidth: 420 }}>
+            <Typography variant="h6" sx={{ color: "white", fontWeight: 700, mb: 1 }}>
+              Video unavailable
+            </Typography>
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.85)" }}>
+              {loadError}
+            </Typography>
+          </Box>
+        </Box>
+      )}
 
       {buffering && (
         <Box
@@ -720,30 +791,62 @@ const VideoPlayer = ({
             size="small"
           />
 
-          <IconButton
-            onClick={() => {
-              setPrevVolume(volume);
-              const video = videoRef.current;
-              if (!video) return;
-              video.muted = !video.muted;
-              setMuted(video.muted);
-              setVolume(video.muted ? 0 : prevVolume);
-              resetHideTimeout();
-            }}
-            sx={{ color: "white" }}
-            title={muted ? "Unmute" : "Mute"}
+          <Box
+            onMouseEnter={() => setVolumePopupOpen(true)}
+            onMouseLeave={() => setVolumePopupOpen(false)}
+            onFocus={() => setVolumePopupOpen(true)}
+            onBlur={() => setVolumePopupOpen(false)}
+            sx={{ position: "relative", display: "flex", alignItems: "center" }}
           >
-            {muted || volume === 0 ? <VolumeOffIcon /> : <VolumeUpIcon />}
-          </IconButton>
-          <Slider
-            min={0}
-            max={1}
-            step={0.01}
-            value={volume}
-            onChange={handleVolumeChange}
-            sx={{ width: 100, mr: 1 }}
-            size="small"
-          />
+            <IconButton
+              onClick={() => {
+                setPrevVolume(volume);
+                const video = videoRef.current;
+                if (!video) return;
+                video.muted = !video.muted;
+                setMuted(video.muted);
+                setVolume(video.muted ? 0 : prevVolume);
+                resetHideTimeout();
+                setVolumePopupOpen(true);
+              }}
+              sx={{ color: "white" }}
+              title={muted ? "Unmute" : "Mute"}
+            >
+              {muted || volume === 0 ? <VolumeOffIcon /> : <VolumeUpIcon />}
+            </IconButton>
+            <Slide in={volumePopupOpen} direction="up" mountOnEnter unmountOnExit timeout={180}>
+              <Box
+                onClick={(e) => e.stopPropagation()}
+                sx={{
+                  position: "absolute",
+                  bottom: "calc(100% + 8px)",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 10,
+                  bgcolor: "rgba(20,20,20,0.96)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 2,
+                  px: 0.75,
+                  py: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: 4,
+                }}
+              >
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  orientation="vertical"
+                  sx={{ height: 100 }}
+                  size="small"
+                />
+              </Box>
+            </Slide>
+          </Box>
 
           <IconButton
             onClick={(e) => setSpeedMenuAnchorEl(e.currentTarget)}
@@ -776,6 +879,22 @@ const VideoPlayer = ({
           </IconButton>
         </Box>
       </Slide>
+
+      <Dialog open={showShortcutsDialog} onClose={() => setShowShortcutsDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Keyboard Shortcuts</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 1 }}>
+            <Typography><strong>Space / k:</strong> Play / Pause</Typography>
+            <Typography><strong>f:</strong> Fullscreen</Typography>
+            <Typography><strong>Arrow Left:</strong> Seek backward 5s</Typography>
+            <Typography><strong>Arrow Right:</strong> Seek forward 5s</Typography>
+            <Typography><strong>Shift + ?:</strong> Show shortcuts</Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowShortcutsDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

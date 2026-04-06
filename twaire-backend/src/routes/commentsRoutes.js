@@ -61,6 +61,7 @@ commentsRouter.put("/:id", isAuthenticated, async (req, res) => {
         }
 
         comment.text = text;
+        comment.isEdited = true;
         await comment.save();
         await comment.populate("user", "username publicName profilePicture verified");
         await comment.populate("replies.user", "username publicName profilePicture verified");
@@ -115,6 +116,7 @@ commentsRouter.put("/:id/replies/:replyId", isAuthenticated, async (req, res) =>
         }
 
         reply.text = text;
+        reply.isEdited = true;
         await comment.save();
         await comment.populate("user", "username publicName profilePicture verified");
         await comment.populate("replies.user", "username publicName profilePicture verified");

@@ -104,8 +104,8 @@ function VideoCard({ video, sx={} }) {
         ...sx,
       }}
     >
-      <CardActionArea
-        sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", height: "100%" }}
+      <Box
+        sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", height: "100%", cursor: "pointer" }}
       >
         <Box sx={{ position: "relative", width: "100%", aspectRatio: "16 / 9", flexGrow: 1 }}>
           {!thumbnailLoaded && (
@@ -140,8 +140,8 @@ function VideoCard({ video, sx={} }) {
           />
         </Box>
 
-        <CardContent sx={{ p: 1.5, pt:1 }}>
-          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.5, mb: 0.5 }}>
+        <CardContent sx={{ p: 1.5, pt: 1, "&:last-child": { pb: 1.5 } }}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 0.5, mb: 0.5 }}>
             <Typography
               variant="h6"
               noWrap
@@ -150,46 +150,45 @@ function VideoCard({ video, sx={} }) {
             >
               {video.title}
             </Typography>
-            <IconButton
-              size="small"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                handleOpenMenu(event);
-              }}
-              onPointerDown={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-              aria-label="Video actions"
-              sx={{
-                mt: 0.25,
-                flexShrink: 0,
-                color: "text.secondary",
-              }}
-            >
-              <MoreVertIcon fontSize="small" />
-            </IconButton>
-            <Menu
-              anchorEl={menuAnchorEl}
-              open={menuOpen}
-              onClose={handleCloseMenu}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-            >
-              <MenuItem onClick={handleAddToQueue}>
-                <QueuePlayNextIcon fontSize="small" style={{ marginRight: 8 }} />
-                Add to queue
-              </MenuItem>
-              <MenuItem onClick={handleSaveToPlaylist}>
-                <PlaylistAddIcon fontSize="small" style={{ marginRight: 8 }} />
-                Save to playlist
-              </MenuItem>
-              <MenuItem onClick={handleReport} sx={{ color: "warning.main" }}>
-                <FlagOutlinedIcon fontSize="small" style={{ marginRight: 8 }} />
-                Report
-              </MenuItem>
-            </Menu>
+            <Box>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOpenMenu(e);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                aria-label="Video actions"
+                sx={{ color: "text.secondary", mt: -0.5, mr: -1 }}
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+              <Menu
+                anchorEl={menuAnchorEl}
+                open={menuOpen}
+                onClose={handleCloseMenu}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+              >
+                <MenuItem onClick={handleAddToQueue}>
+                  <QueuePlayNextIcon fontSize="small" style={{ marginRight: 8 }} />
+                  Add to queue
+                </MenuItem>
+                <MenuItem onClick={handleSaveToPlaylist}>
+                  <PlaylistAddIcon fontSize="small" style={{ marginRight: 8 }} />
+                  Save to playlist
+                </MenuItem>
+                <MenuItem onClick={handleReport} sx={{ color: "warning.main" }}>
+                  <FlagOutlinedIcon fontSize="small" style={{ marginRight: 8 }} />
+                  Report
+                </MenuItem>
+              </Menu>
+            </Box>
           </Box>
 
           <Box
@@ -225,7 +224,7 @@ function VideoCard({ video, sx={} }) {
             )}
           </Box>
         </CardContent>
-      </CardActionArea>
+      </Box>
 
       <Dialog open={reportDialogOpen} onClose={handleCloseReportDialog} fullWidth maxWidth="sm">
         <DialogTitle>Report video</DialogTitle>

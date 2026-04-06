@@ -27,6 +27,7 @@ export default function AppBarHeader() {
   const [searchTerm, setSearchTerm] = useState("");
   const [autocompleteOptions, setAutocompleteOptions] = useState([]);
   const [autocompleteLoading, setAutocompleteLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const searchInputRef = useRef(null);
 
@@ -214,6 +215,7 @@ export default function AppBarHeader() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setDropdownOpen(false);
     if (searchTerm.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
     }
@@ -222,12 +224,10 @@ export default function AppBarHeader() {
   const handleAutocompleteSelection = (_, value) => {
     const term = typeof value === "string" ? value : "";
     setSearchTerm(term);
+    setDropdownOpen(false);
     if (term.trim()) {
       navigate(`/search?q=${encodeURIComponent(term.trim())}`);
     }
-    requestAnimationFrame(() => {
-      searchInputRef.current?.blur();
-    });
   };
 
   const navLinkPages = {
@@ -273,7 +273,7 @@ export default function AppBarHeader() {
               edge="start"
               color="inherit"
               aria-label="menu"
-              sx={{ mr: { xs: 1.25, md: 1.5 } }}
+              sx={{ mr: { xs: 1.25, md: 1.5 }, ml: { xs: 1, md: 0 } }}
               onClick={toggleDrawer(true)}
             >
               <MenuIcon />
@@ -330,12 +330,17 @@ export default function AppBarHeader() {
                 fullWidth
                 size="small"
                 options={autocompleteOptions}
-                open={autocompleteOptions.length > 0}
+                open={dropdownOpen && autocompleteOptions.length > 0}
+                onOpen={() => setDropdownOpen(true)}
+                onClose={() => setDropdownOpen(false)}
                 loading={autocompleteLoading}
                 loadingText=""
                 filterOptions={(options) => options}
                 inputValue={searchTerm}
-                onInputChange={(_, newInputValue) => setSearchTerm(newInputValue)}
+                onInputChange={(_, newInputValue, reason) => {
+                  setSearchTerm(newInputValue);
+                  if (reason === "input") setDropdownOpen(true);
+                }}
                 onChange={handleAutocompleteSelection}
                 renderInput={(params) => (
                   <TextField

@@ -23,6 +23,7 @@ import {
   Grid,
   IconButton,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Select,
   Skeleton,
@@ -64,6 +65,8 @@ function Dashboard() {
   const [viewMode, setViewMode] = useState("grid");
   const [thumbnailLoadedMap, setThumbnailLoadedMap] = useState({});
   const [fabCollapsed, setFabCollapsed] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -167,7 +170,7 @@ function Dashboard() {
     setEditingTag({ index: null, text: "" });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
@@ -175,6 +178,9 @@ function Dashboard() {
       return;
     }
     setErrors({});
+    setIsUploading(true);
+    setUploadProgress(0);
+    setDisabled(true);
 
     const formData = new FormData();
     formData.append("title", title);
@@ -185,42 +191,60 @@ function Dashboard() {
     if (thumbnail) formData.append("thumbnail", thumbnail);
     if (tags.length > 0) formData.append("tags", tags.join(","));
 
-    try {
-      const res = await fetch(`${ApiConfig.serverUrl}/api/videos`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setAlert({ type: "danger", message: data.error || "Upload failed" });
-        return;
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${ApiConfig.serverUrl}/api/videos`, true);
+    xhr.withCredentials = true;
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percentComplete);
+      }
+    };
+
+    xhr.onload = () => {
+      setIsUploading(false);
+      setUploadProgress(0);
+      let data;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch (e) {
+        data = { error: "Failed to parse response" };
       }
 
-      setAlert({
-        type: "success",
-        message: `Video uploaded successfully! Redirecting in`,
-        videoId: data._id,
-      });
-      setRedirectCountdown(3);
-      setDisabled(true);
-      setTitle("");
-      setDescription("");
-      setCategory(DEFAULT_VIDEO_CATEGORY);
-      setVisibility("public");
-      setTags([]);
-      setFile(null);
-      setThumbnail(null);
-      setOpenDialog(false);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setAlert({
+          type: "success",
+          message: `Video uploaded successfully! Redirecting in`,
+          videoId: data._id,
+        });
+        setRedirectCountdown(3);
+        setTitle("");
+        setDescription("");
+        setCategory(DEFAULT_VIDEO_CATEGORY);
+        setVisibility("public");
+        setTags([]);
+        setFile(null);
+        setThumbnail(null);
+        setOpenDialog(false);
+        setVideos((prev) => [data, ...prev]);
+      } else {
+        setDisabled(false);
+        setAlert({ type: "danger", message: data.error || "Upload failed" });
+      }
+    };
 
-      setVideos((prev) => [data, ...prev]);
-    } catch (err) {
-      console.error(err);
+    xhr.onerror = () => {
+      setIsUploading(false);
+      setUploadProgress(0);
+      setDisabled(false);
       setAlert({
         type: "danger",
-        message: err.message || "Error uploading video.",
+        message: "Error uploading video.",
       });
-    }
+    };
+
+    xhr.send(formData);
   };
 
   const handleDragEvents = (e) => {
@@ -528,7 +552,7 @@ function Dashboard() {
                             }}
                           />
                         </Box>
-                        <Box sx={{ p: 1.75 }}>
+                        <Box sx={{ px: 1.75, py: 1.25 }}>
                           <Typography variant="body2" fontWeight={500} noWrap>
                             {v.title}
                           </Typography>
@@ -668,6 +692,17 @@ function Dashboard() {
               >
                 {alert.message}
               </Alert>
+            )}
+
+            {isUploading && (
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                  <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                    Uploading... {uploadProgress}%
+                  </Typography>
+                </Box>
+                <LinearProgress variant="determinate" value={uploadProgress} />
+              </Box>
             )}
 
             <TextField

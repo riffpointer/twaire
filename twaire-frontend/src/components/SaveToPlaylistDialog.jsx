@@ -217,7 +217,7 @@ function SaveToPlaylistDialog({ open, onClose, videoId, currentUser }) {
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 2, py: 1, flexDirection: "column", alignItems: "stretch", gap: 0.5 }}>
+      <DialogActions sx={{ px: 2, py: 1.5, flexDirection: "column", alignItems: "stretch", gap: 1 }}>
         <Collapse in={showCreate} sx={{ width: "100%" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pb: 1.5 }}>
             <TextField
@@ -266,16 +266,24 @@ function SaveToPlaylistDialog({ open, onClose, videoId, currentUser }) {
           </Box>
           <Divider sx={{ mb: 1 }} />
         </Collapse>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
           <Button
             startIcon={<AddIcon />}
             size="small"
             onClick={() => setShowCreate((p) => !p)}
-            sx={{ textTransform: "none" }}
+            sx={{
+              flex: 1,
+              justifyContent: "flex-start",
+              textTransform: "none",
+              pl: 0,
+              "& .MuiButton-startIcon": { ml: 0 },
+            }}
           >
             New playlist
           </Button>
-          <Button onClick={onClose} size="small">Done</Button>
+          <Button onClick={onClose} size="small" sx={{ flex: 1 }}>
+            Done
+          </Button>
         </Box>
       </DialogActions>
     </Dialog>

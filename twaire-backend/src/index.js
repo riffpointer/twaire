@@ -76,6 +76,7 @@ app.use("/data/uploads", express.static("data/uploads"));
 app.use("/data/thumbnails", express.static("data/thumbnails"));
 app.use("/data/banners", express.static("data/banners"));
 app.use("/data/profile_pictures", express.static("data/profile_pictures"));
+app.use("/data/playlist_thumbnails", express.static("data/playlist_thumbnails"));
 app.use("/api/users", userRouter);
 app.use("/api/videos", videoRouter);
 app.use("/api/comments", commentsRouter);

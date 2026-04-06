@@ -1,398 +1,293 @@
 # Twaire API Implementation
 
-This document provides details on the Twaire backend API.
+This document summarizes the public backend routes exposed by Twaire.
 
-## Authentication
+## Base Paths
 
-### POST /api/user/login
-
-Login a user.
-
-**Request Body:**
-
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-**Response:**
-
-```json
-{
-  "message": "Login successful",
-  "user": {
-    "username": "testuser",
-    "publicName": "Test User",
-    "profilePicture": "path/to/profile/picture.jpg"
-  }
-}
-```
-
-### POST /api/user/signup
-
-Register a new user.
-
-**Request Body:**
-
-```json
-{
-  "username": "testuser",
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-**Response:**
-
-```json
-{
-  "message": "Signup successful",
-  "userId": "60d5f7a7e7b3c2a4e8b4a5a0"
-}
-```
-
-### POST /api/user/logout
-
-Logout the current user.
-
-**Response:**
-
-```json
-{
-  "message": "Logged out"
-}
-```
+- `/api/users`
+- `/api/videos`
+- `/api/comments`
+- `/api/playlists`
+- `/api/helper`
 
 ## Users
 
-### GET /api/user/me
+### `POST /api/users/signup`
+Creates a new account.
 
-Get the profile of the currently logged-in user. Requires authentication.
+- Body: `username`, `email`, `password`
+- Returns: created user id
 
-**Response:**
+### `POST /api/users/login`
+Authenticates a user and starts a session.
 
-```json
-{
-  "_id": "60d5f7a7e7b3c2a4e8b4a5a0",
-  "username": "testuser",
-  "publicName": "Test User",
-  "verified": false,
-  "subscribers": 10,
-  "accountViews": 1000,
-  "profilePicture": "path/to/profile/picture.jpg",
-  "bio": "This is a bio.",
-  "createdAt": "2021-06-25T12:00:00.000Z"
-}
-```
+- Body: `email`, `password`
+- Returns: user profile and account switch token
 
-### PUT /api/user/profile
+### `POST /api/users/logout`
+Ends the current session.
 
-Update the profile of the currently logged-in user. Requires authentication.
+- Optional body: `switchToken`
+- Returns: confirmation message
 
-**Request Body (form-data):**
+### `GET /api/users/me`
+Returns the authenticated user profile.
 
-- `publicName` (string, optional)
-- `bio` (string, optional)
-- `profilePicture` (file, optional)
+- Auth: required
 
-**Response:**
+### `POST /api/users/me/account-switch-token`
+Generates a new account switch token for the authenticated user.
 
-```json
-{
-  "message": "Profile updated successfully",
-  "user": {
-    "username": "testuser",
-    "publicName": "New Public Name",
-    "profilePicture": "path/to/new/profile/picture.jpg",
-    "bio": "This is an updated bio."
-  }
-}
-```
+- Auth: required
 
-### GET /api/user/:id/videos
+### `POST /api/users/switch-account`
+Restores a saved session using a valid switch token.
 
-Get all videos uploaded by a user.
+- Body: `userId`, `switchToken`
 
-**Response:**
+### `GET /api/users/check-username`
+Checks whether a username is available.
 
-An array of video objects.
+- Query: `username`
 
-### GET /api/user/:username
+### `PUT /api/users/profile`
+Updates profile metadata and uploads profile media.
 
-Get the public profile of a user.
+- Auth: required
+- Form data: `publicName`, `bio`, `links`, `profilePicture`, `banner`
 
-**Response:**
+### `GET /api/users/:username`
+Returns the public profile for a channel.
 
-```json
-{
-  "_id": "60d5f7a7e7b3c2a4e8b4a5a0",
-  "username": "testuser",
-  "publicName": "Test User",
-  "verified": false,
-  "subscribers": 10,
-  "accountViews": 1000,
-  "profilePicture": "path/to/profile/picture.jpg",
-  "bio": "This is a bio.",
-  "createdAt": "2021-06-25T12:00:00.000Z"
-}
-```
+### `POST /api/users/:username/view`
+Increments the channel view counter.
 
-### POST /api/user/:username/view
+### `GET /api/users/:id/videos`
+Returns videos uploaded by a user.
 
-Increment the view count of a user's profile.
+### `GET /api/users/:id/subscriptions`
+Returns the user’s subscriptions.
 
-**Response:**
+### `GET /api/users/:id/isSubscribed`
+Checks whether the current user is subscribed to the target user.
 
-```json
-{
-  "username": "testuser",
-  "publicName": "Test User",
-  "verified": false,
-  "subscribers": 10,
-  "accountViews": 1001
-}
-```
+- Auth: required
 
-### GET /api/user/:id/isSubscribed
+### `POST /api/users/:id/subscribe`
+Toggles a subscription to the target user.
 
-Check if the current user is subscribed to another user. Requires authentication.
+- Auth: required
 
-**Response:**
+### `GET /api/users/me/bookmarks`
+Returns the authenticated user’s saved bookmarks grouped by video.
 
-```json
-{
-  "subscribed": true
-}
-```
+- Auth: required
 
-### POST /api/user/:id/subscribe
+### `GET /api/users/me/analytics/views`
+Returns per-day channel view analytics.
 
-Subscribe or unsubscribe to a user. Requires authentication.
+- Auth: required
 
-**Response:**
+### `DELETE /api/users/me/delete/profile_picture`
+Removes the current profile picture.
 
-```json
-{
-  "subscribed": true
-}
-```
+- Auth: required
 
-### DELETE /api/user/me
+### `DELETE /api/users/me/delete/banner`
+Removes the current channel banner.
 
-Delete the account of the currently logged-in user. Requires authentication.
+- Auth: required
 
-**Response:**
+### `DELETE /api/users/me`
+Deletes the current account and related data.
 
-```json
-{
-  "message": "Account deleted successfully"
-}
-```
+- Auth: required
 
 ## Videos
 
-### GET /api/videos
+### `GET /api/videos`
+Returns videos with optional filtering and sorting.
 
-Get a list of videos.
+- Query: `sort`, `tag`, `uploader`
 
-**Query Parameters:**
+### `POST /api/videos`
+Uploads a new video.
 
-- `sort` (string, optional): `trending` or `latest`. Defaults to `latest`.
-- `tag` (string, optional): Filter by tag.
-- `uploader` (string, optional): Filter by uploader ID.
+- Auth: required
+- Form data: `title`, `description`, `tags`, `category`, `visibility`, `video`, `thumbnail`
 
-**Response:**
+### `GET /api/videos/search`
+Searches videos by title, description, or tags.
 
-An array of video objects.
+- Query: `q`, `sort`
 
-### POST /api/videos
+### `GET /api/videos/search/autocomplete`
+Returns autocomplete suggestions for the search bar.
 
-Upload a new video. Requires authentication.
+- Query: `q`
 
-**Request Body (form-data):**
+### `GET /api/videos/category/:category`
+Returns public videos for a category.
 
-- `title` (string, required)
-- `description` (string, optional)
-- `tags` (string, optional): Comma-separated list of tags.
-- `video` (file, required)
-- `thumbnail` (file, optional)
+### `GET /api/videos/:id`
+Returns a single video.
 
-**Response:**
+### `POST /api/videos/:id/view`
+Increments the video view count and returns the video payload.
 
-The newly created video object.
+### `GET /api/videos/:id/comments`
+Returns all comments for a video.
 
-### GET /api/videos/search
+### `POST /api/videos/:id/comments`
+Adds a comment to a video.
 
-Search for videos.
+- Auth: required
+- Body: `text`
 
-**Query Parameters:**
+### `POST /api/videos/:id/like`
+Toggles a like on a video.
 
-- `q` (string, required): The search query.
-- `sort` (string, optional): `date` or `views`.
+- Auth: required
 
-**Response:**
+### `POST /api/videos/:id/dislike`
+Toggles a dislike on a video.
 
-An array of video objects.
+- Auth: required
 
-### GET /api/videos/search/autocomplete
+### `GET /api/videos/:id/reactions`
+Returns video like and dislike counts plus the current user state.
 
-Get search autocomplete suggestions.
+### `GET /api/videos/:id/bookmarks`
+Returns the current user’s bookmarks for a video.
 
-**Query Parameters:**
+- Auth: required
 
-- `q` (string, required): The search query.
+### `POST /api/videos/:id/bookmarks`
+Creates or updates a bookmark for a video timestamp.
 
-**Response:**
+- Auth: required
+- Body: `timestampSeconds`, `note`
 
-An array of strings.
+### `DELETE /api/videos/:id/bookmarks/:bookmarkId`
+Deletes a bookmark.
 
-### GET /api/videos/:id
+- Auth: required
 
-Get a single video by ID.
+### `GET /api/videos/subscriptions/feed`
+Returns public videos from subscribed channels.
 
-**Response:**
-
-The video object.
-
-### POST /api/videos/:id/view
-
-Increment the view count of a video.
-
-**Response:**
-
-The updated video object.
-
-### GET /api/videos/:id/comments
-
-Get all comments for a video.
-
-**Response:**
-
-An array of comment objects.
-
-### POST /api/videos/:id/comments
-
-Add a comment to a video. Requires authentication.
-
-**Request Body:**
-
-```json
-{
-  "text": "This is a comment."
-}
-```
-
-**Response:**
-
-The newly created comment object.
-
-### POST /api/videos/:id/like
-
-Like a video. Requires authentication.
-
-**Response:**
-
-```json
-{
-  "likes": 10,
-  "dislikes": 2,
-  "liked": true,
-  "disliked": false
-}
-```
-
-### POST /api/videos/:id/dislike
-
-Dislike a video. Requires authentication.
-
-**Response:**
-
-```json
-{
-  "likes": 9,
-  "dislikes": 3,
-  "liked": false,
-  "disliked": true
-}
-```
-
-### GET /api/videos/:id/reactions
-
-Get the like/dislike counts and user reaction status for a video.
-
-**Response:**
-
-```json
-{
-  "likes": 10,
-  "dislikes": 2,
-  "liked": true,
-  "disliked": false
-}
-```
+- Auth: required
+- Query: `sort`
 
 ## Comments
 
-### POST /api/comments/:id/replies
+### `POST /api/comments/:id/replies`
+Adds a reply to a comment.
 
-Add a reply to a comment. Requires authentication.
+- Auth: required
+- Body: `text`
 
-**Request Body:**
+### `PUT /api/comments/:id`
+Edits a comment owned by the current user.
 
-```json
-{
-  "text": "This is a reply."
-}
-```
+- Auth: required
+- Body: `text`
 
-**Response:**
+### `DELETE /api/comments/:id`
+Deletes a comment owned by the current user.
 
-The updated comment object with the new reply.
+- Auth: required
 
-### POST /api/comments/:id/like
+### `PUT /api/comments/:id/replies/:replyId`
+Edits a reply owned by the current user.
 
-Like a comment. Requires authentication.
+- Auth: required
+- Body: `text`
 
-**Response:**
+### `DELETE /api/comments/:id/replies/:replyId`
+Deletes a reply owned by the current user.
 
-```json
-{
-  "likes": 5,
-  "dislikes": 1
-}
-```
+- Auth: required
 
-### POST /api/comments/:id/dislike
+### `POST /api/comments/:id/like`
+Toggles a like on a comment or reply.
 
-Dislike a comment. Requires authentication.
+- Auth: required
 
-**Response:**
+### `POST /api/comments/:id/dislike`
+Toggles a dislike on a comment or reply.
 
-```json
-{
-  "likes": 4,
-  "dislikes": 2
-}
-```
+- Auth: required
+
+### `POST /api/comments/:id/pin`
+Pins a comment to the associated video.
+
+- Auth: required
+
+## Playlists
+
+### `GET /api/playlists/user/:username`
+Returns playlists for a channel.
+
+### `GET /api/playlists/:id`
+Returns a single playlist.
+
+### `POST /api/playlists`
+Creates a playlist.
+
+- Auth: required
+- Body: `name`, `visibility`, `description`
+
+### `PUT /api/playlists/:id`
+Updates playlist metadata.
+
+- Auth: required
+
+### `POST /api/playlists/:id/thumbnail`
+Uploads or replaces a playlist thumbnail.
+
+- Auth: required
+- Form data: `thumbnail`
+
+### `DELETE /api/playlists/:id/thumbnail`
+Removes a playlist thumbnail.
+
+- Auth: required
+
+### `POST /api/playlists/:id/videos`
+Adds a video to a playlist.
+
+- Auth: required
+- Body: `videoId`
+
+### `DELETE /api/playlists/:id/videos/:videoId`
+Removes a video from a playlist.
+
+- Auth: required
+
+### `PATCH /api/playlists/:id/reorder`
+Reorders videos within a playlist.
+
+- Auth: required
+- Body: `videoIds`
+
+### `DELETE /api/playlists/:id`
+Deletes a playlist.
+
+- Auth: required
 
 ## Helper
 
-### GET /api/helper/placeholder/:dimensions
+### `GET /api/helper/placeholder/:dimensions`
+Returns a generated placeholder image.
 
-Generate a placeholder image.
+- Query: `text`, `bgColor`, `textColor`
+- Path format: `WIDTHxHEIGHT`
 
-**URL Parameters:**
+## Media Paths
 
-- `dimensions` (string, required): The dimensions of the image in the format `WIDTHxHEIGHT`.
-
-**Query Parameters:**
-
-- `text` (string, optional): The text to display on the image.
-- `bgColor` (string, optional): The background color in hexadecimal.
-- `textColor` (string, optional): The text color in hexadecimal.
-
-**Response:**
-
-A PNG image.
+- `/data/uploads/:filename`
+- `/data/thumbnails/:filename`
+- `/data/banners/:filename`
+- `/data/profile_pictures/:filename`
+- `/data/playlist_thumbnails/:filename`

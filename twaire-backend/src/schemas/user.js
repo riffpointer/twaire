@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   profilePicture: { type: String, default: null },
   banner: { type: String, default: null },
   bio: { type: String, default: null },
+  trailerVideo: { type: mongoose.Schema.Types.ObjectId, ref: "Video", default: null },
   links: [{
     title: { type: String, required: true },
     url: { type: String, required: true },

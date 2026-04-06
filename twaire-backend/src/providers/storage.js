@@ -68,4 +68,25 @@ const videoStorage = multer.diskStorage({
 
 const videoUpload = multer({ storage: videoStorage });
 
-export { userUpload, videoUpload, bannerUpload, profileUpload };
+// multer setup for playlist thumbnail uploads
+const playlistThumbnailStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "data/playlist_thumbnails";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const playlistThumbnailUpload = multer({
+  storage: playlistThumbnailStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed"));
+  },
+});
+
+export { userUpload, videoUpload, bannerUpload, profileUpload, playlistThumbnailUpload };
