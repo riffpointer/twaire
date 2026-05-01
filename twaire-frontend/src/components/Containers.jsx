@@ -1,13 +1,16 @@
 import { forwardRef } from "react";
-import { Box } from "@mui/material";
 
 export const ContentContainer = forwardRef(function ContentContainer(
-  { children, sx = {} },
+  { children, className = "", style = {} },
   ref,
 ) {
   return (
-    <Box ref={ref} sx={{ px: { xs: 2, md: 6 }, ...sx }}>
+    <div 
+      ref={ref} 
+      className={`px-3 px-md-5 ${className}`}
+      style={style}
+    >
       {children}
-    </Box>
+    </div>
   );
 });

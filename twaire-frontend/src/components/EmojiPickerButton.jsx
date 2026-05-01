@@ -1,6 +1,9 @@
-import MoodOutlinedIcon from "@mui/icons-material/MoodOutlined";
 import { Box, Button, IconButton, Menu, Tooltip, Typography } from "@mui/material";
 import { useState } from "react";
+
+const MoodOutlinedIcon = ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`bi bi-emoji-smile${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
 
 const EMOJI_OPTIONS = [
   { symbol: "\u{1F600}", name: "Grinning face" },

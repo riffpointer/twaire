@@ -1,15 +1,6 @@
-import VideocamOffIcon from "@mui/icons-material/VideocamOff";
-import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
-import { Box, Card, Chip, Container, Divider, Skeleton, Typography } from "@mui/material";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import PublicVideosList from "@/components/PublicVideosList.jsx";
 import VideoActionBar from "@/components/VideoActionBar.jsx";
 import VideoPlayer from "@/components/VideoPlayer.jsx";
@@ -58,8 +49,8 @@ function Watch() {
     setContextMenu(
       contextMenu === null
         ? {
-            mouseX: event.clientX + 2,
-            mouseY: event.clientY - 6,
+            mouseX: event.clientX,
+            mouseY: event.clientY,
           }
         : null,
     );
@@ -115,9 +106,8 @@ function Watch() {
       const token = match[0];
       const seconds = parseTimestampToSeconds(token);
       nodes.push(
-        <Typography
+        <button
           key={`desc-ts-${match.index}`}
-          component="button"
           type="button"
           title={`Click to jump to ${token}`}
           onClick={() => {
@@ -125,25 +115,11 @@ function Watch() {
               seekVideoElementToTimestamp("main-video-player", seconds);
             }
           }}
-          sx={{
-            border: 0,
-            p: 0,
-            m: 0,
-            bgcolor: "transparent",
-            color: "primary.main",
-            cursor: "pointer",
-            display: "inline",
-            font: "inherit",
-            lineHeight: "inherit",
-            textDecoration: "none",
-            fontWeight: 600,
-            "&:hover": {
-              textDecoration: "underline",
-            },
-          }}
+          className="btn btn-link p-0 m-0 border-0 text-primary fw-bold text-decoration-none"
+          style={{ verticalAlign: 'baseline' }}
         >
           {token}
-        </Typography>,
+        </button>,
       );
 
       lastIndex = match.index + token.length;
@@ -210,7 +186,6 @@ function Watch() {
         }
 
         const data = await videoDataRequest.json();
-        console.log(data);
         setVideo(data);
         document.title = `${data.title} - Twaire`;
 
@@ -243,7 +218,6 @@ function Watch() {
 
     fetchVideo();
     
-    // Fetch current user for self-subscribe check
     const fetchCurrentUser = async () => {
       try {
         const res = await fetch(`${ApiConfig.serverUrl}/api/users/me`, {
@@ -254,7 +228,7 @@ function Watch() {
           setCurrentUser(userData);
         }
       } catch (err) {
-        // Not logged in - ignore
+        // Not logged in
       }
     };
     fetchCurrentUser();
@@ -307,10 +281,17 @@ function Watch() {
     return () => observer.disconnect();
   }, [commentsVisible, loading]);
 
+  useEffect(() => {
+    const handleClick = () => handleClose();
+    if (contextMenu) {
+      window.addEventListener('click', handleClick);
+    }
+    return () => window.removeEventListener('click', handleClick);
+  }, [contextMenu]);
+
   const handleSubscribe = async () => {
     if (!video?.uploaderId) return;
 
-    // Check if user is trying to subscribe to themselves
     if (currentUser && video.uploaderId === currentUser._id) {
       showSnackbar("You may not subscribe to yourself", "warning");
       return;
@@ -356,69 +337,48 @@ function Watch() {
 
   if (loading)
     return (
-      <Container sx={{ mb: 4 }}>
+      <div className="container-fluid px-3 px-md-5 mb-5">
         <div className="row">
           <div className="col-lg-8 mb-4">
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="rectangular" sx={{ width: "100%", height: { xs: 300, md: 500 }, borderRadius: 2 }} />
-            </Box>
-            <Skeleton variant="text" width="70%" height={32} sx={{ mb: 1 }} />
-            <Skeleton variant="text" width="40%" height={24} sx={{ mb: 2 }} />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-              <Skeleton variant="circular" width={40} height={40} />
-              <Skeleton variant="text" width="30%" height={24} />
-            </Box>
-            <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 1 }} />
+            <div className="bg-light-subtle skeleton-shimmer mb-3 rounded-3" style={{ height: '450px' }}></div>
+            <div className="bg-light-subtle skeleton-shimmer mb-2 rounded" style={{ height: '32px', width: '70%' }}></div>
+            <div className="bg-light-subtle skeleton-shimmer mb-4 rounded" style={{ height: '24px', width: '40%' }}></div>
+            <div className="d-flex align-items-center gap-3 mb-4">
+              <div className="bg-light-subtle skeleton-shimmer rounded-circle" style={{ width: '40px', height: '40px' }}></div>
+              <div className="bg-light-subtle skeleton-shimmer rounded" style={{ height: '24px', width: '30%' }}></div>
+            </div>
+            <div className="bg-light-subtle skeleton-shimmer rounded-3" style={{ height: '100px' }}></div>
           </div>
           <div className="col-lg-4">
-            <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
+            <div className="bg-light-subtle skeleton-shimmer mb-3 rounded" style={{ height: '24px', width: '50%' }}></div>
             {[...Array(5)].map((_, i) => (
-              <Box key={i} sx={{ display: "flex", gap: 2, mb: 2 }}>
-                <Skeleton variant="rectangular" width={168} height={94} sx={{ borderRadius: 1 }} />
-                <Box sx={{ flex: 1 }}>
-                  <Skeleton variant="text" width="100%" />
-                  <Skeleton variant="text" width="60%" />
-                </Box>
-              </Box>
+              <div key={i} className="d-flex gap-3 mb-3">
+                <div className="bg-light-subtle skeleton-shimmer rounded flex-shrink-0" style={{ width: '168px', height: '94px' }}></div>
+                <div className="flex-grow-1">
+                  <div className="bg-light-subtle skeleton-shimmer mb-2 rounded" style={{ height: '16px', width: '100%' }}></div>
+                  <div className="bg-light-subtle skeleton-shimmer rounded" style={{ height: '16px', width: '60%' }}></div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      </Container>
+      </div>
     );
 
   if (!video)
     return (
-      <Container sx={{ mb: 4 }}>
-        <Card
-          elevation={1}
-          sx={{
-            mt: 4,
-            p: { xs: 3, sm: 4 },
-            textAlign: "center",
-            borderRadius: 2,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 1.25,
-              color: "text.secondary",
-              mb: 2,
-            }}
-          >
-            <VideocamOffIcon sx={{ fontSize: 34 }} />
-            <SentimentDissatisfiedIcon sx={{ fontSize: 30 }} />
-          </Box>
-          <Typography variant="h4" gutterBottom>
-            Video not found
-          </Typography>
-          <Typography color="text.secondary">
+      <div className="container-fluid px-3 px-md-5 mb-5">
+        <div className="card border-0 shadow-sm mt-5 p-5 text-center rounded-4">
+          <div className="d-flex justify-content-center align-items-center gap-3 text-muted mb-4">
+            <i className="bi bi-camera-video-off" style={{ fontSize: '3rem' }}></i>
+            <i className="bi bi-emoji-frown" style={{ fontSize: '2.5rem' }}></i>
+          </div>
+          <h2 className="fw-bold mb-3">Video not found</h2>
+          <p className="text-muted mb-0">
             This video may have been removed, made private, or the link may be incorrect.
-          </Typography>
-        </Card>
-      </Container>
+          </p>
+        </div>
+      </div>
     );
 
   const uploadedAgo = getRelativeTime(video.uploadedAt);
@@ -438,13 +398,11 @@ function Watch() {
 
   return (
     <>
-      <Container sx={{ mb: 4 }}>
+      <div className="container-fluid px-3 px-md-5 mb-5">
         <div className="row">
-          {/* Left column: video player and details */}
           <div className="col-lg-8 mb-4">
-            <div className="card-body">
-              {/* Video player */}
-              <Box sx={{ mb: 2 }}>
+            <div className="position-relative">
+              <div className="mb-3 rounded-4 overflow-hidden shadow-sm">
                 <VideoPlayer
                   onContextMenu={handleContextMenu}
                   src={`${ApiConfig.serverUrl}/data/uploads/${video.filename}`}
@@ -455,179 +413,134 @@ function Watch() {
                   hasNextVideo={Boolean(nextVideo?._id)}
                   nextVideoTitle={nextVideo?.title || ""}
                 />
-                <Menu
-                  open={contextMenu !== null}
-                  onClose={handleClose}
-                  anchorReference="anchorPosition"
-                  anchorPosition={
-                    contextMenu !== null
-                      ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-                      : undefined
-                  }
-                  slotProps={{
-                    paper: {
-                      sx: {
-                        backgroundColor: "background.paper",
-                        color: "text.primary",
-                        "& .MuiMenuItem-root": {
-                          "&:hover": {
-                            backgroundColor: "action.hover",
-                          },
-                        },
-                      },
-                    },
+              </div>
+
+              {/* Custom Context Menu */}
+              {contextMenu && (
+                <div 
+                  className="dropdown-menu show shadow-lg border-0 p-2 rounded-3" 
+                  style={{ 
+                    position: 'fixed', 
+                    top: contextMenu.mouseY, 
+                    left: contextMenu.mouseX,
+                    zIndex: 2000,
+                    minWidth: '220px'
                   }}
                 >
-                  <MenuItem onClick={handlePlayPause}>
-                    <ListItemIcon>
-                      <i
-                        className={`bi ${isPaused ? "bi-play-fill" : "bi-pause-fill"}`}
-                        style={{ color: "white" }}
-                      ></i>
-                    </ListItemIcon>
-                    <ListItemText>{isPaused ? "Play" : "Pause"}</ListItemText>
-                  </MenuItem>
-                  <MenuItem onClick={handleRestart}>
-                    <ListItemIcon>
-                      <i
-                        className="bi bi-arrow-repeat"
-                        style={{ color: "white" }}
-                      ></i>
-                    </ListItemIcon>
-                    <ListItemText>Restart</ListItemText>
-                  </MenuItem>
-                  <MenuItem onClick={handleCopyTimestamp}>
-                    <ListItemIcon>
-                      <ContentCopyIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Copy link at current time</ListItemText>
-                  </MenuItem>
-                  <MenuItem onClick={handleAddBookmarkAtCurrentTime}>
-                    <ListItemIcon>
-                      <BookmarkAddIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Add bookmark at this time</ListItemText>
-                  </MenuItem>
-                </Menu>
-              </Box>
-
-              {/* Tags */}
-              {video.tags && video.tags.length > 0 && (
-                <div className="mb-2">
-                  {video.tags.map((tag, index) => (
-                    <Chip label={tag} key={index} className="me-1" />
-                  ))}
+                  <button className="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" onClick={handlePlayPause}>
+                    <i className={`bi ${isPaused ? "bi-play-fill" : "bi-pause-fill"} me-3 fs-5`}></i>
+                    <span>{isPaused ? "Play" : "Pause"}</span>
+                  </button>
+                  <button className="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" onClick={handleRestart}>
+                    <i className="bi bi-arrow-repeat me-3 fs-5"></i>
+                    <span>Restart</span>
+                  </button>
+                  <div className="dropdown-divider mx-2"></div>
+                  <button className="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" onClick={handleCopyTimestamp}>
+                    <i className="bi bi-link-45deg me-3 fs-5"></i>
+                    <span>Copy link at current time</span>
+                  </button>
+                  <button className="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" onClick={handleAddBookmarkAtCurrentTime}>
+                    <i className="bi bi-bookmark-plus me-3 fs-5"></i>
+                    <span>Add bookmark at this time</span>
+                  </button>
                 </div>
               )}
+            </div>
 
-              {/* Title */}
-              <Typography
-                variant="h4"
-                gutterBottom
-                sx={{ fontWeight: "bold", mb: 1 }}
-              >
-                {video.title}
-              </Typography>
+            {video.tags && video.tags.length > 0 && (
+              <div className="mb-2 d-flex flex-wrap gap-2">
+                {video.tags.map((tag, index) => (
+                  <span key={index} className="badge rounded-pill bg-light text-dark border px-3 py-2 fw-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
-              {/* Video statistics */}
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {video.views} views • Uploaded {uploadedAgo} (
-                {formattedUploadDate})
-              </Typography>
+            <h1 className="h3 fw-bold mb-2">{video.title}</h1>
 
-              {/* Video action bar i.e like dislike share etc */}
-              <VideoActionBar
-                videoId={video._id}
-                onOpenBookmarks={() => setBookmarksDialogOpen(true)}
-              />
+            <div className="text-muted small mb-3">
+              {video.views} views • Uploaded {uploadedAgo} ({formattedUploadDate})
+            </div>
 
-              {/* Uploader + subscribe */}
-              <ChannelBar
-                video={video}
-                uploaderSubs={uploaderSubs}
-                subscribed={subscribed}
-                subLoading={subLoading}
-                handleSubscribe={handleSubscribe}
-              />
+            <VideoActionBar
+              videoId={video._id}
+              onOpenBookmarks={() => setBookmarksDialogOpen(true)}
+            />
 
-              {/* Description */}
-              <Card sx={{ p: 1.5, mb: 3 }}>
-                <p className="mb-1 fw-bold">Description</p>
-                {video.description ? (
-                  <Typography component="p" className="mb-0" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                    {renderTimestampLinkedText(video.description)}
-                  </Typography>
-                ) : (
-                  <i>No description provided.</i>
-                )}
-                <Typography variant="body2" sx={{ mt: 3, mb: 1, display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "baseline" }}>
-                  <Box component="span" sx={{ fontWeight: 700 }}>
-                    Category:
-                  </Box>
-                  <Typography
-                    component={Link}
-                    to={`/category/${video.category || "general"}`}
-                    sx={{
-                      color: "primary.main",
-                      textDecoration: "none",
-                      fontWeight: 600,
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
-                  >
-                    {getVideoCategoryLabel(video.category)}
-                  </Typography>
-                </Typography>
-              </Card>
-              <Divider />
+            <ChannelBar
+              video={video}
+              uploaderSubs={uploaderSubs}
+              subscribed={subscribed}
+              subLoading={subLoading}
+              handleSubscribe={handleSubscribe}
+            />
 
-              {/* Comment section */}
-              <Box ref={commentsAnchorRef} sx={{ mt: 2 }}>
-                {commentsVisible ? (
-                  <React.Suspense
-                    fallback={
-                      <Box sx={{ mt: 1 }}>
-                        <Skeleton variant="text" width={140} height={34} sx={{ mb: 1 }} />
-                        <Skeleton variant="rounded" height={86} sx={{ borderRadius: 2, mb: 2 }} />
-                        {[...Array(2)].map((_, index) => (
-                          <Box key={index} sx={{ display: "flex", gap: 1.5, mb: 2 }}>
-                            <Skeleton variant="circular" width={36} height={36} />
-                            <Box sx={{ flex: 1 }}>
-                              <Skeleton variant="text" width="40%" />
-                              <Skeleton variant="text" width="88%" />
-                            </Box>
-                          </Box>
-                        ))}
-                      </Box>
-                    }
-                  >
-                    <CommentSection
-                      videoId={video._id}
-                      videoUploaderId={video.uploaderId}
-                      pinnedCommentId={video.pinnedCommentId}
-                    />
-                  </React.Suspense>
-                ) : (
-                  <Card sx={{ p: 2, mb: 1 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                      Comments
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Comments not loading? Report an issue.
-                    </Typography>
-                  </Card>
-                )}
-              </Box>
+            <div className="card border-0 bg-light rounded-4 p-4 mb-4">
+              <h6 className="fw-bold mb-2">Description</h6>
+              {video.description ? (
+                <div className="mb-3 text-break" style={{ whiteSpace: 'pre-wrap' }}>
+                  {renderTimestampLinkedText(video.description)}
+                </div>
+              ) : (
+                <p className="text-muted fst-italic mb-3">No description provided.</p>
+              )}
+              
+              <div className="d-flex align-items-center gap-2 small">
+                <span className="fw-bold">Category:</span>
+                <Link 
+                  to={`/category/${video.category || "general"}`}
+                  className="text-primary fw-bold text-decoration-none"
+                >
+                  {getVideoCategoryLabel(video.category)}
+                </Link>
+              </div>
+            </div>
+
+            <hr className="my-4 opacity-25" />
+
+            <div ref={commentsAnchorRef}>
+              {commentsVisible ? (
+                <React.Suspense
+                  fallback={
+                    <div className="mt-2">
+                      <div className="bg-light-subtle skeleton-shimmer mb-3 rounded" style={{ height: '24px', width: '140px' }}></div>
+                      <div className="bg-light-subtle skeleton-shimmer mb-4 rounded-4" style={{ height: '86px' }}></div>
+                      {[...Array(2)].map((_, index) => (
+                        <div key={index} className="d-flex gap-3 mb-4">
+                          <div className="bg-light-subtle skeleton-shimmer rounded-circle" style={{ width: '36px', height: '36px' }}></div>
+                          <div className="flex-grow-1">
+                            <div className="bg-light-subtle skeleton-shimmer mb-2 rounded" style={{ height: '16px', width: '40%' }}></div>
+                            <div className="bg-light-subtle skeleton-shimmer rounded" style={{ height: '16px', width: '88%' }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  }
+                >
+                  <CommentSection
+                    videoId={video._id}
+                    videoUploaderId={video.uploaderId}
+                    pinnedCommentId={video.pinnedCommentId}
+                  />
+                </React.Suspense>
+              ) : (
+                <div className="card border-0 bg-light rounded-4 p-4 mb-3">
+                  <h6 className="fw-bold mb-1">Comments</h6>
+                  <small className="text-muted">Comments not loading? Report an issue.</small>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right column: suggested videos */}
           <div className="col-lg-4">
+            <h6 className="fw-bold mb-3 px-1">Up next</h6>
             <PublicVideosList limit={10} />
           </div>
         </div>
-      </Container>
+      </div>
+
       <PromptLoginDialog
         action="subscribe to this channel"
         open={promptLoginDialogShown}
@@ -645,6 +558,19 @@ function Watch() {
         open={bookmarksDialogOpen}
         onClose={() => setBookmarksDialogOpen(false)}
       />
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .skeleton-shimmer {
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .transition-opacity { transition: opacity 0.2s ease-in-out; }
+      `}} />
     </>
   );
 }

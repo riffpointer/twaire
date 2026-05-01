@@ -1,20 +1,3 @@
-import {
-  Box,
-  Button,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Grid,
-  Paper,
-  Skeleton,
-} from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loading from "@/components/Loading.jsx";
@@ -107,92 +90,71 @@ function MyAccount() {
 
   if (loading)
     return (
-      <Container sx={{ mb: 4 }}>
-        <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-            <Skeleton variant="circular" width={112} height={112} sx={{ mr: 2 }} />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="40%" height={40} sx={{ mb: 0.5 }} />
-              <Skeleton variant="text" width="25%" height={24} sx={{ mb: 0.5 }} />
-              <Skeleton variant="text" width="35%" height={20} sx={{ mb: 1 }} />
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Skeleton variant="rectangular" width={100} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: 1 }} />
-              </Box>
-            </Box>
-          </Box>
-          <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1 }} />
-        </Paper>
-
-        <Paper elevation={2} sx={{ p: 2, pt: 1 }}>
-          <Box sx={{ display: "flex", gap: 2, mb: 2, borderBottom: 1, borderColor: "divider", pb: 1 }}>
-            <Skeleton variant="text" width={80} height={24} />
-            <Skeleton variant="text" width={60} height={24} />
-          </Box>
-          <Box sx={{ mb: 2 }}>
-            <Skeleton variant="rectangular" width={160} height={40} sx={{ mb: 2 }} />
-          </Box>
-          <Grid container spacing={2}>
-            {[...Array(4)].map((_, i) => (
-              <Grid key={i} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="text" width="90%" height={20} sx={{ mt: 1 }} />
-                <Skeleton variant="text" width="60%" height={16} />
-              </Grid>
-            ))}
-          </Grid>
-        </Paper>
-      </Container>
+      <div className="container mb-4">
+        <div className="card border-0 shadow-sm rounded-4 mb-3">
+          <div className="card-body p-4 placeholder-glow">
+            <div className="d-flex align-items-center gap-3 mb-4">
+              <div className="placeholder rounded-circle" style={{ width: 112, height: 112 }} />
+              <div className="flex-grow-1">
+                <div className="placeholder rounded col-5 mb-2" style={{ height: 34 }} />
+                <div className="placeholder rounded col-3 mb-2" style={{ height: 20 }} />
+                <div className="placeholder rounded col-4 mb-3" style={{ height: 18 }} />
+                <div className="d-flex gap-2">
+                  <div className="placeholder rounded" style={{ width: 100, height: 32 }} />
+                  <div className="placeholder rounded" style={{ width: 80, height: 32 }} />
+                </div>
+              </div>
+            </div>
+            <div className="placeholder rounded d-block" style={{ height: 80 }} />
+          </div>
+        </div>
+        <div className="card border-0 shadow-sm rounded-4">
+          <div className="card-body p-4 pt-3 placeholder-glow">
+            <div className="d-flex gap-3 mb-3 border-bottom pb-2">
+              <div className="placeholder rounded col-1" style={{ height: 20 }} />
+              <div className="placeholder rounded col-1" style={{ height: 20 }} />
+            </div>
+            <div className="placeholder rounded mb-3" style={{ width: 160, height: 40 }} />
+            <div className="row g-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="col-12 col-sm-6 col-lg-3">
+                  <div className="placeholder rounded d-block mb-2" style={{ height: 120 }} />
+                  <div className="placeholder rounded col-9 mb-1" style={{ height: 18 }} />
+                  <div className="placeholder rounded col-6" style={{ height: 14 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     );
 
   return (
     <>
-      <Container sx={{ mb: 4 }}>
+      <div className="container mb-4">
         {user && (
           <UserHeader user={user}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                component={Link}
+            <div className="d-flex gap-2">
+              <Link
                 to="/editprofile"
-                variant={user.banner ? "contained" : "outlined"}
-                color={user.banner ? "inherit" : "primary"}
-                size="small"
-                sx={
+                className={`btn btn-sm ${user.banner ? "btn-light" : "btn-outline-primary"}`}
+                style={
                   user.banner
-                    ? {
-                        bgcolor: "rgba(255,255,255,0.16)",
-                        color: "common.white",
-                        backdropFilter: "blur(8px)",
-                        "&:hover": {
-                          bgcolor: "rgba(255,255,255,0.24)",
-                        },
-                      }
+                    ? { backgroundColor: "rgba(255,255,255,0.16)", color: "white", backdropFilter: "blur(8px)" }
                     : undefined
                 }
               >
                 Edit Profile
-              </Button>
-              <Button
-                variant={user.banner ? "contained" : "outlined"}
-                color="error"
-                disableElevation
+              </Link>
+              <button
+                type="button"
+                className={`btn btn-sm ${user.banner ? "btn-danger" : "btn-outline-danger"}`}
                 onClick={() => setShowLogoutModal(true)}
-                size="small"
-                sx={
-                  user.banner
-                    ? {
-                        bgcolor: "rgba(211, 47, 47, 0.82)",
-                        color: "common.white",
-                        "&:hover": {
-                          bgcolor: "rgba(198, 40, 40, 0.94)",
-                        },
-                      }
-                    : undefined
-                }
+                style={user.banner ? { backgroundColor: "rgba(211, 47, 47, 0.82)", color: "white" } : undefined}
               >
                 Logout
-              </Button>
-            </Box>
+              </button>
+            </div>
           </UserHeader>
         )}
         <UserTabs
@@ -208,34 +170,40 @@ function MyAccount() {
           onPlaylistCreated={(newPl) => setPlaylists((prev) => [newPl, ...prev])}
           onPlaylistDeleted={(id) => setPlaylists((prev) => prev.filter((p) => p._id !== id))}
         />
-      </Container>
+      </div>
 
-      <Dialog
-        open={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        aria-labelledby="logout-dialog-title"
-        aria-describedby="logout-dialog-description"
-      >
-        <DialogTitle id="logout-dialog-title">Logout</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="logout-dialog-description">
-            Are you sure you want to log out? This action will redirect you to
-            the login page.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowLogoutModal(false)}>Cancel</Button>
-          <Button
-            onClick={() => {
-              setShowLogoutModal(false);
-              handleLogout();
-            }}
-            color="error"
-          >
-            Logout
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {showLogoutModal ? (
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog" aria-modal="true" style={{ backgroundColor: "rgba(0,0,0,.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2 className="modal-title fs-5">Logout</h2>
+                <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowLogoutModal(false)} />
+              </div>
+              <div className="modal-body">
+                <p className="mb-0">
+                  Are you sure you want to log out? This action will redirect you to the login page.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowLogoutModal(false)}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => {
+                    setShowLogoutModal(false);
+                    handleLogout();
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

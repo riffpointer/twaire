@@ -11,18 +11,22 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
-import LanguageIcon from "@mui/icons-material/Language";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import RedditIcon from "@mui/icons-material/Reddit";
-import ForumIcon from "@mui/icons-material/Forum";
 import { useEffect, useState } from "react";
 import ApiConfig from "../utils/ApiConfig.js";
 import UserAvatar from "./UserAvatar.jsx";
 import VerifiedUserBadge from "./VerifiedUserBadge.jsx";
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <i className={`${cls}${fontSize === "inherit" ? "" : fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const LanguageIcon = makeBiIcon("bi bi-globe");
+const YouTubeIcon = makeBiIcon("bi bi-youtube");
+const GitHubIcon = makeBiIcon("bi bi-github");
+const InstagramIcon = makeBiIcon("bi bi-instagram");
+const LinkedInIcon = makeBiIcon("bi bi-linkedin");
+const FacebookIcon = makeBiIcon("bi bi-facebook");
+const RedditIcon = makeBiIcon("bi bi-reddit");
+const ForumIcon = makeBiIcon("bi bi-chat-dots");
 
 function getLinkIcon(url) {
   try {

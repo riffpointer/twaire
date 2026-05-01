@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CircularProgress from "@mui/material/CircularProgress";
-import InputAdornment from "@mui/material/InputAdornment";
-import Tooltip from "@mui/material/Tooltip";
-import { Alert, Box, Button, Card, CardContent, Checkbox, Container, Divider, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
 import ApiConfig from "../utils/ApiConfig.js";
 
 function Signup() {
@@ -126,161 +119,105 @@ function Signup() {
     }
   };
 
-  const usernameAdornment = (
-    <InputAdornment position="end">
-      {usernameAvailability.checking ? (
-        <CircularProgress size={18} />
-      ) : (
-        <Tooltip
-          title={
-            usernameAvailability.available === true
-              ? "Username available"
-              : usernameAvailability.available === false
-                ? "Username unavailable"
-                : "Username availability"
-          }
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              transformOrigin: "center",
-              color:
-                usernameAvailability.available === true
-                  ? "success.main"
-                  : usernameAvailability.available === false
-                    ? "error.main"
-                    : "text.disabled",
-              animation:
-                usernameAvailability.available === true || usernameAvailability.available === false
-                  ? "usernameStatusPop 180ms ease-out"
-                  : "none",
-              "@keyframes usernameStatusPop": {
-                "0%": {
-                  transform: "scale(0.85)",
-                  opacity: 0.55,
-                },
-                "100%": {
-                  transform: "scale(1)",
-                  opacity: 1,
-                },
-              },
-            }}
-          >
-            {usernameAvailability.available === true ? (
-              <CheckCircleIcon fontSize="small" />
-            ) : usernameAvailability.available === false ? (
-              <CancelIcon fontSize="small" />
-            ) : null}
-          </Box>
-        </Tooltip>
-      )}
-    </InputAdornment>
-  );
-
   return (
-    <>
-      <Container maxWidth="sm" sx={{ mb: 4 }}>
-        <Card elevation={4} sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-            <Typography variant="h4" gutterBottom>
-              Create an Account
-            </Typography>
-
-            {alert && (
-              <Alert
-                severity={alert.type === "danger" ? "error" : alert.type}
-                action={
-                  <IconButton
-                    aria-label="close"
-                    color="inherit"
-                    size="small"
-                    onClick={() => setAlert(null)}
-                  >
-                    <i className="bi bi-x"></i>
-                  </IconButton>
-                }
-                sx={{ mt: 2, mb: 2 }}
-              >
-                {alert.message}
-              </Alert>
-            )}
-            <Alert severity="info">
-              By signing up, <b>you agree to our terms and conditions</b>. Currently there are no terms and conditions as this is alpha software, so feel free to test out the software. No guarantee is provided and responsibilities taken for any damages or data loss caused by the use of this pre-release software. 
-              <hr />
-              <i>Have fun!</i>
-            </Alert>
-            <Box component="form" onSubmit={handleSubmit} noValidate>
-              <Typography sx={{mt:2}}>
-                Please fill out the following fields. Note that the username you choose is permanent and you will not be able to change it later.
-              </Typography>
-              <TextField
-                label="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                fullWidth
-                margin="normal"
-                autoComplete="off"
-                required
-                error={!!errors.username}
-                helperText={errors.username || usernameAvailability.message || "You won't be able to change this, so choose wisely!"}
-                InputProps={{ endAdornment: usernameAdornment }}
-              />
-              <TextField
-                label="Email"
+    <div className="container py-4" style={{ maxWidth: 560 }}>
+      <div className="card border-0 shadow-sm rounded-4">
+        <div className="card-body p-4 p-sm-5">
+          <h1 className="h3 fw-bold mb-3">Create an Account</h1>
+          {alert ? (
+            <div className={`alert alert-${alert.type === "danger" ? "danger" : alert.type} d-flex justify-content-between align-items-start gap-3`}>
+              <span>{alert.message}</span>
+              <button type="button" className="btn btn-sm btn-link text-reset p-0" onClick={() => setAlert(null)} aria-label="Close">
+                <i className="bi bi-x-lg" />
+              </button>
+            </div>
+          ) : null}
+          <div className="alert alert-info">
+            By signing up, <b>you agree to our terms and conditions</b>. Currently there are no terms and conditions as this is alpha software, so feel free to test out the software. No guarantee is provided and responsibilities taken for any damages or data loss caused by the use of this pre-release software.
+            <hr />
+            <i>Have fun!</i>
+          </div>
+          <form onSubmit={handleSubmit} noValidate>
+            <p className="text-body-secondary">
+              Please fill out the following fields. Note that the username you choose is permanent and you will not be able to change it later.
+            </p>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="signup-username">Username</label>
+              <div className="input-group">
+                <input
+                  id="signup-username"
+                  className={`form-control ${errors.username ? "is-invalid" : ""}`}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="off"
+                  required
+                />
+                <span className="input-group-text">
+                  {usernameAvailability.checking ? (
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                  ) : usernameAvailability.available === true ? (
+                    <i className="bi bi-check-circle text-success" />
+                  ) : usernameAvailability.available === false ? (
+                    <i className="bi bi-x-circle text-danger" />
+                  ) : (
+                    <i className="bi bi-person-badge text-body-secondary" />
+                  )}
+                </span>
+                {errors.username ? <div className="invalid-feedback d-block">{errors.username}</div> : null}
+              </div>
+              <div className="form-text">{usernameAvailability.message || "You won't be able to change this, so choose wisely!"}</div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="signup-email">Email</label>
+              <input
+                id="signup-email"
+                className={`form-control ${errors.email ? "is-invalid" : ""}`}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                margin="normal"
                 required
-                error={!!errors.email}
-                helperText={errors.email}
               />
-              <TextField
-                label="Password"
+              {errors.email ? <div className="invalid-feedback d-block">{errors.email}</div> : null}
+            </div>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="signup-password">Password</label>
+              <input
+                id="signup-password"
+                className={`form-control ${errors.password ? "is-invalid" : ""}`}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                margin="normal"
                 required
-                error={!!errors.password}
-                helperText={errors.password}
               />
-              <FormControlLabel
-                control={<Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} />}
-                label={
-                  <>
-                    I have read and agreed to the{" "}
-                    <Box
-                      component={Link}
-                      to="/terms-and-conditions"
-                      sx={{ fontWeight: 600, textDecoration: "underline" }}
-                    >
-                      terms and conditions
-                    </Box>
-                    .
-                  </>
-                }
+              {errors.password ? <div className="invalid-feedback d-block">{errors.password}</div> : null}
+            </div>
+            <div className="form-check mb-2">
+              <input
+                id="signup-agree"
+                className={`form-check-input ${errors.agree ? "is-invalid" : ""}`}
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => setAgree(e.target.checked)}
               />
-              <Box sx={{ mt: -1, mb: 1 }}>
-                {errors.agree && <Typography color="error" variant="caption">{errors.agree}</Typography>}
-              </Box>
-
-              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                <Button type="submit" variant="contained" disableElevation>
-                  Sign Up
-                </Button>
-                <Button component={Link} to="/login" variant="text">
-                  Already have an account? Login
-                </Button>
-              </Stack>
-            </Box>
-          </CardContent>
-        </Card>
-      </Container>
-    </>
+              <label className="form-check-label" htmlFor="signup-agree">
+                I have read and agreed to the{" "}
+                <Link to="/terms-and-conditions" className="fw-semibold text-decoration-underline">
+                  terms and conditions
+                </Link>
+                .
+              </label>
+              {errors.agree ? <div className="invalid-feedback d-block">{errors.agree}</div> : null}
+            </div>
+            <div className="d-flex flex-column flex-sm-row gap-2 mt-4">
+              <button type="submit" className="btn btn-primary">Sign Up</button>
+              <Link to="/login" className="btn btn-link text-decoration-none px-0">
+                Already have an account? Login
+              </Link>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 

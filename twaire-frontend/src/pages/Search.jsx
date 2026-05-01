@@ -1,20 +1,3 @@
-import {
-  Button,
-  Box,
-  Checkbox,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  Skeleton,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import VideoGrid from "@/components/VideoGrid.jsx";
@@ -27,38 +10,21 @@ function useQuery() {
 
 function SearchResultsSkeleton() {
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(2, minmax(0, 1fr))",
-          md: "repeat(3, minmax(0, 1fr))",
-        },
-        gap: 3,
-        mt: 1,
-      }}
-    >
+    <div className="row g-3 mt-1">
       {[...Array(6)].map((_, index) => (
-        <Box key={`search-skeleton-${index}`}>
-          <Skeleton
-            variant="rounded"
-            height={0}
-            sx={{
-              pt: "56.25%",
-              borderRadius: 2,
-              mb: 1.25,
-            }}
-          />
-          <Skeleton variant="text" width={`${72 - (index % 3) * 8}%`} height={34} />
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.75 }}>
-            <Skeleton variant="circular" width={24} height={24} />
-            <Skeleton variant="text" width="34%" />
-          </Box>
-          <Skeleton variant="text" width="52%" />
-        </Box>
+        <div key={`search-skeleton-${index}`} className="col-12 col-sm-6 col-md-4">
+          <div className="placeholder-glow">
+            <div className="placeholder rounded-4 d-block w-100 mb-3" style={{ paddingTop: "56.25%" }} />
+            <div className="placeholder rounded col-9 mb-2" style={{ height: 24 }} />
+            <div className="d-flex align-items-center gap-2 mt-2 mb-2">
+              <div className="placeholder rounded-circle" style={{ width: 24, height: 24 }} />
+              <div className="placeholder rounded col-4" style={{ height: 16 }} />
+            </div>
+            <div className="placeholder rounded col-6" style={{ height: 16 }} />
+          </div>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -194,186 +160,100 @@ function Search() {
   };
 
   return (
-    <Container>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexDirection: {
-            xs: "column",
-            sm: "row",
-          },
-          mb: { xs: 4, sm: 2 },
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            mb: { xs: 2, sm: 0 },
-            textAlign: { xs: "center", sm: "left" },
-            width: "100%",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
+    <div className="container">
+      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <h1 className="h5 text-center text-sm-start mb-0 text-truncate w-100">
           Search Results for: <b>{searchTerm}</b>
-        </Typography>
-
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={1}
-          sx={{ width: { xs: "100%", sm: "auto" }, mt: 2 }}
-        >
-          <TextField
-            select
-            label="Sort by"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            variant="outlined"
-            sx={{ minWidth: { xs: "100%", sm: 200 } }}
-            size="small"
-          >
-            <MenuItem value="relevance">Relevance</MenuItem>
-            <MenuItem value="date">Upload date (Newest first)</MenuItem>
-            <MenuItem value="views">Most viewed</MenuItem>
-          </TextField>
-          <Button variant="outlined" onClick={openFilters} startIcon={<FilterAltIcon />}>
+        </h1>
+        <div className="d-flex flex-column flex-sm-row gap-2 flex-shrink-0" style={{ minWidth: 220 }}>
+          <select className="form-select form-select-sm" value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="relevance">Relevance</option>
+            <option value="date">Upload date (Newest first)</option>
+            <option value="views">Most viewed</option>
+          </select>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={openFilters}>
+            <i className="bi bi-funnel me-1" />
             Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-          </Button>
-        </Stack>
-      </Box>
+          </button>
+        </div>
+      </div>
 
       {!loading && !error && activeFilterCount > 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <p className="text-body-secondary mb-2">
           {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active
-        </Typography>
+        </p>
       )}
 
       {loading && <SearchResultsSkeleton />}
       {error && (
-        <Typography variant="body1" color="error">
+        <p className="text-danger">
           Unable to fetch search results: {error}
-        </Typography>
+        </p>
       )}
 
       {!loading && !error && videos.length === 0 && (
-        <Typography variant="body1" color="text.secondary">
+        <p className="text-body-secondary">
           No videos found for search term <b>"{searchTerm}"</b>.
-        </Typography>
+        </p>
       )}
 
       {!loading && !error && videos.length > 0 && filteredVideos.length === 0 && (
-        <Typography variant="body1" color="text.secondary">
+        <p className="text-body-secondary">
           No videos match your current filters.
-        </Typography>
+        </p>
       )}
 
       <VideoGrid videos={filteredVideos} />
 
-      <Dialog open={filtersOpen} onClose={closeFilters} fullWidth maxWidth="sm">
-        <DialogTitle>Search Filters</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ pt: 1 }}>
-            <TextField
-              select
-              label="Category"
-              value={draftFilters.category}
-              onChange={(event) =>
-                setDraftFilters((previous) => ({ ...previous, category: event.target.value }))
-              }
-              size="small"
-            >
-              <MenuItem value="all">All categories</MenuItem>
-              {VIDEO_CATEGORY_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField
-              select
-              label="Upload date"
-              value={draftFilters.uploadedWithin}
-              onChange={(event) =>
-                setDraftFilters((previous) => ({ ...previous, uploadedWithin: event.target.value }))
-              }
-              size="small"
-            >
-              <MenuItem value="any">Any time</MenuItem>
-              <MenuItem value="today">Today</MenuItem>
-              <MenuItem value="week">This week</MenuItem>
-              <MenuItem value="month">This month</MenuItem>
-              <MenuItem value="year">This year</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Channel name"
-              value={draftFilters.channel}
-              onChange={(event) =>
-                setDraftFilters((previous) => ({ ...previous, channel: event.target.value }))
-              }
-              size="small"
-              placeholder="Uploader public name or username"
-            />
-
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-              <TextField
-                label="Min views"
-                value={draftFilters.minViews}
-                onChange={(event) =>
-                  setDraftFilters((previous) => ({ ...previous, minViews: event.target.value.replace(/[^\d]/g, "") }))
-                }
-                size="small"
-                inputMode="numeric"
-                fullWidth
-              />
-              <TextField
-                label="Max views"
-                value={draftFilters.maxViews}
-                onChange={(event) =>
-                  setDraftFilters((previous) => ({ ...previous, maxViews: event.target.value.replace(/[^\d]/g, "") }))
-                }
-                size="small"
-                inputMode="numeric"
-                fullWidth
-              />
-            </Stack>
-
-            <TextField
-              label="Tags"
-              value={draftFilters.tags}
-              onChange={(event) =>
-                setDraftFilters((previous) => ({ ...previous, tags: event.target.value }))
-              }
-              size="small"
-              placeholder="comma,separated,tags"
-            />
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={draftFilters.verifiedOnly}
-                  onChange={(event) =>
-                    setDraftFilters((previous) => ({ ...previous, verifiedOnly: event.target.checked }))
-                  }
-                />
-              }
-              label="Verified channels only"
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={resetFilters}>Reset</Button>
-          <Button onClick={closeFilters}>Cancel</Button>
-          <Button variant="contained" onClick={applyFilters}>
-            Apply
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+      {filtersOpen ? (
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog" aria-modal="true" style={{ backgroundColor: "rgba(0,0,0,.5)" }}>
+          <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2 className="modal-title fs-5">Search Filters</h2>
+                <button type="button" className="btn-close" aria-label="Close" onClick={closeFilters} />
+              </div>
+              <div className="modal-body">
+                <div className="d-grid gap-3">
+                  <select className="form-select form-select-sm" value={draftFilters.category} onChange={(event) => setDraftFilters((previous) => ({ ...previous, category: event.target.value }))}>
+                    <option value="all">All categories</option>
+                    {VIDEO_CATEGORY_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <select className="form-select form-select-sm" value={draftFilters.uploadedWithin} onChange={(event) => setDraftFilters((previous) => ({ ...previous, uploadedWithin: event.target.value }))}>
+                    <option value="any">Any time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This week</option>
+                    <option value="month">This month</option>
+                    <option value="year">This year</option>
+                  </select>
+                  <input className="form-control form-control-sm" placeholder="Uploader public name or username" value={draftFilters.channel} onChange={(event) => setDraftFilters((previous) => ({ ...previous, channel: event.target.value }))} />
+                  <div className="row g-2">
+                    <div className="col-6">
+                      <input className="form-control form-control-sm" placeholder="Min views" inputMode="numeric" value={draftFilters.minViews} onChange={(event) => setDraftFilters((previous) => ({ ...previous, minViews: event.target.value.replace(/[^\d]/g, "") }))} />
+                    </div>
+                    <div className="col-6">
+                      <input className="form-control form-control-sm" placeholder="Max views" inputMode="numeric" value={draftFilters.maxViews} onChange={(event) => setDraftFilters((previous) => ({ ...previous, maxViews: event.target.value.replace(/[^\d]/g, "") }))} />
+                    </div>
+                  </div>
+                  <input className="form-control form-control-sm" placeholder="comma,separated,tags" value={draftFilters.tags} onChange={(event) => setDraftFilters((previous) => ({ ...previous, tags: event.target.value }))} />
+                  <div className="form-check">
+                    <input className="form-check-input" type="checkbox" checked={draftFilters.verifiedOnly} onChange={(event) => setDraftFilters((previous) => ({ ...previous, verifiedOnly: event.target.checked }))} id="verified-only" />
+                    <label className="form-check-label" htmlFor="verified-only">Verified channels only</label>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-outline-secondary" onClick={resetFilters}>Reset</button>
+                <button className="btn btn-secondary" onClick={closeFilters}>Cancel</button>
+                <button className="btn btn-primary" onClick={applyFilters}>Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

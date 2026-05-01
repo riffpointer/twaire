@@ -1,5 +1,3 @@
-import SearchOffIcon from "@mui/icons-material/SearchOff";
-import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -197,8 +195,8 @@ function User() {
               mb: 2,
             }}
           >
-            <SearchOffIcon sx={{ fontSize: 34 }} />
-            <SentimentDissatisfiedIcon sx={{ fontSize: 30 }} />
+            <i className="bi bi-search-off" style={{ fontSize: 34 }} aria-hidden="true" />
+            <i className="bi bi-emoji-frown" style={{ fontSize: 30 }} aria-hidden="true" />
           </Box>
           <Typography variant="h4" gutterBottom>
             User not found

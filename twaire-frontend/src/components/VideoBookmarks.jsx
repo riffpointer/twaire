@@ -1,29 +1,16 @@
 import { useEffect, useState } from "react";
 import ApiConfig from "../utils/ApiConfig.js";
 import PromptLoginDialog from "@/components/PromptLoginDialog.jsx";
-import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import CloseIcon from "@mui/icons-material/Close";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Skeleton,
-  Stack,
-  TextField,
-  useMediaQuery,
-  useTheme,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Card, Chip, Dialog, DialogContent, DialogTitle, Divider, IconButton, Skeleton, Stack, TextField, Typography } from "bootstrap";
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const BookmarkAddIcon = makeBiIcon("bi bi-bookmark-plus");
+const BookmarkIcon = makeBiIcon("bi bi-bookmark");
+const DeleteOutlineIcon = makeBiIcon("bi bi-trash");
+const PlayArrowIcon = makeBiIcon("bi bi-play-fill");
+const CloseIcon = makeBiIcon("bi bi-x-lg");
 
 const DEFAULT_NOTE_PLACEHOLDER = "04:20 - Great guitar solo";
 

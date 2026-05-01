@@ -1,25 +1,4 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ImageIcon from '@mui/icons-material/Image';
-import EditIcon from '@mui/icons-material/Edit';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import ForumIcon from '@mui/icons-material/Forum';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import LanguageIcon from '@mui/icons-material/Language';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import LinkIcon from '@mui/icons-material/Link';
-import LockIcon from '@mui/icons-material/Lock';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import PublicIcon from '@mui/icons-material/Public';
-import RedditIcon from '@mui/icons-material/Reddit';
-import ShareIcon from '@mui/icons-material/Share';
-import SmartDisplayIcon from '@mui/icons-material/SmartDisplay';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import XIcon from '@mui/icons-material/X';
 import VideoPlayer from './VideoPlayer.jsx';
 import {
   Accordion,
@@ -60,6 +39,31 @@ import UserAvatar from './UserAvatar.jsx';
 import VerifiedUserBadge from './VerifiedUserBadge.jsx';
 import VideoGrid from './VideoGrid.jsx';
 import SubscribeButton from './SubscribeButton.jsx';
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const DeleteOutlineIcon = makeBiIcon("bi bi-trash");
+const ImageIcon = makeBiIcon("bi bi-image");
+const EditIcon = makeBiIcon("bi bi-pencil");
+const ExpandMoreIcon = makeBiIcon("bi bi-chevron-down");
+const FacebookIcon = makeBiIcon("bi bi-facebook");
+const ForumIcon = makeBiIcon("bi bi-chat-dots");
+const GitHubIcon = makeBiIcon("bi bi-github");
+const InstagramIcon = makeBiIcon("bi bi-instagram");
+const LanguageIcon = makeBiIcon("bi bi-globe");
+const LinkedInIcon = makeBiIcon("bi bi-linkedin");
+const LinkIcon = makeBiIcon("bi bi-link-45deg");
+const LockIcon = makeBiIcon("bi bi-lock-fill");
+const MoreVertIcon = makeBiIcon("bi bi-three-dots-vertical");
+const PublicIcon = makeBiIcon("bi bi-globe");
+const RedditIcon = makeBiIcon("bi bi-reddit");
+const ShareIcon = makeBiIcon("bi bi-share");
+const SmartDisplayIcon = makeBiIcon("bi bi-display");
+const ViewListIcon = makeBiIcon("bi bi-list");
+const ViewModuleIcon = makeBiIcon("bi bi-grid-3x3-gap");
+const PlaylistAddIcon = makeBiIcon("bi bi-plus-square");
+const XIcon = makeBiIcon("bi bi-twitter-x");
 
 function formatBookmarkTime(seconds) {
   const safeSeconds = Math.max(0, Number(seconds) || 0);

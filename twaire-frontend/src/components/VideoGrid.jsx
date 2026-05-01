@@ -1,21 +1,20 @@
-import { Grid } from "@mui/material";
 import { Link } from "react-router-dom";
 import VideoCard from "./VideoCard";
 
 function VideoGrid({ videos, ...props }) {
   return (
-    <Grid container spacing={3} mt={1} {...props}>
+    <div className="row g-4 mt-2" {...props}>
       {videos.map((video) => (
-        <Grid key={video._id} size={{ xs: 12, sm: 4 }}>
+        <div key={video._id} className="col-12 col-sm-6 col-lg-4 col-xl-3">
           <Link
             to={`/watch/${video._id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
+            className="text-decoration-none text-reset"
           >
-            <VideoCard video={video} sx={{ width: { xs: "100%" } }} />
+            <VideoCard video={video} />
           </Link>
-        </Grid>
+        </div>
       ))}
-    </Grid>
+    </div>
   )
 }
 export default VideoGrid;

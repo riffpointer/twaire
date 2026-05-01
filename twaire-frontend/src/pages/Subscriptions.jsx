@@ -1,8 +1,6 @@
 import { ContentContainer } from "@/components/Containers.jsx";
 import Footer from "@/components/Footer.jsx";
 import VideoCard from "@/components/VideoCard.jsx";
-import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
-import { Alert, Box, Button, MenuItem, Skeleton, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
@@ -15,23 +13,16 @@ function VideoGridSkeleton({ count = 8 }) {
     <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-0">
       {[...Array(count)].map((_, index) => (
         <div key={index} className="col">
-          <Box
-            sx={{
-              borderRadius: 2,
-              overflow: "hidden",
-              bgcolor: "background.paper",
-              boxShadow: 1,
-            }}
-          >
-            <Skeleton variant="rectangular" height={180} />
-            <Box sx={{ p: 1.5 }}>
-              <Skeleton variant="text" width="82%" height={34} />
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                <Skeleton variant="circular" width={24} height={24} />
-                <Skeleton variant="text" width="62%" height={22} />
-              </Box>
-            </Box>
-          </Box>
+          <div className="card border-0 shadow-sm rounded-4 overflow-hidden placeholder-glow">
+            <div className="placeholder d-block w-100" style={{ height: 180 }} />
+            <div className="card-body p-3">
+              <div className="placeholder rounded col-10 mb-2" style={{ height: 22 }} />
+              <div className="d-flex align-items-center gap-2 mt-1">
+                <div className="placeholder rounded-circle" style={{ width: 24, height: 24 }} />
+                <div className="placeholder rounded col-7" style={{ height: 16 }} />
+              </div>
+            </div>
+          </div>
         </div>
       ))}
     </div>
@@ -94,69 +85,31 @@ function Subscriptions() {
   return (
     <ContentContainer>
       <div>
-        <Typography variant="h3" sx={{ mb: 0.5 }}>
-          <SubscriptionsIcon sx={{ mb: 2, fontSize: 46 }} /> Subscriptions
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-            flexWrap: "wrap",
-            gap: 1,
-          }}
-        >
-          <Typography variant="subtitle1" sx={{ mb: 0 }}>
-            Latest videos from channels you subscribe to.
-          </Typography>
-          <TextField
-            select
-            size="small"
-            value={sort}
-            onChange={(event) => setSort(event.target.value)}
-            sx={{ minWidth: 150 }}
-          >
-            <MenuItem value="recent">Recent videos</MenuItem>
-            <MenuItem value="trending">Trending</MenuItem>
-          </TextField>
-        </Box>
+        <h1 className="h3 fw-bold mb-1"><i className="bi bi-rss me-2" aria-hidden="true" />Subscriptions</h1>
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+          <p className="text-body-secondary mb-0">Latest videos from channels you subscribe to.</p>
+          <select className="form-select form-select-sm" style={{ minWidth: 150 }} value={sort} onChange={(event) => setSort(event.target.value)}>
+            <option value="recent">Recent videos</option>
+            <option value="trending">Trending</option>
+          </select>
+        </div>
 
-        <Box sx={{ position: "relative", minHeight: 320 }}>
-          <Box
-            sx={{
-              opacity: showSkeletons && !requiresAuth ? 1 : 0,
-              transition: "opacity 180ms ease-out",
-              pointerEvents: "none",
-              position: showSkeletons ? "relative" : "absolute",
-              inset: 0,
-            }}
-          >
+        <div style={{ position: "relative", minHeight: 320 }}>
+          <div style={{ opacity: showSkeletons && !requiresAuth ? 1 : 0, transition: "opacity 180ms ease-out", pointerEvents: "none", position: showSkeletons ? "relative" : "absolute", inset: 0 }}>
             <VideoGridSkeleton />
-          </Box>
-          <Box
-            sx={{
-              opacity: !showSkeletons && !loading ? 1 : 0,
-              transition: "opacity 180ms ease-out",
-            }}
-          >
+          </div>
+          <div style={{ opacity: !showSkeletons && !loading ? 1 : 0, transition: "opacity 180ms ease-out" }}>
             {!loading && requiresAuth && (
-              <Alert
-                severity="info"
-                action={
-                  <Button component={Link} to="/login" color="inherit" size="small">
-                    Login
-                  </Button>
-                }
-              >
-                Please log in to see your subscriptions feed.
-              </Alert>
+              <div className="alert alert-info d-flex justify-content-between align-items-center gap-3">
+                <span>Please log in to see your subscriptions feed.</span>
+                <Link to="/login" className="btn btn-outline-primary btn-sm">Login</Link>
+              </div>
             )}
 
             {!loading && !requiresAuth && !error && videos.length === 0 && (
-              <Typography color="text.secondary">
+              <p className="text-body-secondary">
                 No videos yet from your subscriptions.
-              </Typography>
+              </p>
             )}
 
             {!loading && !requiresAuth && !error && videos.length > 0 && (
@@ -170,10 +123,10 @@ function Subscriptions() {
                 ))}
               </div>
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
 
-        {error && <Typography color="error">Error: {error}</Typography>}
+        {error && <p className="text-danger">Error: {error}</p>}
       </div>
       <Footer />
     </ContentContainer>

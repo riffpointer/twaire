@@ -1,17 +1,3 @@
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddLinkIcon from "@mui/icons-material/AddLink";
-import EditIcon from "@mui/icons-material/Edit";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import ForumIcon from "@mui/icons-material/Forum";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import ImageIcon from "@mui/icons-material/Image";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LanguageIcon from "@mui/icons-material/Language";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import RedditIcon from "@mui/icons-material/Reddit";
-import SmartDisplayIcon from "@mui/icons-material/SmartDisplay";
-import XIcon from "@mui/icons-material/X";
 import {
   Alert,
   Avatar,
@@ -42,6 +28,24 @@ import {
   isValidLinkUrl,
 } from "../utils/ProfileLinks.js";
 import VideoPickerDialog from "@/components/VideoPickerDialog.jsx";
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const CameraAltIcon = makeBiIcon("bi bi-camera");
+const DeleteIcon = makeBiIcon("bi bi-trash");
+const AddLinkIcon = makeBiIcon("bi bi-link-45deg");
+const EditIcon = makeBiIcon("bi bi-pencil");
+const FacebookIcon = makeBiIcon("bi bi-facebook");
+const ForumIcon = makeBiIcon("bi bi-chat-dots");
+const GitHubIcon = makeBiIcon("bi bi-github");
+const ImageIcon = makeBiIcon("bi bi-image");
+const InstagramIcon = makeBiIcon("bi bi-instagram");
+const LanguageIcon = makeBiIcon("bi bi-globe");
+const LinkedInIcon = makeBiIcon("bi bi-linkedin");
+const RedditIcon = makeBiIcon("bi bi-reddit");
+const SmartDisplayIcon = makeBiIcon("bi bi-display");
+const XIcon = makeBiIcon("bi bi-twitter-x");
 
 function ProfileSettings() {
   const [loading, setLoading] = useState(true);

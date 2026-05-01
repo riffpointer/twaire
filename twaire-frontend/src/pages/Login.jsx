@@ -1,5 +1,3 @@
-import { Alert, Box, Button, Card, CardContent, Container, Stack, TextField, Typography } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
@@ -60,71 +58,56 @@ function Login() {
   };
 
   return (
-    <>
-      <Container maxWidth="sm">
-        <Card elevation={4} sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-            <Typography variant="h4" gutterBottom>
-              Login to Twaire
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              {Strings.branding.description} To upload videos and share your opinions and reactions, please login.
-            </Typography>
+    <div className="container py-4" style={{ maxWidth: 560 }}>
+      <div className="card border-0 shadow-sm rounded-4">
+        <div className="card-body p-4 p-sm-5">
+          <h1 className="h3 fw-bold mb-2">Login to Twaire</h1>
+          <p className="text-body-secondary mb-4">
+            {Strings.branding.description} To upload videos and share your opinions and reactions, please login.
+          </p>
 
-            {alert && (
-              <Alert
-                severity={alert.type === "danger" ? "error" : alert.type}
-                action={
-                  <IconButton
-                    aria-label="close"
-                    color="inherit"
-                    size="small"
-                    onClick={() => setAlert(null)}
-                  >
-                    <i className="bi bi-close"></i>
-                  </IconButton>
-                }
-                sx={{ mt: 2 }}
-              >
-                {alert.message}
-              </Alert>
-            )}
+          {alert ? (
+            <div className={`alert alert-${alert.type === "danger" ? "danger" : alert.type} d-flex justify-content-between align-items-start gap-3`}>
+              <span>{alert.message}</span>
+              <button type="button" className="btn btn-sm btn-link text-reset p-0" onClick={() => setAlert(null)} aria-label="Close">
+                <i className="bi bi-x-lg" />
+              </button>
+            </div>
+          ) : null}
 
-            <Box component="form" onSubmit={handleLogin} noValidate>
-              <TextField
-                label="Email"
+          <form onSubmit={handleLogin} noValidate>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="login-email">Email</label>
+              <input
+                id="login-email"
+                className="form-control"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                margin="normal"
                 required
               />
-
-              <TextField
-                label="Password"
+            </div>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="login-password">Password</label>
+              <input
+                id="login-password"
+                className="form-control"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                margin="normal"
                 required
               />
-
-              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                <Button type="submit" variant="contained" disableElevation>
-                  Login
-                </Button>
-
-                <Button component={Link} to="/signup" variant="text" disableElevation>
-                  Don't have an account? Sign up
-                </Button>
-              </Stack>
-            </Box>
-          </CardContent>
-        </Card>
-      </Container>
-    </>
+            </div>
+            <div className="d-flex flex-column flex-sm-row gap-2 mt-4">
+              <button type="submit" className="btn btn-primary">Login</button>
+              <Link to="/signup" className="btn btn-link text-decoration-none px-0">
+                Don't have an account? Sign up
+              </Link>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 

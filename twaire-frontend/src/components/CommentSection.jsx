@@ -13,13 +13,16 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useCallback, useEffect, useState, useRef } from "react";
 import ApiConfig from "../utils/ApiConfig.js";
 import Strings from "../utils/Strings.js";
 import Comment from "./Comment";
 import EmojiPickerButton from "./EmojiPickerButton.jsx";
 import Loading from "./Loading.jsx";
+
+const WarningAmberIcon = ({ fontSize, color, className = "", ...props }) => (
+  <Box component="i" className={`bi bi-exclamation-triangle-fill${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
 
 function CommentSection({ videoId, videoUploaderId, pinnedCommentId: initialPinnedCommentId = null }) {
   const [comments, setComments] = useState([]);

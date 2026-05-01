@@ -1,6 +1,4 @@
 import { useMemo, useState, createContext, useContext, lazy, Suspense, useEffect, useRef } from "react";
-import { CssBaseline, LinearProgress, ThemeProvider, Toolbar } from "@mui/material";
-import { alpha, createTheme } from "@mui/material/styles";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import AppBar from "./components/AppBarHeader.jsx";
@@ -140,91 +138,6 @@ function App() {
     [],
   );
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-          ...(mode === "dark"
-            ? {
-                primary: { main: "#D0BCFF" },
-                secondary: { main: "#CCC2DC" },
-              }
-            : {
-                primary: { main: "#6750A4" },
-                secondary: { main: "#625B71" },
-              }),
-        },
-        components: {
-          MuiCssBaseline: {
-            styleOverrides: (themeParam) => ({
-              html: {
-                backgroundColor: themeParam.palette.background.default,
-              },
-              body: {
-                backgroundColor: themeParam.palette.background.default,
-                color: themeParam.palette.text.primary,
-                minHeight: "100vh",
-              },
-              "#root": {
-                minHeight: "100vh",
-                backgroundColor: themeParam.palette.background.default,
-                color: themeParam.palette.text.primary,
-              },
-            }),
-          },
-          MuiSkeleton: {
-            defaultProps: {
-              animation: false,
-            },
-            styleOverrides: {
-              root: ({ theme: t }) => ({
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: 8,
-                backgroundColor:
-                  t.palette.mode === "dark"
-                    ? alpha(t.palette.common.white, 0.12)
-                    : alpha(t.palette.common.black, 0.08),
-                animation: "muiSkeletonEnter 140ms ease-out both",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  inset: 0,
-                  background: `linear-gradient(90deg, transparent, ${
-                    t.palette.mode === "dark"
-                      ? alpha(t.palette.common.white, 0.16)
-                      : alpha(t.palette.common.white, 0.52)
-                  }, transparent)`,
-                  transform: "translateX(-100%)",
-                  animation: "muiSkeletonShimmer 980ms ease-in-out infinite",
-                },
-                "@keyframes muiSkeletonEnter": {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
-                "@keyframes muiSkeletonShimmer": {
-                  from: { transform: "translateX(-100%)" },
-                  to: { transform: "translateX(100%)" },
-                },
-                "@media (prefers-reduced-motion: reduce)": {
-                  animation: "none",
-                  "&::after": { animation: "none" },
-                },
-              }),
-            },
-          },
-        },
-        shape: {
-          borderRadius: 7,
-        },
-        typography: {
-          fontFamily: "Inter, Roboto, Arial, sans-serif",
-        },
-      }),
-    [mode],
-  );
-
   const queueApi = useMemo(
     () => ({
       queueItems,
@@ -262,34 +175,36 @@ function App() {
           },
         }}
       >
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <BrowserRouter>
-            <NavigationProgressBridge progress={navProgress} setProgress={setNavProgress} />
-            <ScrollToTopBridge />
-            <LinearProgress
-              variant="determinate"
-              value={navProgress}
-              sx={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: (theme) => theme.zIndex.tooltip + 1,
-                height: 3,
-                opacity: navProgress > 0 ? 1 : 0,
-                transition: "opacity 120ms ease",
-                "& .MuiLinearProgress-bar": {
-                  transition: "transform 180ms ease",
-                },
-              }}
-            />
-            <AppBar />
-            <Toolbar
-              sx={{
-                minHeight: { xs: 56, md: 50 },
-              }}
-            />
+        <BrowserRouter>
+          <NavigationProgressBridge progress={navProgress} setProgress={setNavProgress} />
+          <ScrollToTopBridge />
+          
+          <div 
+            className="progress position-fixed top-0 start-0 end-0 rounded-0" 
+            style={{ 
+              zIndex: 2000, 
+              height: '3px', 
+              opacity: navProgress > 0 ? 1 : 0,
+              transition: 'opacity 120ms ease',
+              backgroundColor: 'transparent'
+            }}
+          >
+            <div 
+              className="progress-bar bg-primary" 
+              role="progressbar" 
+              style={{ 
+                width: `${navProgress}%`,
+                transition: 'width 180ms ease'
+              }} 
+              aria-valuenow={navProgress} 
+              aria-valuemin="0" 
+              aria-valuemax="100"
+            ></div>
+          </div>
+
+          <AppBar />
+          
+          <div className="pt-5 mt-2">
             <QueueContext.Provider value={queueApi}>
               <Suspense fallback={<InfinitySpinner />}>
                 <Routes>
@@ -316,8 +231,8 @@ function App() {
               </Suspense>
               <QueuePanel />
             </QueueContext.Provider>
-          </BrowserRouter>
-        </ThemeProvider>
+          </div>
+        </BrowserRouter>
       </NavigationProgressContext.Provider>
     </ColorModeContext.Provider>
   );

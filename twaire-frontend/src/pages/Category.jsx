@@ -1,4 +1,3 @@
-import { Box, Container, FormControl, InputLabel, MenuItem, Select, Skeleton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import VideoGrid from "@/components/VideoGrid.jsx";
@@ -10,31 +9,18 @@ import {
 
 function CategorySkeleton() {
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(2, minmax(0, 1fr))",
-          md: "repeat(3, minmax(0, 1fr))",
-        },
-        gap: 3,
-        mt: 1,
-      }}
-    >
+    <div className="row g-3 mt-1">
       {[...Array(6)].map((_, index) => (
-        <Box key={`category-skeleton-${index}`}>
-          <Skeleton
-            variant="rounded"
-            height={0}
-            sx={{ pt: "56.25%", borderRadius: 2, mb: 1.25 }}
-          />
-          <Skeleton variant="text" width={`${70 - (index % 3) * 10}%`} height={34} />
-          <Skeleton variant="text" width="40%" />
-          <Skeleton variant="text" width="56%" />
-        </Box>
+        <div key={`category-skeleton-${index}`} className="col-12 col-sm-6 col-md-4">
+          <div className="placeholder-glow">
+            <div className="placeholder rounded-4 d-block w-100 mb-3" style={{ paddingTop: "56.25%" }} />
+            <div className="placeholder rounded col-8 mb-2" style={{ height: 24 }} />
+            <div className="placeholder rounded col-4 mb-2" style={{ height: 16 }} />
+            <div className="placeholder rounded col-6" style={{ height: 16 }} />
+          </div>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -97,77 +83,57 @@ function Category() {
   }, [categoryKey, categoryValid, sort]);
 
   return (
-    <Container>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexDirection: { xs: "column", sm: "row" },
-          mb: { xs: 4, sm: 2 },
-          gap: 2,
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            textAlign: { xs: "center", sm: "left" },
-            width: "100%",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
+    <div className="container">
+      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
+        <h1 className="h5 text-center text-sm-start mb-0 text-truncate w-100">
           {categoryValid ? (
             <>
-              <Box component="span" sx={{ fontWeight: 700 }}>
+              <span className="fw-bold">
                 Category
-              </Box>
+              </span>
               : {categoryLabel}
             </>
           ) : (
             "Category not found"
           )}
-        </Typography>
+        </h1>
 
-        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 220 } }}>
-          <InputLabel id="category-sort-label">Sort by</InputLabel>
-          <Select
-            labelId="category-sort-label"
-            id="category-sort"
+        <div className="flex-shrink-0" style={{ minWidth: 220 }}>
+          <select
+            className="form-select form-select-sm"
             value={sort}
-            label="Sort by"
             onChange={(event) => setSort(event.target.value)}
+            aria-label="Sort by"
           >
-            <MenuItem value="recent">Recent videos</MenuItem>
-            <MenuItem value="trending">Trending videos</MenuItem>
-            <MenuItem value="views">Most viewed videos</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+            <option value="recent">Recent videos</option>
+            <option value="trending">Trending videos</option>
+            <option value="views">Most viewed videos</option>
+          </select>
+        </div>
+      </div>
 
       {loading && <CategorySkeleton />}
 
       {!loading && error && (
-        <Typography variant="body1" color="error">
+        <p className="text-danger">
           Unable to load category videos: {error}
-        </Typography>
+        </p>
       )}
 
       {!loading && notFound && !error && (
-        <Typography variant="body1" color="text.secondary">
+        <p className="text-body-secondary">
           This category does not exist.
-        </Typography>
+        </p>
       )}
 
       {!loading && !error && !notFound && videos.length === 0 && (
-        <Typography variant="body1" color="text.secondary">
+        <p className="text-body-secondary">
           No videos found in <b>{categoryLabel}</b>.
-        </Typography>
+        </p>
       )}
 
       {!loading && !error && !notFound && <VideoGrid videos={videos} />}
-    </Container>
+    </div>
   );
 }
 

@@ -1,9 +1,3 @@
-import CloseIcon from "@mui/icons-material/Close";
-import QueueMusicIcon from "@mui/icons-material/QueueMusic";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { Avatar, Box, Collapse, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
 import { useQueue } from "../contexts/QueueContext.jsx";
@@ -19,114 +13,118 @@ function QueuePanel() {
   const currentIndex = currentVideoId ? queueItems.findIndex((item) => item._id === currentVideoId) : -1;
 
   return (
-    <Paper
-      elevation={8}
-      sx={{
-        position: "fixed",
-        right: { xs: 12, sm: 20 },
-        bottom: { xs: 12, sm: 20 },
-        width: { xs: "calc(100vw - 24px)", sm: 360 },
-        maxWidth: 360,
-        zIndex: (theme) => theme.zIndex.modal + 1,
-        overflow: "hidden",
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
-        transform: isVisible
-          ? "translateY(0)"
-          : "translateY(150%)",
-        opacity: isVisible ? 1 : 0,
-        transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        pointerEvents: isVisible ? "auto" : "none",
+    <div
+      className={`card shadow-lg fixed-bottom border-0 m-3 ms-auto overflow-hidden ${isVisible ? 'translate-middle-y-0 opacity-100' : 'translate-middle-y-100 opacity-0'}`}
+      style={{
+        width: '360px',
+        maxWidth: 'calc(100vw - 32px)',
+        zIndex: 1050,
+        borderRadius: '12px',
+        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        pointerEvents: isVisible ? 'auto' : 'none',
+        transform: isVisible ? 'translateY(0)' : 'translateY(150%)',
+        right: 0,
+        bottom: 0,
       }}
     >
-      <Box onClick={() => setIsQueueExpanded(!isQueueExpanded)} sx={{ height: 48, boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "space-between", px: 1.5, bgcolor: "action.hover", cursor: "pointer" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <QueueMusicIcon fontSize="small" />
-          <Typography variant="subtitle2" fontWeight={700}>
-            Queue
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div 
+        className="card-header bg-light border-0 d-flex align-items-center justify-content-between py-2 px-3 cursor-pointer"
+        onClick={() => setIsQueueExpanded(!isQueueExpanded)}
+      >
+        <div className="d-flex align-items-center gap-2">
+          <i className="bi bi-music-note-list text-primary"></i>
+          <span className="fw-bold small">Queue</span>
+          <span className="text-muted small">
             {queueItems.length} item{queueItems.length === 1 ? "" : "s"}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          <Tooltip title="Clear queue">
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); clearQueue(); }} aria-label="Clear queue">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={isQueueExpanded ? "Collapse queue" : "Expand queue"}>
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); setIsQueueExpanded(!isQueueExpanded); }} aria-label="Toggle queue">
-              {isQueueExpanded ? <KeyboardArrowDownIcon fontSize="small" /> : <KeyboardArrowUpIcon fontSize="small" />}
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+          </span>
+        </div>
+        <div className="d-flex gap-1">
+          <button 
+            className="btn btn-link btn-sm text-muted p-1 border-0"
+            onClick={(e) => { e.stopPropagation(); clearQueue(); }}
+            title="Clear queue"
+          >
+            <i className="bi bi-trash-fill small"></i>
+          </button>
+          <button 
+            className="btn btn-link btn-sm text-muted p-1 border-0"
+            onClick={(e) => { e.stopPropagation(); setIsQueueExpanded(!isQueueExpanded); }}
+            title={isQueueExpanded ? "Collapse queue" : "Expand queue"}
+          >
+            <i className={`bi bi-chevron-${isQueueExpanded ? 'down' : 'up'} small`}></i>
+          </button>
+        </div>
+      </div>
 
-      <Collapse in={isQueueExpanded}>
-        <Stack sx={{ maxHeight: 320, overflowY: "auto" }}>
+      <div 
+        className={`overflow-hidden transition-all duration-300 ${isQueueExpanded ? 'opacity-100' : 'opacity-0'}`}
+        style={{ 
+          maxHeight: isQueueExpanded ? '320px' : '0',
+          transition: 'max-height 0.3s ease-in-out, opacity 0.2s ease-in-out'
+        }}
+      >
+        <div className="list-group list-group-flush overflow-auto" style={{ maxHeight: '320px' }}>
           {queueItems.map((item, index) => {
             const isPast = currentIndex !== -1 && index < currentIndex;
+            const isCurrent = currentIndex === index;
             
             return (
-              <Box
+              <div
                 key={item._id}
-                sx={{
-                  display: "flex",
-                  gap: 1.25,
-                  alignItems: "center",
-                  px: 1.5,
-                  py: 1,
-                  borderTop: "1px solid",
-                  borderColor: "divider",
-                  opacity: isPast ? 0.5 : 1,
-              }}
-            >
-              <Avatar
-                variant="rounded"
-                src={
-                  item.thumbnail
-                    ? `${ApiConfig.serverUrl}/data/thumbnails/${item.thumbnail}`
-                    : undefined
-                }
-                alt={item.title}
-                sx={{ width: 56, height: 32, bgcolor: "action.hover" }}
-              />
-              <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography
-                  component={Link}
-                  to={`/watch/${item._id}`}
-                  variant="body2"
-                  fontWeight={600}
-                  noWrap
-                  sx={{ display: "block", textDecoration: "none", color: "text.primary" }}
-                >
-                  {item.title}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                  Added to queue
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", gap: 0.5 }}>
-                <Tooltip title="Play Now">
-                  <IconButton size="small" component={Link} to={`/watch/${item._id}`} aria-label={`Play ${item.title}`}>
-                    <PlayArrowIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Remove from queue">
-                  <IconButton size="small" onClick={() => removeFromQueue(item._id)} aria-label={`Remove ${item.title} from queue`}>
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
+                className={`list-group-item d-flex gap-2 align-items-center py-2 px-3 border-0 border-top ${isCurrent ? 'bg-primary bg-opacity-10' : ''}`}
+                style={{ opacity: isPast ? 0.5 : 1 }}
+              >
+                <div className="position-relative flex-shrink-0">
+                  <img
+                    src={item.thumbnail ? `${ApiConfig.serverUrl}/data/thumbnails/${item.thumbnail}` : 'https://placehold.co/320x180?text=No+Thumbnail'}
+                    alt={item.title}
+                    className="rounded"
+                    style={{ width: '56px', height: '32px', objectFit: 'cover' }}
+                  />
+                  {isCurrent && (
+                    <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 rounded">
+                      <i className="bi bi-play-fill text-white"></i>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="min-w-0 flex-grow-1">
+                  <Link 
+                    to={`/watch/${item._id}`} 
+                    className="d-block text-truncate fw-bold text-dark text-decoration-none small"
+                  >
+                    {item.title}
+                  </Link>
+                  <small className="text-muted d-block text-truncate" style={{ fontSize: '0.7rem' }}>
+                    {isCurrent ? 'Now playing' : 'Added to queue'}
+                  </small>
+                </div>
+
+                <div className="d-flex gap-1">
+                  <Link 
+                    to={`/watch/${item._id}`}
+                    className="btn btn-link btn-sm text-primary p-1 border-0"
+                    title="Play Now"
+                  >
+                    <i className="bi bi-play-fill"></i>
+                  </Link>
+                  <button 
+                    className="btn btn-link btn-sm text-danger p-1 border-0"
+                    onClick={() => removeFromQueue(item._id)}
+                    title="Remove from queue"
+                  >
+                    <i className="bi bi-x-lg" style={{ fontSize: '0.75rem' }}></i>
+                  </button>
+                </div>
+              </div>
             );
           })}
-        </Stack>
-      </Collapse>
-    </Paper>
+        </div>
+      </div>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .cursor-pointer { cursor: pointer; }
+      `}} />
+    </div>
   );
 }
 

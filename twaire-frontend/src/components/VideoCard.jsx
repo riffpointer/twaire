@@ -1,20 +1,13 @@
 import { getRelativeTime } from "../utils/DateUtils.js";
 import ApiConfig from "../utils/ApiConfig.js";
-import { Alert, Box, Button, Card, CardActionArea, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, InputLabel, Menu, MenuItem, Select, Skeleton, Snackbar, TextField, Typography } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import QueuePlayNextIcon from "@mui/icons-material/QueuePlayNext";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import React, { useEffect, useRef, useState } from "react";
 import UserAvatar from "./UserAvatar.jsx";
 import { useQueue } from "../contexts/QueueContext.jsx";
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import SaveToPlaylistDialog from "./SaveToPlaylistDialog.jsx";
 
-
-function VideoCard({ video, sx={} }) {
+function VideoCard({ video, className = "" }) {
   const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState("spam");
   const [reportDetails, setReportDetails] = useState("");
@@ -22,7 +15,7 @@ function VideoCard({ video, sx={} }) {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const thumbnailRef = useRef(null);
-  const menuOpen = Boolean(menuAnchorEl);
+  const menuRef = useRef(null);
   const { addToQueue } = useQueue();
 
   const safeThumbnail = video.thumbnail
@@ -34,7 +27,6 @@ function VideoCard({ video, sx={} }) {
   }, [safeThumbnail]);
 
   useEffect(() => {
-    // Cached images may already be complete before onLoad fires in some navigation paths.
     if (thumbnailRef.current?.complete) {
       setThumbnailLoaded(true);
     }
@@ -50,38 +42,43 @@ function VideoCard({ video, sx={} }) {
     fetchCurrentUser();
   }, []);
 
-  // Format uploaded date
-  //   const formattedDate = uploadedAt ? new Date(uploadedAt).toLocaleDateString() : "";
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const uploadedAtFormatted = getRelativeTime(video.uploadedAt);
 
   const handleOpenMenu = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setMenuAnchorEl(event.currentTarget);
+    setMenuOpen(!menuOpen);
   };
-
-  const handleCloseMenu = () => setMenuAnchorEl(null);
 
   const handleAddToQueue = (event) => {
     event.preventDefault();
     event.stopPropagation();
     addToQueue(video);
-    handleCloseMenu();
+    setMenuOpen(false);
   };
 
   const handleReport = (event) => {
     event.preventDefault();
     event.stopPropagation();
     setReportDialogOpen(true);
-    handleCloseMenu();
+    setMenuOpen(false);
   };
 
   const handleSaveToPlaylist = (event) => {
     event.preventDefault();
     event.stopPropagation();
     setSaveDialogOpen(true);
-    handleCloseMenu();
+    setMenuOpen(false);
   };
 
   const handleCloseReportDialog = () => {
@@ -91,198 +88,131 @@ function VideoCard({ video, sx={} }) {
   };
 
   return (
-    <Card
-      elevation={3}
-      sx={{
-        userSelect: "none",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        minWidth: 200,
-        position: "relative",
-        ...sx,
-      }}
-    >
-      <Box
-        sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", height: "100%", cursor: "pointer" }}
-      >
-        <Box sx={{ position: "relative", width: "100%", aspectRatio: "16 / 9", flexGrow: 1 }}>
-          {!thumbnailLoaded && (
-            <Skeleton
-              variant="rectangular"
-              sx={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-              }}
-            />
-          )}
-          <Box
-            component="img"
-            ref={thumbnailRef}
-            src={safeThumbnail}
-            alt={video.title}
-            loading="lazy"
-            onLoad={() => setThumbnailLoaded(true)}
-            onError={() => setThumbnailLoaded(true)}
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              opacity: thumbnailLoaded ? 1 : 0,
-              transition: "opacity 180ms ease-out",
-            }}
-          />
-        </Box>
+    <div className={`card h-100 border-0 shadow-sm video-card position-relative ${className}`} style={{ minWidth: '200px' }}>
+      <div className="ratio ratio-16x9 position-relative overflow-hidden rounded-3 cursor-pointer">
+        {!thumbnailLoaded && (
+          <div className="position-absolute inset-0 w-100 h-100 bg-light-subtle skeleton-shimmer"></div>
+        )}
+        <img
+          ref={thumbnailRef}
+          src={safeThumbnail}
+          alt={video.title}
+          loading="lazy"
+          onLoad={() => setThumbnailLoaded(true)}
+          onError={() => setThumbnailLoaded(true)}
+          className={`position-absolute top-0 start-0 w-100 h-100 object-fit-cover transition-opacity duration-200 ${thumbnailLoaded ? 'opacity-100' : 'opacity-0'}`}
+        />
+      </div>
 
-        <CardContent sx={{ p: 1.5, pt: 1, "&:last-child": { pb: 1.5 } }}>
-          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 0.5, mb: 0.5 }}>
-            <Typography
-              variant="h6"
-              noWrap
-              sx={{ flex: 1, minWidth: 0, fontWeight: 500 }}
-              title={video.description || ""}
+      <div className="card-body p-2 px-1">
+        <div className="d-flex align-items-start justify-content-between gap-2 mb-1">
+          <h6 className="card-title mb-0 text-truncate fw-bold flex-grow-1" title={video.title}>
+            {video.title}
+          </h6>
+          <div className="dropdown" ref={menuRef}>
+            <button
+              className="btn btn-link btn-sm text-muted p-0 border-0 shadow-none"
+              onClick={handleOpenMenu}
             >
-              {video.title}
-            </Typography>
-            <Box>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleOpenMenu(e);
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                }}
-                aria-label="Video actions"
-                sx={{ color: "text.secondary", mt: -0.5, mr: -1 }}
-              >
-                <MoreVertIcon fontSize="small" />
-              </IconButton>
-              <Menu
-                anchorEl={menuAnchorEl}
-                open={menuOpen}
-                onClose={handleCloseMenu}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              >
-                <MenuItem onClick={handleAddToQueue}>
-                  <QueuePlayNextIcon fontSize="small" style={{ marginRight: 8 }} />
-                  Add to queue
-                </MenuItem>
-                <MenuItem onClick={handleSaveToPlaylist}>
-                  <PlaylistAddIcon fontSize="small" style={{ marginRight: 8 }} />
-                  Save to playlist
-                </MenuItem>
-                <MenuItem onClick={handleReport} sx={{ color: "warning.main" }}>
-                  <FlagOutlinedIcon fontSize="small" style={{ marginRight: 8 }} />
-                  Report
-                </MenuItem>
-              </Menu>
-            </Box>
-          </Box>
+              <i className="bi bi-three-dots-vertical"></i>
+            </button>
+            <div className={`dropdown-menu dropdown-menu-end shadow border-0 ${menuOpen ? 'show' : ''}`} style={{ position: 'absolute', right: 0, top: '100%' }}>
+              <button className="dropdown-item d-flex align-items-center py-2" onClick={handleAddToQueue}>
+                <i className="bi bi-plus-square me-2"></i> Add to queue
+              </button>
+              <button className="dropdown-item d-flex align-items-center py-2" onClick={handleSaveToPlaylist}>
+                <i className="bi bi-plus-circle me-2"></i> Save to playlist
+              </button>
+              <div className="dropdown-divider"></div>
+              <button className="dropdown-item d-flex align-items-center py-2 text-warning" onClick={handleReport}>
+                <i className="bi bi-flag me-2"></i> Report
+              </button>
+            </div>
+          </div>
+        </div>
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              fontSize: "0.85rem",
-              color: "text.secondary",
-            }}
-          >
-            <UserAvatar user={video.uploader} size={24} />
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{ fontSize: "inherit", color: "inherit" }}
-            >
-              {video.uploader.publicName}
-            </Typography>
-
+        <div className="d-flex align-items-center gap-2 text-muted small overflow-hidden">
+          <UserAvatar user={video.uploader} size={24} />
+          <div className="text-truncate d-flex align-items-center">
+            <span className="text-truncate">{video.uploader.publicName}</span>
             {video.uploader.verified && (
-              <CheckCircleIcon sx={{ fontSize: 14, color: "primary.main" }} />
+              <i className="bi bi-patch-check-fill text-primary ms-1" style={{ fontSize: '0.75rem' }}></i>
             )}
+          </div>
+          <span className="flex-shrink-0">• {video.views} views</span>
+          {uploadedAtFormatted && (
+            <span className="flex-shrink-0">• {uploadedAtFormatted}</span>
+          )}
+        </div>
+      </div>
 
-            <Box component="span" sx={{ whiteSpace: "nowrap" }}>
-              • {video.views} views
-            </Box>
+      {/* Report Dialog */}
+      {reportDialogOpen && (
+        <>
+          <div className="modal-backdrop fade show" onClick={handleCloseReportDialog}></div>
+          <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content border-0 shadow">
+                <div className="modal-header border-bottom-0 pb-0">
+                  <h5 className="modal-title fw-bold">Report video</h5>
+                  <button type="button" className="btn-close" onClick={handleCloseReportDialog}></button>
+                </div>
+                <div className="modal-body">
+                  <p className="text-muted small mb-3">Tell us why you are reporting this video.</p>
+                  
+                  <div className="mb-3">
+                    <label className="form-label small fw-bold">Reason</label>
+                    <select 
+                      className="form-select" 
+                      value={reportReason}
+                      onChange={(e) => setReportReason(e.target.value)}
+                    >
+                      <option value="spam">Spam or misleading</option>
+                      <option value="harassment">Harassment or bullying</option>
+                      <option value="hate">Hateful or abusive</option>
+                      <option value="sexual">Sexual or inappropriate</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div className="mb-0">
+                    <label className="form-label small fw-bold">Additional details</label>
+                    <textarea 
+                      className="form-control" 
+                      rows="3"
+                      value={reportDetails}
+                      onChange={(e) => setReportDetails(e.target.value)}
+                      placeholder="Optional context"
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer border-top-0 pt-0">
+                  <button className="btn btn-light rounded-pill px-3" onClick={handleCloseReportDialog}>Cancel</button>
+                  <button className="btn btn-warning rounded-pill px-3" onClick={() => {
+                    handleCloseReportDialog();
+                    setReportSuccessOpen(true);
+                    setTimeout(() => setReportSuccessOpen(false), 2200);
+                  }}>Submit report</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
-            {uploadedAtFormatted && (
-              <Box component="span" sx={{ whiteSpace: "nowrap" }}>
-                • {uploadedAtFormatted}
-              </Box>
-            )}
-          </Box>
-        </CardContent>
-      </Box>
-
-      <Dialog open={reportDialogOpen} onClose={handleCloseReportDialog} fullWidth maxWidth="sm">
-        <DialogTitle>Report video</DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ mb: 2 }}>
-            Tell us why you are reporting this video. This currently opens a local reporting flow only.
-          </DialogContentText>
-          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel id="video-report-reason-label">Reason</InputLabel>
-            <Select
-              labelId="video-report-reason-label"
-              label="Reason"
-              value={reportReason}
-              onChange={(event) => setReportReason(event.target.value)}
-            >
-              <MenuItem value="spam">Spam or misleading</MenuItem>
-              <MenuItem value="harassment">Harassment or bullying</MenuItem>
-              <MenuItem value="hate">Hateful or abusive</MenuItem>
-              <MenuItem value="sexual">Sexual or inappropriate</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            multiline
-            minRows={3}
-            maxRows={6}
-            label="Additional details"
-            value={reportDetails}
-            onChange={(event) => setReportDetails(event.target.value)}
-            placeholder="Optional context"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseReportDialog}>Cancel</Button>
-          <Button
-            variant="contained"
-            color="warning"
-            onClick={() => {
-              handleCloseReportDialog();
-              setReportSuccessOpen(true);
-            }}
-          >
-            Submit report
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={reportSuccessOpen}
-        autoHideDuration={2200}
-        onClose={() => setReportSuccessOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Alert onClose={() => setReportSuccessOpen(false)} severity="warning" variant="filled">
-          Report submitted.
-        </Alert>
-      </Snackbar>
+      {/* Report Success Toast */}
+      {reportSuccessOpen && (
+        <div className="position-fixed bottom-0 start-0 p-3" style={{ zIndex: 1100 }}>
+          <div className="toast show align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div className="d-flex">
+              <div className="toast-body">
+                Report submitted.
+              </div>
+              <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setReportSuccessOpen(false)}></button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SaveToPlaylistDialog
         open={saveDialogOpen}
@@ -290,7 +220,21 @@ function VideoCard({ video, sx={} }) {
         videoId={video._id}
         currentUser={currentUser}
       />
-    </Card>
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .skeleton-shimmer {
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .cursor-pointer { cursor: pointer; }
+        .transition-opacity { transition: opacity 0.2s ease-in-out; }
+      `}} />
+    </div>
   );
 }
 

@@ -1,9 +1,3 @@
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
-import PeopleIcon from "@mui/icons-material/People";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import GridViewIcon from "@mui/icons-material/GridView";
-import ViewListIcon from "@mui/icons-material/ViewList";
 import {
   Alert,
   Box,
@@ -42,6 +36,16 @@ import {
   DEFAULT_VIDEO_CATEGORY,
   VIDEO_CATEGORY_OPTIONS,
 } from "../utils/VideoCategories.js";
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const CloudUploadIcon = makeBiIcon("bi bi-cloud-upload");
+const VideoLibraryIcon = makeBiIcon("bi bi-collection-play");
+const PeopleIcon = makeBiIcon("bi bi-people-fill");
+const CalendarTodayIcon = makeBiIcon("bi bi-calendar-event-fill");
+const GridViewIcon = makeBiIcon("bi bi-grid-3x3-gap");
+const ViewListIcon = makeBiIcon("bi bi-list");
 
 function Dashboard() {
   const [title, setTitle] = useState("");
@@ -277,116 +281,57 @@ function Dashboard() {
   const averageChannelViews = channelViewsAnalytics?.averageViews ?? 0;
 
   return (
-    <Container maxWidth="xl" sx={{ mb: 4 }}>
+    <div className="container-fluid px-md-5 mb-4">
       {/* Header */}
-      <Box mb={3}>
-        <Typography variant="h5" fontWeight={700} gutterBottom>
-          Dashboard
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+      <div className="mb-4">
+        <h1 className="h3 fw-bold mb-1">Dashboard</h1>
+        <p className="text-muted">
           Manage your videos, track performance, and upload new content.
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Stats */}
-      <Grid container spacing={2} mb={3}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Card
-            elevation={2}
-            sx={{
-              borderRadius: 1,
-            }}
-          >
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: 2.5 }}>
-              <Box
-                sx={{
-                  color: "primary.main",
-                  bgcolor: "transparent",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1,
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <VideoLibraryIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
-                  {videos.length}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Videos uploaded
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Card
-            elevation={2}
-            sx={{
-              borderRadius: 1,
-            }}
-          >
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: 2.5 }}>
-              <Box
-                sx={{
-                  color: "primary.main",
-                  bgcolor: "transparent",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1,
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <PeopleIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
-                  {user ? user.subscribers ?? 0 : "..."}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Subscribers
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Card
-            elevation={2}
-            sx={{
-              borderRadius: 1,
-            }}
-          >
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: 2.5 }}>
-              <Box
-                sx={{
-                  color: "primary.main",
-                  bgcolor: "transparent",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1,
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <CalendarTodayIcon />
-              </Box>
-              <Box>
-                <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
-                  {user ? getRelativeTime(user.createdAt) : "..."}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Account age
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <div className="row g-3 mb-4">
+        <div className="col-sm-6 col-md-4">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center p-3">
+              <div className="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                <i className="bi bi-collection-play fs-4"></i>
+              </div>
+              <div>
+                <h4 className="h5 fw-bold mb-0">{videos.length}</h4>
+                <p className="text-muted mb-0 small">Videos uploaded</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-sm-6 col-md-4">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center p-3">
+              <div className="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                <i className="bi bi-people-fill fs-4"></i>
+              </div>
+              <div>
+                <h4 className="h5 fw-bold mb-0">{user ? user.subscribers ?? 0 : "..."}</h4>
+                <p className="text-muted mb-0 small">Subscribers</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-sm-6 col-md-4">
+          <div className="card shadow-sm border-0 h-100">
+            <div className="card-body d-flex align-items-center p-3">
+              <div className="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                <i className="bi bi-calendar-event-fill fs-4"></i>
+              </div>
+              <div>
+                <h4 className="h5 fw-bold mb-0">{user ? getRelativeTime(user.createdAt) : "..."}</h4>
+                <p className="text-muted mb-0 small">Account age</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Content */}
       <Grid container spacing={3}>
@@ -893,7 +838,7 @@ function Dashboard() {
             </Button>
           </DialogActions>
         </Dialog>
-    </Container>
+    </div>
   );
 }
 

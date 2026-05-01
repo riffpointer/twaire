@@ -1,15 +1,19 @@
-import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import FastForwardIcon from "@mui/icons-material/FastForward";
-import FastRewindIcon from "@mui/icons-material/FastRewind";
-import PauseIcon from "@mui/icons-material/Pause";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import ReplayIcon from "@mui/icons-material/Replay";
-import SkipNextIcon from "@mui/icons-material/SkipNext";
-import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
-import VolumeOffIcon from "@mui/icons-material/VolumeOff";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Box, Button, CircularProgress, Fade, IconButton, Menu, MenuItem, Slide, Slider, Snackbar, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const FullscreenIcon = makeBiIcon("bi bi-fullscreen");
+const FastForwardIcon = makeBiIcon("bi bi-skip-forward-fill");
+const FastRewindIcon = makeBiIcon("bi bi-skip-backward-fill");
+const PauseIcon = makeBiIcon("bi bi-pause-fill");
+const PlayArrowIcon = makeBiIcon("bi bi-play-fill");
+const ReplayIcon = makeBiIcon("bi bi-arrow-repeat");
+const SkipNextIcon = makeBiIcon("bi bi-skip-forward-fill");
+const SlowMotionVideoIcon = makeBiIcon("bi bi-speedometer2");
+const VolumeOffIcon = makeBiIcon("bi bi-volume-mute");
+const VolumeUpIcon = makeBiIcon("bi bi-volume-up");
 
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 const UP_NEXT_SECONDS = 5;

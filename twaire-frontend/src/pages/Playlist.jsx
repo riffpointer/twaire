@@ -1,15 +1,3 @@
-import LockIcon from "@mui/icons-material/Lock";
-import LinkIcon from "@mui/icons-material/Link";
-import PublicIcon from "@mui/icons-material/Public";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import QueueMusicIcon from "@mui/icons-material/QueueMusic";
-import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ImageIcon from "@mui/icons-material/Image";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import SortIcon from "@mui/icons-material/Sort";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -39,6 +27,22 @@ import {
 import ApiConfig from "../utils/ApiConfig.js";
 import { getRelativeTime } from "../utils/DateUtils.js";
 import UserAvatar from "../components/UserAvatar.jsx";
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const LockIcon = makeBiIcon("bi bi-lock-fill");
+const LinkIcon = makeBiIcon("bi bi-link-45deg");
+const PublicIcon = makeBiIcon("bi bi-globe");
+const PlayArrowIcon = makeBiIcon("bi bi-play-fill");
+const QueueMusicIcon = makeBiIcon("bi bi-music-note-list");
+const SentimentDissatisfiedIcon = makeBiIcon("bi bi-emoji-frown");
+const EditIcon = makeBiIcon("bi bi-pencil");
+const DeleteIcon = makeBiIcon("bi bi-trash");
+const ImageIcon = makeBiIcon("bi bi-image");
+const CalendarTodayIcon = makeBiIcon("bi bi-calendar-event-fill");
+const SortIcon = makeBiIcon("bi bi-sort-down");
+const DragIndicatorIcon = makeBiIcon("bi bi-grip-vertical");
 
 const VISIBILITY_MAP = {
   0: { label: "Public", icon: <PublicIcon fontSize="small" /> },

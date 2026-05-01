@@ -1,36 +1,10 @@
-import AddIcon from "@mui/icons-material/Add";
-import CheckIcon from "@mui/icons-material/Check";
-import LockIcon from "@mui/icons-material/Lock";
-import LinkIcon from "@mui/icons-material/Link";
-import PublicIcon from "@mui/icons-material/Public";
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  IconButton,
-  MenuItem,
-  Select,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import ApiConfig from "../utils/ApiConfig.js";
 
 const VISIBILITY_OPTIONS = [
-  { value: 0, label: "Public", icon: <PublicIcon fontSize="small" /> },
-  { value: 1, label: "Unlisted", icon: <LinkIcon fontSize="small" /> },
-  { value: 2, label: "Private", icon: <LockIcon fontSize="small" /> },
+  { value: 0, label: "Public", icon: <i className="bi bi-globe small"></i> },
+  { value: 1, label: "Unlisted", icon: <i className="bi bi-link-45deg small"></i> },
+  { value: 2, label: "Private", icon: <i className="bi bi-lock-fill small"></i> },
 ];
 
 function SaveToPlaylistDialog({ open, onClose, videoId, currentUser }) {
@@ -53,7 +27,6 @@ function SaveToPlaylistDialog({ open, onClose, videoId, currentUser }) {
       .then((data) => {
         if (Array.isArray(data)) {
           setPlaylists(data);
-          // Pre-check which playlists already contain this video
           const alreadyIn = new Set(
             data
               .filter((pl) =>
@@ -124,169 +97,120 @@ function SaveToPlaylistDialog({ open, onClose, videoId, currentUser }) {
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pb: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <PlaylistAddIcon />
-          <Typography variant="h6" component="span">Save to playlist</Typography>
-        </Box>
-        <IconButton onClick={onClose} size="small" aria-label="close">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent dividers sx={{ p: 0 }}>
-        {!currentUser ? (
-          <Box sx={{ p: 3, textAlign: "center" }}>
-            <Typography color="text.secondary">
-              Sign in to save videos to playlists.
-            </Typography>
-          </Box>
-        ) : loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : (
-          <>
-            <Box sx={{ maxHeight: 280, overflowY: "auto" }}>
-              {playlists.map((pl) => {
-                const isSaved = savedIds.has(pl._id);
-                const isSaving = saving === pl._id;
-                const visIcon = VISIBILITY_OPTIONS.find((o) => o.value === pl.visibility)?.icon;
-                return (
-                  <Box
-                    key={pl._id}
-                    onClick={() => !isSaving && handleToggle(pl)}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1.5,
-                      px: 2,
-                      py: 1.25,
-                      cursor: "pointer",
-                      userSelect: "none",
-                      transition: "background 0.15s",
-                      "&:hover": { bgcolor: "action.hover" },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: 0.5,
-                        border: "2px solid",
-                        borderColor: isSaved ? "primary.main" : "divider",
-                        bgcolor: isSaved ? "primary.main" : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      {isSaving ? (
-                        <CircularProgress size={12} sx={{ color: isSaved ? "primary.contrastText" : "text.secondary" }} />
-                      ) : isSaved ? (
-                        <CheckIcon sx={{ fontSize: 14, color: "primary.contrastText" }} />
-                      ) : null}
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body1" fontWeight={600} noWrap sx={{ pb: "4px" }}>
-                        {pl.name}
-                      </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-                        {visIcon && <Box sx={{ fontSize: 12, display: "flex" }}>{visIcon}</Box>}
-                        <Typography variant="caption">
-                          {VISIBILITY_OPTIONS.find((o) => o.value === pl.visibility)?.label} · {pl.videos?.length || 0} video{pl.videos?.length === 1 ? "" : "s"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                );
-              })}
-              {playlists.length === 0 && (
-                <Box sx={{ px: 2, py: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    No playlists yet. Create one below.
-                  </Typography>
-                </Box>
+    <>
+      <div className="modal-backdrop fade show" onClick={onClose}></div>
+      <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+        <div className="modal-dialog modal-dialog-centered modal-sm">
+          <div className="modal-content shadow-lg border-0">
+            <div className="modal-header border-bottom-0 pb-0">
+              <h6 className="modal-title fw-bold d-flex align-items-center">
+                <i className="bi bi-plus-square me-2 text-primary"></i>
+                Save to playlist
+              </h6>
+              <button type="button" className="btn-close" onClick={onClose}></button>
+            </div>
+            
+            <div className="modal-body p-0 mt-3">
+              {!currentUser ? (
+                <div className="p-4 text-center">
+                  <p className="text-muted small mb-0">Sign in to save videos to playlists.</p>
+                </div>
+              ) : loading ? (
+                <div className="d-flex justify-content-center p-4">
+                  <div className="spinner-border spinner-border-sm text-primary" role="status"></div>
+                </div>
+              ) : (
+                <div className="overflow-auto" style={{ maxHeight: '280px' }}>
+                  {playlists.map((pl) => {
+                    const isSaved = savedIds.has(pl._id);
+                    const isSaving = saving === pl._id;
+                    const visibilityOpt = VISIBILITY_OPTIONS.find(o => o.value === pl.visibility);
+                    
+                    return (
+                      <div 
+                        key={pl._id}
+                        className="d-flex align-items-center px-3 py-2 border-0 bg-transparent w-100 text-start"
+                        style={{ cursor: isSaving ? 'default' : 'pointer' }}
+                        onClick={() => !isSaving && handleToggle(pl)}
+                      >
+                        <div className="me-3">
+                          {isSaving ? (
+                            <div className="spinner-border spinner-border-sm text-primary" style={{ width: '1.1rem', height: '1.1rem' }}></div>
+                          ) : (
+                            <div className={`border rounded d-flex align-items-center justify-content-center ${isSaved ? 'bg-primary border-primary' : 'bg-white'}`} style={{ width: '1.1rem', height: '1.1rem' }}>
+                              {isSaved && <i className="bi bi-check text-white" style={{ fontSize: '0.9rem' }}></i>}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-grow-1 overflow-hidden">
+                          <div className="fw-bold text-truncate small">{pl.name}</div>
+                          <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            {visibilityOpt?.icon} <span className="ms-1">{visibilityOpt?.label}</span> · {pl.videos?.length || 0} videos
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {playlists.length === 0 && (
+                    <div className="p-4 text-center">
+                      <p className="text-muted small mb-0">No playlists yet. Create one below.</p>
+                    </div>
+                  )}
+                </div>
               )}
-            </Box>
-          </>
-        )}
-      </DialogContent>
+            </div>
 
-      <DialogActions sx={{ px: 2, py: 1.5, flexDirection: "column", alignItems: "stretch", gap: 1 }}>
-        <Collapse in={showCreate} sx={{ width: "100%" }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pb: 1.5 }}>
-            <TextField
-              autoFocus
-              size="small"
-              label="Playlist name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-              fullWidth
-            />
-            <Select
-              size="small"
-              value={newVisibility}
-              onChange={(e) => setNewVisibility(e.target.value)}
-              fullWidth
-              renderValue={(v) => {
-                const opt = VISIBILITY_OPTIONS.find((o) => o.value === v);
-                return (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {opt?.icon}
-                    {opt?.label}
-                  </Box>
-                );
-              }}
-            >
-              {VISIBILITY_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {opt.icon}
-                    {opt.label}
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleCreate}
-              disabled={!newName.trim() || creating}
-              startIcon={creating ? <CircularProgress size={14} /> : null}
-              sx={{ alignSelf: "flex-end", textTransform: "none" }}
-            >
-              Create
-            </Button>
-          </Box>
-          <Divider sx={{ mb: 1 }} />
-        </Collapse>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
-          <Button
-            startIcon={<AddIcon />}
-            size="small"
-            onClick={() => setShowCreate((p) => !p)}
-            sx={{
-              flex: 1,
-              justifyContent: "flex-start",
-              textTransform: "none",
-              pl: 0,
-              "& .MuiButton-startIcon": { ml: 0 },
-            }}
-          >
-            New playlist
-          </Button>
-          <Button onClick={onClose} size="small" sx={{ flex: 1 }}>
-            Done
-          </Button>
-        </Box>
-      </DialogActions>
-    </Dialog>
+            <div className="modal-footer border-top-0 flex-column align-items-stretch px-3 pb-3">
+              {showCreate && (
+                <div className="mb-3 border-top pt-3">
+                  <input
+                    type="text"
+                    className="form-control form-control-sm mb-2"
+                    placeholder="Playlist name"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    autoFocus
+                  />
+                  <select 
+                    className="form-select form-select-sm mb-3"
+                    value={newVisibility}
+                    onChange={(e) => setNewVisibility(parseInt(e.target.value))}
+                  >
+                    {VISIBILITY_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <div className="d-flex justify-content-end">
+                    <button 
+                      className="btn btn-primary btn-sm rounded-pill px-3"
+                      onClick={handleCreate}
+                      disabled={!newName.trim() || creating}
+                    >
+                      {creating ? <span className="spinner-border spinner-border-sm me-1"></span> : null}
+                      Create
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="d-flex justify-content-between mt-2">
+                <button 
+                  className="btn btn-link btn-sm text-decoration-none p-0 d-flex align-items-center"
+                  onClick={() => setShowCreate(!showCreate)}
+                >
+                  <i className={`bi bi-${showCreate ? 'dash' : 'plus'}-circle me-2`}></i>
+                  New playlist
+                </button>
+                <button className="btn btn-light btn-sm rounded-pill px-3" onClick={onClose}>Done</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

@@ -1,4 +1,3 @@
-import { MenuItem, TextField, Box, Typography, Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
@@ -6,29 +5,21 @@ import VideoCard from "./VideoCard.jsx";
 
 function PublicVideosListSkeleton({ count = 5 }) {
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <div className="d-flex flex-column gap-3">
       {[...Array(count)].map((_, index) => (
-        <Box
-          key={index}
-          sx={{
-            borderRadius: 2,
-            overflow: "hidden",
-            bgcolor: "background.paper",
-            boxShadow: 1,
-          }}
-        >
-          <Skeleton variant="rectangular" sx={{ width: "100%", pt: "56.25%" }} />
-          <Box sx={{ p: 1.5, pt: 1, pb: 1.5 }}>
-            <Skeleton variant="text" width="88%" height={30} />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-              <Skeleton variant="circular" width={24} height={24} />
-              <Skeleton variant="text" width="42%" height={20} />
-              <Skeleton variant="text" width="22%" height={20} />
-            </Box>
-          </Box>
-        </Box>
+        <div key={index} className="card h-100 border-0 shadow-sm overflow-hidden">
+          <div className="bg-light-subtle skeleton-shimmer" style={{ paddingTop: '56.25%' }}></div>
+          <div className="card-body p-2 px-1">
+            <div className="bg-light-subtle skeleton-shimmer mb-2 rounded" style={{ height: '24px', width: '88%' }}></div>
+            <div className="d-flex align-items-center gap-2 mt-1">
+              <div className="bg-light-subtle skeleton-shimmer rounded-circle" style={{ width: '24px', height: '24px' }}></div>
+              <div className="bg-light-subtle skeleton-shimmer rounded" style={{ height: '16px', width: '42%' }}></div>
+              <div className="bg-light-subtle skeleton-shimmer rounded" style={{ height: '16px', width: '22%' }}></div>
+            </div>
+          </div>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -58,43 +49,53 @@ function PublicVideosList({ defaultSort = "trending", limit }) {
   };
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6">
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h6 className="fw-bold mb-0">
           {sort === "latest" ? "Latest uploads" : "Trending now"}
-        </Typography>
-        <TextField
-          select
-          size="small"
+        </h6>
+        <select 
+          className="form-select form-select-sm w-auto shadow-none" 
+          style={{ minWidth: '110px' }}
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          variant="outlined"
-          sx={{ width: "auto", minWidth: 120 }}
         >
-          <MenuItem value="latest">Latest</MenuItem>
-          <MenuItem value="trending">Trending</MenuItem>
-        </TextField>
-      </Box>
+          <option value="latest">Latest</option>
+          <option value="trending">Trending</option>
+        </select>
+      </div>
 
       {loading ? (
         <PublicVideosListSkeleton count={limit ?? 5} />
       ) : videos.length === 0 ? (
-        <Typography>No videos available.</Typography>
+        <p className="text-muted small">No videos available.</p>
       ) : (
-        <Box display="flex" flexDirection="column" gap={2}>
+        <div className="d-flex flex-column gap-3">
           {videos.map((video) => (
             <Link
               key={video._id}
               to={`/watch/${video._id}`}
               onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }) }}
-              style={{ textDecoration: "none", color: "inherit", userSelect: "none" }}
+              className="text-decoration-none text-reset"
             >
               <VideoCard video={video} />
             </Link>
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .skeleton-shimmer {
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}} />
+    </div>
   );
 }
 

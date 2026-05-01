@@ -1,50 +1,43 @@
-import { Link as MuiLink, Typography } from "@mui/material";
-import { Avatar, Box, Card } from "@mui/material";
 import React from "react";
-import ApiConfig from "../utils/ApiConfig.js";
 import SubscribeButton from "./SubscribeButton";
 import VerifiedUserBadge from "./VerifiedUserBadge";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import UserAvatar from "./UserAvatar.jsx";
 
 function ChannelBar({ video, uploaderSubs, subscribed, subLoading, handleSubscribe }) {
-  return <Card
-    sx={{
-      p: 1.5,
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      mb: 2,
-    }}>
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <UserAvatar user={video.uploader} size={48} sx={{ mr: 1 }} />
+  return (
+    <div className="card border-0 shadow-sm rounded-4 p-3 mb-4">
+      <div className="d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center gap-3">
+          <Link to={`/user/${video.uploader.username}`} className="text-decoration-none">
+            <UserAvatar user={video.uploader} size={48} />
+          </Link>
 
-      <Box>
-        <MuiLink
-          component={Link}
-          to={`/user/${video.uploader.username}`}
-          underline="none"
-          color="text.primary"
-          sx={{ fontWeight: 'bold', display: "flex", alignItems: "center" }}
-        >
-          {video.uploader.publicName}
-          <VerifiedUserBadge user={video.uploader} verticalAlign="text-center" />
-        </MuiLink>
+          <div>
+            <Link
+              to={`/user/${video.uploader.username}`}
+              className="d-flex align-items-center gap-1 text-dark fw-bold text-decoration-none mb-0 h6"
+            >
+              {video.uploader.publicName}
+              <VerifiedUserBadge user={video.uploader} verticalAlign="middle" />
+            </Link>
 
-        <Typography variant="body2" color="text.secondary">
-          {uploaderSubs} subscriber{uploaderSubs === 1 || "s"}
-        </Typography>
-      </Box>
-    </Box>
+            <div className="text-muted small">
+              {uploaderSubs} subscriber{uploaderSubs === 1 ? "" : "s"}
+            </div>
+          </div>
+        </div>
 
-    <Box>
-      <SubscribeButton
-        subscribed={subscribed}
-        subLoading={subLoading}
-        handleSubscribe={handleSubscribe} />
-    </Box>
-  </Card>;
+        <div>
+          <SubscribeButton
+            subscribed={subscribed}
+            subLoading={subLoading}
+            handleSubscribe={handleSubscribe} 
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default ChannelBar;

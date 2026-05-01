@@ -1,16 +1,3 @@
-import HomeIcon from "@mui/icons-material/Home";
-import InfoIcon from "@mui/icons-material/Info";
-import LoginIcon from "@mui/icons-material/Login";
-import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import WhatshotIcon from "@mui/icons-material/Whatshot";
-import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
-import { Autocomplete, Button, CircularProgress, InputAdornment, Slide, TextField } from "@mui/material";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { fromServer } from "../utils/ApiConfig.js";
@@ -30,6 +17,7 @@ export default function AppBarHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const searchInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,9 +30,7 @@ export default function AppBarHeader() {
         });
         if (!res.ok) {
           setUser(null);
-          console.log(
-            "Unable to obtain logged in user information, response not ok",
-          );
+          console.log("Unable to obtain logged in user information, response not ok");
         } else {
           const data = await res.json();
           const storedAccount = getSavedAccounts().find((account) => account.userId === data._id);
@@ -103,7 +89,6 @@ export default function AppBarHeader() {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  // Sync search box with URL ?q= when on search page
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get("q") || "";
@@ -147,6 +132,16 @@ export default function AppBarHeader() {
       controller.abort();
     };
   }, [searchTerm]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const toggleDrawer = (newOpen) => () => {
     setDrawerOpen(newOpen);
@@ -221,8 +216,7 @@ export default function AppBarHeader() {
     }
   };
 
-  const handleAutocompleteSelection = (_, value) => {
-    const term = typeof value === "string" ? value : "";
+  const handleAutocompleteSelection = (term) => {
     setSearchTerm(term);
     setDropdownOpen(false);
     if (term.trim()) {
@@ -233,173 +227,120 @@ export default function AppBarHeader() {
   const navLinkPages = {
     Home: {
       path: "/",
-      icon: <HomeIcon />,
+      icon: <i className="bi bi-house-door-fill"></i>,
     },
     Trending: {
       path: "/trending",
-      icon: <WhatshotIcon />,
+      icon: <i className="bi bi-fire"></i>,
     },
     Subscriptions: {
       path: "/subscriptions",
-      icon: <SubscriptionsIcon />,
+      icon: <i className="bi bi-collection-play-fill"></i>,
     },
     About: {
       path: "/about",
-      icon: <InfoIcon />,
+      icon: <i className="bi bi-info-circle-fill"></i>,
     },
   };
 
-  const searchFieldEndAdornment = (
-    <InputAdornment position="end">
-      <IconButton type="submit" edge="end" aria-label="search">
-        <SearchIcon />
-      </IconButton>
-    </InputAdornment>
-  );
-
   return (
-    <Box mb={4}>
-      <Slide in direction="down" timeout={220}>
-        <AppBar position="fixed">
-          <Toolbar
-            variant="dense"
-            sx={{
-              minHeight: { xs: 56, md: 50 },
-              px: { xs: 1, sm: 2 },
-            }}
-          >
-            <IconButton
-              size="medium"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: { xs: 1.25, md: 1.5 }, ml: { xs: 1, md: 0 } }}
-              onClick={toggleDrawer(true)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              variant="h6"
-              component={Link}
-              color="inherit"
-              to="/"
-              sx={{
-                display: { xs: "none", sm: "block" },
-                textDecoration: "none",
-                mr: 2,
-                flexGrow: { xs: 1, md: 0 },
-              }}
-            >
-              Twaire
-            </Typography>
-            <Box
-              sx={{
-                display: { xs: "none", md: "flex" },
-                justifyContent: "start",
-                flexGrow: 1,
-              }}
-            >
-              {Object.entries(navLinkPages).map(([label, navLink]) => (
-                <Button
-                  key={label}
-                  onClick={() => {
-                    navigate(navLink.path);
-                  }}
-                  sx={{
-                    my: 0.5,
-                    color: "inherit",
-                    display: "block",
-                  }}
-                >
+    <nav className="navbar navbar-expand-md navbar-dark bg-primary fixed-top shadow-sm py-1">
+      <div className="container-fluid px-2">
+        <button 
+          className="btn btn-link text-white p-2 me-2" 
+          onClick={toggleDrawer(true)}
+          aria-label="Menu"
+        >
+          <i className="bi bi-list" style={{ fontSize: "1.5rem" }}></i>
+        </button>
+
+        <Link className="navbar-brand fw-bold d-none d-sm-block me-4" to="/">
+          Twaire
+        </Link>
+
+        <div className="collapse navbar-collapse d-none d-md-block">
+          <ul className="navbar-nav me-auto">
+            {Object.entries(navLinkPages).map(([label, navLink]) => (
+              <li key={label} className="nav-item">
+                <NavLink className="nav-link px-3" to={navLink.path}>
                   {label}
-                </Button>
-              ))}
-            </Box>
-            <Box
-              component="form"
-              onSubmit={handleSearch}
-              sx={{
-                marginRight: 2,
-                width: "100%",
-                maxWidth: { xs: "100%", sm: 300, md: 400 },
-                flexGrow: { xs: 1, md: 0 },
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex-grow-1 mx-2 mx-md-4 position-relative" style={{ maxWidth: "500px" }} ref={autocompleteRef}>
+          <form onSubmit={handleSearch} className="input-group input-group-sm bg-white rounded-pill overflow-hidden border-0">
+            <input
+              type="text"
+              className="form-control border-0 px-3 shadow-none"
+              placeholder="Search videos..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setDropdownOpen(true);
               }}
-            >
-              <Autocomplete
-                freeSolo
-                fullWidth
-                size="small"
-                options={autocompleteOptions}
-                open={dropdownOpen && autocompleteOptions.length > 0}
-                onOpen={() => setDropdownOpen(true)}
-                onClose={() => setDropdownOpen(false)}
-                loading={autocompleteLoading}
-                loadingText=""
-                filterOptions={(options) => options}
-                inputValue={searchTerm}
-                onInputChange={(_, newInputValue, reason) => {
-                  setSearchTerm(newInputValue);
-                  if (reason === "input") setDropdownOpen(true);
-                }}
-                onChange={handleAutocompleteSelection}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    placeholder="Search videos..."
-                    inputRef={searchInputRef}
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {autocompleteLoading ? <CircularProgress color="inherit" size={16} /> : null}
-                          {params.InputProps.endAdornment}
-                          {searchFieldEndAdornment}
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-              />
-            </Box>
-            <Box>
-              {!user && !loading && (
-                <Button
-                  component={NavLink}
-                  to="/login"
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  sx={{ height: { xs: 36, md: 34 } }}
-                  startIcon={<LoginIcon />}
-                >
-                  Login
-                </Button>
-              )}
-
-              {user ? (
-                <UserDropdown
-                  user={user}
-                  handleLogout={handleLogout}
-                  savedAccounts={savedAccounts}
-                  switchingUserId={switchingUserId}
-                  handleSwitchAccount={handleSwitchAccount}
-                  handleAddAccount={handleAddAccount}
-                />
+              onFocus={() => setDropdownOpen(true)}
+              ref={searchInputRef}
+            />
+            <button className="btn btn-light border-0 px-3" type="submit">
+              {autocompleteLoading ? (
+                <span className="spinner-border spinner-border-sm text-primary" role="status"></span>
               ) : (
-                !user && loading && <Loading />
+                <i className="bi bi-search text-primary"></i>
               )}
-            </Box>
-          </Toolbar>
-        </AppBar>
-      </Slide>
+            </button>
+          </form>
 
-      {/* App drawer */}
+          {dropdownOpen && autocompleteOptions.length > 0 && (
+            <div className="dropdown-menu show w-100 shadow-lg border-0 mt-1 rounded-3 py-2">
+              {autocompleteOptions.map((option, index) => (
+                <button
+                  key={index}
+                  className="dropdown-item py-2 px-3"
+                  onClick={() => handleAutocompleteSelection(option)}
+                >
+                  <i className="bi bi-search me-3 text-muted small"></i>
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="d-flex align-items-center">
+          {!user && !loading && (
+            <Link to="/login" className="btn btn-light rounded-pill btn-sm px-3 fw-bold d-flex align-items-center">
+              <i className="bi bi-box-arrow-in-right me-2"></i>
+              Login
+            </Link>
+          )}
+
+          {user ? (
+            <UserDropdown
+              user={user}
+              handleLogout={handleLogout}
+              savedAccounts={savedAccounts}
+              switchingUserId={switchingUserId}
+              handleSwitchAccount={handleSwitchAccount}
+              handleAddAccount={handleAddAccount}
+            />
+          ) : (
+            !user && loading && (
+              <div className="spinner-border spinner-border-sm text-white" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            )
+          )}
+        </div>
+      </div>
+
       <AppDrawer
         navLinkPages={navLinkPages}
         open={drawerOpen}
         toggleDrawer={toggleDrawer}
       />
-    </Box>
+    </nav>
   );
 }

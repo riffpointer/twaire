@@ -1,18 +1,8 @@
 import Footer from "@/components/Footer.jsx";
-import Strings from "../utils/Strings.js";
 import VideoCard from "@/components/VideoCard.jsx";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiConfig from "../utils/ApiConfig.js";
-import {
-  Box,
-  Container,
-  Divider,
-  MenuItem,
-  Skeleton,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { ContentContainer } from "@/components/Containers.jsx";
 
 const MIN_SKELETON_MS = 250;
@@ -22,23 +12,16 @@ function VideoGridSkeleton({ count = 8 }) {
     <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-2">
       {[...Array(count)].map((_, index) => (
         <div className="col mt-0 mb-4" key={index}>
-          <Box
-            sx={{
-              borderRadius: 2,
-              overflow: "hidden",
-              bgcolor: "background.paper",
-              boxShadow: 1,
-            }}
-          >
-            <Skeleton variant="rectangular" height={180} />
-            <Box sx={{ p: 1.5 }}>
-              <Skeleton variant="text" width="82%" height={34} />
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                <Skeleton variant="circular" width={24} height={24} />
-                <Skeleton variant="text" width="62%" height={22} />
-              </Box>
-            </Box>
-          </Box>
+          <div className="card h-100 border-0 shadow-sm overflow-hidden">
+            <div className="bg-light-subtle skeleton-shimmer" style={{ height: '180px' }}></div>
+            <div className="card-body p-2 px-1">
+              <div className="bg-light-subtle skeleton-shimmer mb-2 rounded" style={{ height: '20px', width: '82%' }}></div>
+              <div className="d-flex align-items-center gap-2 mt-1">
+                <div className="bg-light-subtle skeleton-shimmer rounded-circle" style={{ width: '24px', height: '24px' }}></div>
+                <div className="bg-light-subtle skeleton-shimmer rounded" style={{ height: '16px', width: '62%' }}></div>
+              </div>
+            </div>
+          </div>
         </div>
       ))}
     </div>
@@ -81,66 +64,59 @@ function Home() {
   return (
     <>
       {/* Banner*/}
-      <Box sx={{ width: "100%", mb: 4, mt: -4 }}>
+      <div className="w-100 mb-5 mt-n4">
         {!bannerLoaded && (
-          <Skeleton variant="rectangular" width="100%" height={360} />
+          <div className="w-100 bg-light-subtle skeleton-shimmer" style={{ height: '360px' }}></div>
         )}
         <img
           src={`${ApiConfig.serverUrl}/res/branding/TwaireBannerFront.png`}
           alt="Banner"
-          style={{ width: "100%", display: bannerLoaded ? "block" : "none" }}
+          className="w-100 d-block"
+          style={{ display: bannerLoaded ? "block" : "none", maxHeight: '400px', objectFit: 'cover' }}
           onLoad={() => setBannerLoaded(true)}
         />
-      </Box>
+      </div>
 
       <ContentContainer>
-        <Typography variant="h2" sx={{ mb: 1, fontWeight: "bold" }}>
-          Welcome to Twaire!
-        </Typography>
-        <Typography variant="subtitle1">
-          Twaire is an open platform where you can share your vlogs, videos and
-          much more!
-        </Typography>
-        <Divider sx={{ my: 2 }} />
+        <h1 className="display-4 fw-bold mb-2">Welcome to Twaire!</h1>
+        <p className="lead text-muted mb-4">
+          Twaire is an open platform where you can share your vlogs, videos and much more!
+        </p>
+        <hr className="my-4 opacity-25" />
 
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="h4 mb-0 fw-bold">
             {sort === "latest" ? "Latest uploads" : "Trending now"}
-          </h3>
-          <TextField
-            select
-            size="small"
+          </h2>
+          <select 
+            className="form-select form-select-sm w-auto" 
+            style={{ minWidth: '120px' }}
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            variant="outlined"
-            sx={{ width: "auto", minWidth: 120 }}
           >
-            <MenuItem value="latest">Latest</MenuItem>
-            <MenuItem value="trending">Trending</MenuItem>
-          </TextField>
+            <option value="latest">Latest</option>
+            <option value="trending">Trending</option>
+          </select>
         </div>
 
-        <Box sx={{ mb: 3, position: "relative", minHeight: 320 }}>
-          <Box
-            sx={{
-              opacity: showSkeletons ? 1 : 0,
-              transition: "opacity 180ms ease-out",
-              pointerEvents: "none",
-              position: showSkeletons ? "relative" : "absolute",
+        <div className="mb-5 position-relative" style={{ minHeight: '320px' }}>
+          <div
+            className={`transition-opacity duration-200 ${showSkeletons ? 'opacity-100' : 'opacity-0'}`}
+            style={{ 
+              pointerEvents: 'none',
+              position: showSkeletons ? 'relative' : 'absolute',
               inset: 0,
+              zIndex: showSkeletons ? 1 : -1
             }}
           >
             <VideoGridSkeleton />
-          </Box>
+          </div>
 
-          <Box
-            sx={{
-              opacity: !showSkeletons && !loading ? 1 : 0,
-              transition: "opacity 180ms ease-out",
-            }}
+          <div
+            className={`transition-opacity duration-200 ${!showSkeletons && !loading ? 'opacity-100' : 'opacity-0'}`}
           >
             {!loading && videos.length === 0 ? (
-              <p>No videos uploaded yet.</p>
+              <p className="text-muted">No videos uploaded yet.</p>
             ) : (
               !loading && (
                 <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-2">
@@ -148,7 +124,7 @@ function Home() {
                     <div className="col mt-0 mb-4" key={video._id}>
                       <Link
                         to={`/watch/${video._id}`}
-                        style={{ textDecoration: "none", color: "inherit" }}
+                        className="text-decoration-none text-reset"
                       >
                         <VideoCard video={video} />
                       </Link>
@@ -157,11 +133,26 @@ function Home() {
                 </div>
               )
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
       </ContentContainer>
 
       <Footer />
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .mt-n4 { margin-top: -1.5rem !important; }
+        .skeleton-shimmer {
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .transition-opacity { transition: opacity 0.2s ease-in-out; }
+        .duration-200 { transition-duration: 200ms; }
+      `}} />
     </>
   );
 }

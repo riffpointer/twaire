@@ -1,12 +1,3 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import OutlinedFlagIcon from "@mui/icons-material/OutlinedFlag";
-import PushPinIcon from "@mui/icons-material/PushPin";
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import {
   Alert,
   Avatar,
@@ -38,6 +29,19 @@ import { parseTimestampToSeconds, seekVideoElementToTimestamp } from "../utils/v
 import EmojiPickerButton from "./EmojiPickerButton.jsx";
 import VerifiedUserBadge from "./VerifiedUserBadge.jsx";
 import { useEffect, useRef, useState } from 'react';
+
+const makeBiIcon = (cls) => ({ fontSize, className = "", ...props }) => (
+  <Box component="i" className={`${cls}${fontSize === "small" ? " fs-6" : ""}${className ? ` ${className}` : ""}`} aria-hidden="true" {...props} />
+);
+const DeleteOutlineIcon = makeBiIcon("bi bi-trash");
+const EditOutlinedIcon = makeBiIcon("bi bi-pencil");
+const MoreVertIcon = makeBiIcon("bi bi-three-dots-vertical");
+const OutlinedFlagIcon = makeBiIcon("bi bi-flag");
+const PushPinIcon = makeBiIcon("bi bi-pin-angle");
+const ThumbDownIcon = makeBiIcon("bi bi-hand-thumbs-down-fill");
+const ThumbDownOffAltIcon = makeBiIcon("bi bi-hand-thumbs-down");
+const ThumbUpIcon = makeBiIcon("bi bi-hand-thumbs-up-fill");
+const ThumbUpOffAltIcon = makeBiIcon("bi bi-hand-thumbs-up");
 
 function resolveLinkUrl(url) {
   return url.startsWith("www.") ? `https://${url}` : url;
