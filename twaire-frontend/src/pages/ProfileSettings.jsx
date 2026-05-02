@@ -448,7 +448,7 @@ function ProfileSettings() {
                     variant="contained"
                     startIcon={<SmartDisplayIcon />}
                     onClick={() => setShowTrailerPicker(true)}
-                    sx={{ textTransform: "none", borderRadius: 2, px: 3 }}
+                    sx={{ textTransform: "none", px: 3 }}
                   >
                     Select a Trailer
                   </Button>

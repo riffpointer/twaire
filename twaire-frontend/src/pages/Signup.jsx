@@ -216,11 +216,13 @@ function Signup() {
               </Typography>
               <TextField
                 label="Username"
+                name="username"
+                id="signup-username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 fullWidth
                 margin="normal"
-                autoComplete="off"
+                autoComplete="username"
                 required
                 error={!!errors.username}
                 helperText={errors.username || usernameAvailability.message || "You won't be able to change this, so choose wisely!"}
@@ -229,10 +231,13 @@ function Signup() {
               <TextField
                 label="Email"
                 type="email"
+                name="email"
+                id="signup-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 fullWidth
                 margin="normal"
+                autoComplete="email"
                 required
                 error={!!errors.email}
                 helperText={errors.email}
@@ -240,10 +245,13 @@ function Signup() {
               <TextField
                 label="Password"
                 type="password"
+                name="password"
+                id="signup-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 fullWidth
                 margin="normal"
+                autoComplete="new-password"
                 required
                 error={!!errors.password}
                 helperText={errors.password}

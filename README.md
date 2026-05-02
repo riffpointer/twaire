@@ -20,7 +20,7 @@ Twaire is built with [Node.js](https://nodejs.org/) and [Express](https://expres
 
 To run a local instance of Twaire, you must have the following installed on your system:
 
-- [Node.js](https://nodejs.org/) (v16 or higher recommended)
+- [Node.js](https://nodejs.org/) (v20.19 or higher recommended)
 - [Git](https://git-scm.com/)
 - [MongoDB Server](https://www.mongodb.com/try/download/community) (Make sure `mongod` is in your path after installing it)
 - [pnpm](https://pnpm.io) can be installed with `npm install -g pnpm`
@@ -30,6 +30,29 @@ To run a local instance of Twaire, you must have the following installed on your
 Twaire has two components: 
  - the **backend server** 
  - and a **Vite/ReactJS powered frontend**.
+
+Use the root manager for everyday project tasks:
+
+```bash
+.\manager.ps1 help
+.\manager.ps1 setup
+.\manager.ps1 start
+.\manager.ps1 install
+.\manager.ps1 update
+```
+
+The setup helpers live under [`scripts/setup/`](scripts/setup/) and are used by the manager to verify Node.js, ensure `pnpm`, install both app dependencies, and check MongoDB availability:
+
+```bash
+# macOS / Linux
+./scripts/setup/setup.sh
+
+# Windows PowerShell
+.\scripts\setup\setup.ps1
+
+# Windows batch
+scripts\setup\setup.bat
+```
 
 Running the project is quite easy, just follow the instructions below and run the commands (works on most operating systems, assuming you have Git and NodeJS installed)
 
@@ -44,7 +67,7 @@ cd twaire
 ```bash
 cd twaire-backend
 pnpm install
-pnpm approve-builds  # Select all packages hit enter
+pnpm approve-builds  # Only needed if pnpm prompts for native package approval
 pnpm run dev
 ```
 
@@ -55,7 +78,7 @@ pnpm install
 pnpm run dev # Will start up Vite
 ```
 
-> Note: If you're on Windows, you can start the MongoDB server, the frontend and backend server at the same time by running `start.bat`.
+> Note: Use `node manage.js start` to launch the backend and frontend together. If MongoDB is installed as a Windows service, the setup helper will detect it automatically.
 
 ## Contributing
 

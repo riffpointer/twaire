@@ -94,20 +94,26 @@ function Login() {
               <TextField
                 label="Email"
                 type="email"
+                name="email"
+                id="login-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 fullWidth
                 margin="normal"
+                autoComplete="email"
                 required
               />
 
               <TextField
                 label="Password"
                 type="password"
+                name="password"
+                id="login-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 fullWidth
                 margin="normal"
+                autoComplete="current-password"
                 required
               />
 

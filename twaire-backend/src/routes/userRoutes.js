@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import mongoose from "mongoose";
 import { User, Video, Comment, Reply, Bookmark, ChannelView, Playlist } from "../models/models.js";
 import isAuthenticated from "../middleware/auth.js";
 import { profileUpload } from "../providers/storage.js";
@@ -309,6 +310,18 @@ userRouter.get("/me/analytics/views", isAuthenticated, async (req, res) => {
 
     const totalViews = series.reduce((sum, entry) => sum + entry.views, 0);
     const averageViews = Math.round(totalViews / series.length);
+    const last7Days = series.slice(-7);
+    const previous7Days = series.slice(-14, -7);
+    const last7Total = last7Days.reduce((sum, entry) => sum + entry.views, 0);
+    const previous7Total = previous7Days.reduce((sum, entry) => sum + entry.views, 0);
+    const bestDay = series.reduce((best, entry) => (entry.views > best.views ? entry : best), series[0] || { date: null, views: 0 });
+    const activeDays = series.filter((entry) => entry.views > 0).length;
+    const zeroDays = days - activeDays;
+    const growthRate = previous7Total > 0
+      ? Math.round(((last7Total - previous7Total) / previous7Total) * 100)
+      : last7Total > 0
+        ? 100
+        : 0;
 
     res.json({
       days,
@@ -316,11 +329,157 @@ userRouter.get("/me/analytics/views", isAuthenticated, async (req, res) => {
       end: end.toISOString(),
       totalViews,
       averageViews,
+      activeDays,
+      zeroDays,
+      last7Total,
+      previous7Total,
+      growthRate,
+      bestDay,
       series,
     });
   } catch (err) {
     apiError("GET", "/me/analytics/views", "Failed to fetch video analytics:", err);
     res.status(500).json({ error: "Server error while retrieving video analytics" });
+  }
+});
+
+userRouter.get("/me/analytics/summary", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId?.toString();
+    if (!userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const [user, videoSummary, topVideos, recentVideos, commentSummary, recentViewTotals] = await Promise.all([
+      User.findById(userId).select("_id createdAt subscribers accountViews username publicName"),
+      Video.aggregate([
+        { $match: { uploader: new mongoose.Types.ObjectId(userId) } },
+        {
+          $group: {
+            _id: null,
+            totalVideos: { $sum: 1 },
+            totalViews: { $sum: "$views" },
+            totalLikes: { $sum: { $size: "$likes" } },
+            avgViews: { $avg: "$views" },
+            avgDuration: { $avg: "$duration" },
+          },
+        },
+      ]),
+      Video.find({ uploader: userId })
+        .sort({ views: -1, uploadedAt: -1 })
+        .limit(5)
+        .select("_id title thumbnail views likes uploadedAt duration category visibility"),
+      Video.find({ uploader: userId })
+        .sort({ uploadedAt: -1 })
+        .limit(5)
+        .select("_id title thumbnail views uploadedAt duration category visibility"),
+      Comment.aggregate([
+        {
+          $match: {
+            video: {
+              $in: await Video.find({ uploader: userId }).distinct("_id"),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalComments: { $sum: 1 },
+            totalCommentLikes: { $sum: { $size: "$likes" } },
+            totalReplies: { $sum: { $size: "$replies" } },
+          },
+        },
+      ]),
+      ChannelView.aggregate([
+        {
+          $match: {
+            uploader: new mongoose.Types.ObjectId(userId),
+            viewedAt: {
+              $gte: new Date(Date.now() - 30 * 86400000),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$viewedAt",
+                timezone: "UTC",
+              },
+            },
+            views: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+    ]);
+
+    const summary = videoSummary[0] || {};
+    const engagement = commentSummary[0] || {};
+    const totalSubscribers = Array.isArray(user?.subscribers) ? user.subscribers.length : 0;
+    const totalVideos = summary.totalVideos || 0;
+    const totalViews = summary.totalViews || 0;
+    const totalLikes = summary.totalLikes || 0;
+    const totalComments = engagement.totalComments || 0;
+    const avgViews = Math.round(summary.avgViews || 0);
+    const avgDuration = Math.round(summary.avgDuration || 0);
+    const viewsPerVideo = totalVideos > 0 ? Math.round(totalViews / totalVideos) : 0;
+    const engagementRate = totalViews > 0 ? Math.round(((totalLikes + totalComments) / totalViews) * 1000) / 10 : 0;
+    const viewsPerSubscriber = totalSubscribers > 0 ? Math.round(totalViews / totalSubscribers) : 0;
+    const last30TotalViews = recentViewTotals.reduce((sum, entry) => sum + entry.views, 0);
+
+    res.json({
+      totals: {
+        videos: totalVideos,
+        views: totalViews,
+        likes: totalLikes,
+        comments: totalComments,
+        commentLikes: engagement.totalCommentLikes || 0,
+        replies: engagement.totalReplies || 0,
+        subscribers: totalSubscribers,
+        accountViews: user?.accountViews || 0,
+        viewsPerSubscriber,
+      },
+      averages: {
+        viewsPerVideo: viewsPerVideo || avgViews,
+        durationSeconds: avgDuration,
+        engagementRate,
+      },
+      trends: {
+        last30TotalViews,
+      },
+      topVideos: topVideos.map((video) => ({
+        _id: video._id,
+        title: video.title,
+        thumbnail: video.thumbnail,
+        views: video.views || 0,
+        likes: video.likes?.length || 0,
+        uploadedAt: video.uploadedAt,
+        duration: video.duration,
+        category: video.category,
+        visibility: video.visibility,
+      })),
+      recentVideos: recentVideos.map((video) => ({
+        _id: video._id,
+        title: video.title,
+        thumbnail: video.thumbnail,
+        views: video.views || 0,
+        uploadedAt: video.uploadedAt,
+        duration: video.duration,
+        category: video.category,
+        visibility: video.visibility,
+      })),
+      accountAgeDays: user?.createdAt
+        ? Math.max(1, Math.ceil((Date.now() - new Date(user.createdAt).getTime()) / 86400000))
+        : null,
+      videoSpan: {
+        recent30Days: recentViewTotals,
+      },
+    });
+  } catch (err) {
+    apiError("GET", "/me/analytics/summary", "Failed to fetch dashboard summary:", err);
+    res.status(500).json({ error: "Server error while retrieving dashboard summary" });
   }
 });
 

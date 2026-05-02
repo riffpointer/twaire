@@ -770,13 +770,7 @@ function UserTabs({ user, videos, subscriptions = [], playlists = [], showBookma
               </Box>
               <Box sx={{ borderBottom: 1, borderColor: "divider", my: 4 }} />
             </Box>
-          ) : (
-            <Box sx={{ mb: 4, textAlign: "center", py: 4 }}>
-              <Typography variant="body1" color="text.secondary">
-                No featured content.
-              </Typography>
-            </Box>
-          )}
+          ) : null}
 
           {videos.length > 0 && (
             <>

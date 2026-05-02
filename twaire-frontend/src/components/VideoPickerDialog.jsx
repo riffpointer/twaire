@@ -6,10 +6,12 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Stack,
   Typography,
   Skeleton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import MovieCreationIcon from "@mui/icons-material/MovieCreation";
 import ApiConfig from "../utils/ApiConfig.js";
 import VideoCard from "./VideoCard.jsx";
 
@@ -46,7 +48,16 @@ function VideoPickerDialog({ open, onClose, onSelect, userId, currentTrailerId }
 
   return (
     <Dialog open={open} onClose={() => onClose()} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>Select Channel Trailer</DialogTitle>
+      <DialogTitle
+        sx={{
+          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
+          bgcolor: "background.default",
+        }}
+      >
+        Select Channel Trailer
+      </DialogTitle>
       <DialogContent dividers sx={{ bgcolor: 'background.default', pb: 4 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           Choose a video to feature as your channel trailer. This video will autoplay for new visitors to your channel home page.
@@ -63,14 +74,33 @@ function VideoPickerDialog({ open, onClose, onSelect, userId, currentTrailerId }
             ))}
           </Grid>
         ) : videos.length === 0 ? (
-          <Box sx={{ py: 8, textAlign: 'center' }}>
-            <Typography variant="h6" color="text.secondary">
-              No videos found.
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              You need to upload at least one video before you can select a trailer.
-            </Typography>
-          </Box>
+          <Stack
+            spacing={1.5}
+            alignItems="center"
+            sx={{
+              py: 8,
+              textAlign: "center",
+              color: "text.secondary",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <MovieCreationIcon color="disabled" sx={{ fontSize: 56 }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" color="text.secondary" sx={{ textAlign: "center" }}>
+                No videos found.
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                You need to upload at least one video before you can select a trailer.
+              </Typography>
+            </Box>
+          </Stack>
         ) : (
           <Grid container spacing={3}>
             {videos.map((video) => {

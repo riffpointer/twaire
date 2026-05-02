@@ -116,6 +116,70 @@ function ScrollToTopBridge() {
   return null;
 }
 
+function AppShell({ navProgress, setNavProgress, queueApi }) {
+  const location = useLocation();
+  const isDashboardRoute = location.pathname.startsWith("/dashboard");
+
+  return (
+    <>
+      <NavigationProgressBridge progress={navProgress} setProgress={setNavProgress} />
+      <ScrollToTopBridge />
+      <LinearProgress
+        variant="determinate"
+        value={navProgress}
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: (theme) => theme.zIndex.tooltip + 1,
+          height: 3,
+          opacity: navProgress > 0 ? 1 : 0,
+          transition: "opacity 120ms ease",
+          "& .MuiLinearProgress-bar": {
+            transition: "transform 180ms ease",
+          },
+        }}
+      />
+      {!isDashboardRoute && <AppBar />}
+      {!isDashboardRoute && (
+        <Toolbar
+          sx={{
+            minHeight: { xs: 56, md: 50 },
+          }}
+        />
+      )}
+      <QueueContext.Provider value={queueApi}>
+        <Suspense fallback={<InfinitySpinner />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/trending" element={<Trending />} />
+            <Route path="/subscriptions" element={<Subscriptions />} />
+            <Route path="/user/:username" element={<User />} />
+            <Route path="/watch/:id" element={<Watch />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/terms-and-conditions" element={<Terms />} />
+            <Route path="/myaccount" element={<MyAccount />} />
+            <Route path="/editprofile" element={<ProfileSettings />} />
+            <Route path="/category/:category" element={<Category />} />
+            <Route path="/playlist/:id" element={<Playlist />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+        <QueuePanel />
+      </QueueContext.Provider>
+    </>
+  );
+}
+
 function App() {
   const [mode, setMode] = useState(() => localStorage.getItem("theme-mode") || "light");
   const [navProgress, setNavProgress] = useState(0);
@@ -265,57 +329,7 @@ function App() {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <BrowserRouter>
-            <NavigationProgressBridge progress={navProgress} setProgress={setNavProgress} />
-            <ScrollToTopBridge />
-            <LinearProgress
-              variant="determinate"
-              value={navProgress}
-              sx={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: (theme) => theme.zIndex.tooltip + 1,
-                height: 3,
-                opacity: navProgress > 0 ? 1 : 0,
-                transition: "opacity 120ms ease",
-                "& .MuiLinearProgress-bar": {
-                  transition: "transform 180ms ease",
-                },
-              }}
-            />
-            <AppBar />
-            <Toolbar
-              sx={{
-                minHeight: { xs: 56, md: 50 },
-              }}
-            />
-            <QueueContext.Provider value={queueApi}>
-              <Suspense fallback={<InfinitySpinner />}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/trending" element={<Trending />} />
-                  <Route path="/subscriptions" element={<Subscriptions />} />
-                  <Route path="/user/:username" element={<User />} />
-                  <Route path="/watch/:id" element={<Watch />} />
-                  <Route path="/features" element={<Features />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/terms-and-conditions" element={<Terms />} />
-                  <Route path="/myaccount" element={<MyAccount />} />
-                  <Route path="/editprofile" element={<ProfileSettings />} />
-                  <Route path="/category/:category" element={<Category />} />
-                  <Route path="/playlist/:id" element={<Playlist />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-              <QueuePanel />
-            </QueueContext.Provider>
+            <AppShell navProgress={navProgress} setNavProgress={setNavProgress} queueApi={queueApi} />
           </BrowserRouter>
         </ThemeProvider>
       </NavigationProgressContext.Provider>

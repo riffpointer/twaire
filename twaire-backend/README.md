@@ -6,13 +6,15 @@ The backend provides RESTful APIs and core business logic for Twaire. It handles
 
 Copy `.env.example` to `.env` and update environment variables as needed.
 
+If you want a single command to validate Node.js, install `pnpm` if needed, install backend/frontend dependencies, and check MongoDB availability, run the root manager with `..\manager.ps1 setup` or use the setup helper under [`scripts/setup/`](../scripts/setup/).
+
 ### Running the Server
 
 ```bash
 npm run dev
 ```
 
-Or you can run `start.bat` to manually start both the MongoDB server and NodeJS server. Not required if you already have MongoDB running as a service.
+Or you can use `node ../manage.js start` from the repository root to launch the backend and frontend together. This is not required if you already have MongoDB running as a service.
 
 ## Config Guide
 The server configuration is stored in the `.env` file. It also contains some secrets, thus to prevent accidental leakage of those secrets, we have excluded `.env` files from our Git repo through the `.gitignore` file, so you must duplicate `.env.example` and rename it to `.env` to apply the custom settings. Below are some brief descriptions of the settings in `.env`:
